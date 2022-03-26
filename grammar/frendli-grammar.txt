@@ -1,0 +1,152 @@
+
+----------
+START RULE
+----------
+
+file:
+	statement* EOF ;
+
+
+---------------
+STATEMENT RULES
+---------------
+
+statement:
+	declarationStmt
+	| displayStmt (TEMPORARY)
+	| expressionStmt
+	| ifStmt
+	| repeatTimesStmt
+	| repeatWhileStmt
+	| returnStmt
+	| returnWithStmt ;
+
+declarationStmt:
+	classDecl
+	| functionDecl
+	| variableDecl ;
+
+classDecl:
+	"describe" IDENTIFIER ( "inherit" IDENTIFIER )? classBlock ;
+
+functionDecl:
+	"define" function ;
+
+variableDecl:
+	"create" IDENTIFIER "=" expression NEWLINE ;
+
+displayStmt:
+	"display" expression NEWLINE ; (TEMPORARY)
+
+expressionStmt:
+	expression NEWLINE ;
+
+ifStmt:
+	"if" expression block ("otherwise" block)? ;
+
+repeatTimesStmt:
+	"repeat" ( NUMBER | "(" expression ")" ) "times" ;
+
+repeatWhileStmt:
+	"repeat" "while" expression block ;
+
+returnStmt:
+	"return" NEWLINE ;
+
+returnWithStmt:
+	"return" "with" expression NEWLINE ;
+
+block:
+	NEWLINE INDENT statement+ DEDENT
+
+classBlock:
+	NEWLINE INDENT classFieldDecl* function* DEDENT ;
+
+classFieldDecl:
+	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
+
+
+------------
+HELPER RULES
+------------
+
+function:
+	IDENTIFIER "(" parameters? ")" block ;
+
+parameters:
+	parameter ( "," parameter )* ;
+
+parameter:
+	"accept" IDENTIFIER
+
+arguments:
+	argument ( "," argument )* ;
+
+argument:
+	"send" expression ;
+
+
+----------------
+EXPRESSION RULES
+----------------
+
+expression:
+	assignment
+	| logicOr;
+
+assignment:
+	"change" ( call "." )? IDENTIFIER "=" expression ;
+
+logicOr:
+	logicAnd ( "or" logicAnd )* ;
+
+logicAnd:
+	comparison ( "and" comparison )* ;
+
+comparison:
+	term ( ( "<" | "<=" | ">" | ">=" | "not"? "equals" ) term )* ;
+
+term:
+	factor ( ( "+" | "-" ) factor )* ;
+
+factor:
+	unary ( ( "*" | "/" ) unary )* ;
+
+unary:
+	( "not" | "-" ) unary | call ;
+
+call:
+	primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+
+primary:
+	IDENTIFIER
+	| NUMBER
+	| TEXT
+	| "true"
+	| "false"
+	| "empty"
+	| "me"
+	| "parent" "." IDENTIFIER
+	| "(" expression ")"
+
+
+-------------
+LEXICAL RULES
+-------------
+
+IDENTIFIER:
+	ALPHA ( ALPHA | DIGIT )* ;
+
+NUMBER:
+	DIGIT+ ( "." DIGIT+ )? ;
+
+TEXT:
+	"\"" <any ASCII character except "\" or newline>* "\"" ;
+
+ALPHA:
+	"a" ... "z"
+	| "A" ... "Z"
+	| "_" ;
+
+DIGIT:
+	"0" ... "9" ;
