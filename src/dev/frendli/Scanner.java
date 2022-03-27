@@ -62,7 +62,7 @@ public class Scanner {
                 addToken(TokenType.DOT);
                 break;
             case '=':
-                addToken(TokenType.EQUAL_SIGN);
+                addToken(TokenType.EQUALS_SIGN);
                 break;
             case '-':
                 addToken(TokenType.MINUS);
@@ -75,12 +75,12 @@ public class Scanner {
                 break;
             case '>':
                 addToken(match('=')
-                    ? TokenType.GREATER_THAN_EQUAL
+                    ? TokenType.GREATER_THAN_EQUALS
                     : TokenType.GREATER_THAN);
                 break;
             case '<':
                 addToken(match('=')
-                    ? TokenType.LESS_THAN_EQUAL
+                    ? TokenType.LESS_THAN_EQUALS
                     : TokenType.LESS_THAN);
                 break;
             case '/':
@@ -100,9 +100,58 @@ public class Scanner {
                 text();
                 break;
             default:
+                if (isDigit(currentCharacter)) {
+                    number();
+                }
                 Frendli.error(line, "Found unexpected character " + currentCharacter);
                 break;
         }
+    }
+
+    /**
+     * Consume the current text literal.
+     */
+    private void text() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') {
+                Frendli.error(line++, "Found a newline in text. Text cannot contain newline characters.");
+            }
+            advance();
+        }
+
+        if (isAtEnd()) {
+            Frendli.error(line, "Text is not terminated. Text must be terminated by a \"");
+            return;
+        }
+
+        // Consume the terminating double quote (")
+        advance();
+
+        // Remove double quotes from text literal
+        String literal = source.substring(start + 1, current - 1);
+        addToken(TokenType.TEXT, literal);
+    }
+
+    /**
+     * Consume the current number.
+     */
+    private void number() {
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        // Only consume the dot if there are succeeding digits.
+        // (since it may otherwise be a method call)
+        if (peek() == '.' && isDigit(peekNext())) {
+            // Consume the dot (.) then all following digits
+            advance();
+            while (isDigit(peek())) {
+                advance();
+            }
+        }
+
+        double literal = Double.parseDouble(source.substring(start, current));
+        addToken(TokenType.NUMBER, literal);
     }
 
     private void addToken(TokenType type) {
@@ -114,7 +163,7 @@ public class Scanner {
      * the list of tokens.
      *
      * @param type The type of the token.
-     * @param literal The literal of the token type (e.g. "Hello World")
+     * @param literal The literal of the token type (e.g. "Hello World").
      */
     private void addToken(TokenType type, Object literal) {
         String lexeme = source.substring(start, current);
@@ -164,27 +213,20 @@ public class Scanner {
     }
 
     /**
-     * Consume a text literal
+     * Look ahead at the next unconsumed character without consuming it.
+     *
+     * @return The next unconsumed character.
      */
-    private void text() {
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') {
-                Frendli.error(line++, "Found a newline in text. Text cannot contain newline characters.");
-            }
-            advance();
+    private char peekNext() {
+        if (current + 1 > source.length()) {
+            return '\0';    // null
         }
 
-        if (isAtEnd()) {
-            Frendli.error(line, "Text is not terminated. Text must be terminated by a \"");
-            return;
-        }
+        return source.charAt(current + 1);
+    }
 
-        // Consume the terminating double quote (")
-        advance();
-
-        // Remove double quotes from text literal
-        String literal = source.substring(start + 1, current - 1);
-        addToken(TokenType.TEXT, literal);
+    private boolean isDigit(char character) {
+        return character >= '0' && character <= '9';
     }
 
     private boolean isAtEnd() {
