@@ -62,10 +62,10 @@ public class Frendli {
     }
 
     public static void error(int line, String message) {
-        report(line, "", message);
+        reportError(line, "", message);
     }
 
-    private static void report(int line, String location, String message) {
+    private static void reportError(int line, String location, String message) {
         System.err.println("Error " + location + "\n" +
                 line + " |" + "\t" + message
         );
