@@ -11,7 +11,7 @@ import java.util.List;
 public class Frendli {
     private static boolean errorFound = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             printUsage();
             System.exit(64);    // UNIX sysexits.h

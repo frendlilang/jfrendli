@@ -83,6 +83,22 @@ public class Scanner {
                     ? TokenType.LESS_THAN_EQUAL
                     : TokenType.LESS_THAN);
                 break;
+            case '/':
+                if (match('/')) {
+                    skipUntilEndOfLine();
+                }
+                else {
+                    addToken(TokenType.SLASH);
+                }
+                break;
+            // Ignore whitespace and tabs that are
+            // not at the beginning of the lines
+            case ' ':
+            case '\t':
+                break;
+            case '"':
+                text();
+                break;
             default:
                 Frendli.error(line, "Found unexpected character " + currentCharacter);
                 break;
@@ -115,7 +131,7 @@ public class Scanner {
     }
 
     /**
-     * Check if the current character matches and expected
+     * Check if the current unconsumed character matches an expected
      * character and consume if it does.
      *
      * @param expected The expected character.
@@ -125,7 +141,7 @@ public class Scanner {
         if (isAtEnd()) {
             return false;
         }
-        if (source.charAt(current) != expected) {
+        if (getCurrentUnconsumed() != expected) {
             return false;
         }
 
@@ -134,7 +150,54 @@ public class Scanner {
         return true;
     }
 
+    /**
+     * Look ahead at the current unconsumed character without consuming it.
+     *
+     * @return The current unconsumed character.
+     */
+    private char peek() {
+        if (isAtEnd()) {
+            return '\0';    // null
+        }
+
+        return getCurrentUnconsumed();
+    }
+
+    /**
+     * Consume a text literal
+     */
+    private void text() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') {
+                Frendli.error(line++, "Found a newline in text. Text cannot contain newline characters.");
+            }
+            advance();
+        }
+
+        if (isAtEnd()) {
+            Frendli.error(line, "Text is not terminated. Text must be terminated by a \"");
+            return;
+        }
+
+        // Consume the terminating double quote (")
+        advance();
+
+        // Remove double quotes from text literal
+        String literal = source.substring(start + 1, current - 1);
+        addToken(TokenType.TEXT, literal);
+    }
+
     private boolean isAtEnd() {
         return current >= source.length();
+    }
+
+    private void skipUntilEndOfLine() {
+        while (peek() != '\n' && !isAtEnd()) {
+            advance();
+        }
+    }
+
+    private char getCurrentUnconsumed() {
+        return source.charAt(current);
     }
 }
