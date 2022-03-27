@@ -6,9 +6,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class Frendli {
-    static boolean errorFound = false;
+    private static boolean errorFound = false;
 
     public static void main(String[] args) {
         if (args.length > 1) {
