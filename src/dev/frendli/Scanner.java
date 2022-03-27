@@ -1,11 +1,14 @@
 package dev.frendli;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Scanner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
+    private final Map<String, TokenType> keywords = new HashMap<>();
     private int start = 0;              // first character of current lexeme being scanned
     private int current = 0;            // current character of current lexeme being scanned
     private int line = 0;               // current line in source file (for error reporting)
@@ -14,6 +17,35 @@ public class Scanner {
 
     public Scanner(String source) {
         this.source = source;
+        fillKeywords();
+    }
+
+    private void fillKeywords() {
+        keywords.put("accept", TokenType.ACCEPT);
+        keywords.put("and", TokenType.AND);
+        keywords.put("change", TokenType.CHANGE);
+        keywords.put("create", TokenType.CREATE);
+        keywords.put("define", TokenType.DEFINE);
+        keywords.put("describe", TokenType.DESCRIBE);
+        keywords.put("empty", TokenType.EMPTY);
+        keywords.put("equals", TokenType.EQUALS_WORD);
+        keywords.put("false", TokenType.FALSE);
+        keywords.put("has", TokenType.HAS);
+        keywords.put("if", TokenType.IF);
+        keywords.put("inherit", TokenType.INHERIT);
+        keywords.put("me", TokenType.ME);
+        keywords.put("new", TokenType.NEW);
+        keywords.put("not", TokenType.NOT);
+        keywords.put("or", TokenType.OR);
+        keywords.put("otherwise", TokenType.OTHERWISE);
+        keywords.put("parent", TokenType.PARENT);
+        keywords.put("repeat", TokenType.REPEAT);
+        keywords.put("return", TokenType.RETURN);
+        keywords.put("send", TokenType.SEND);
+        keywords.put("times", TokenType.TIMES);
+        keywords.put("true", TokenType.TRUE);
+        keywords.put("while", TokenType.WHILE);
+        keywords.put("with", TokenType.WITH);
     }
 
     /**
@@ -24,7 +56,7 @@ public class Scanner {
     public List<Token> scanTokens() {
         // As long as the end of the file has not been reached, keep
         // scanning token by token, resetting the start position of the
-        // lexeme to the first character in the next-to-be-scanned one.
+        // lexeme to the first character in the next one to be scanned.
         while (!isAtEnd()) {
             start = current;
             scanToken();
@@ -103,9 +135,49 @@ public class Scanner {
                 if (isDigit(currentCharacter)) {
                     number();
                 }
+                else if (isAlpha(currentCharacter)) {
+                    identifier();
+                }
                 Frendli.error(line, "Found unexpected character " + currentCharacter);
                 break;
         }
+    }
+
+    /**
+     * Consume the current number.
+     */
+    private void number() {
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        // Only consume the dot if there are succeeding digits.
+        // (since it may otherwise be a method call)
+        if (peek() == '.' && isDigit(peekNext())) {
+            // Consume the dot (.) then all following digits
+            advance();
+            while (isDigit(peek())) {
+                advance();
+            }
+        }
+
+        double literal = Double.parseDouble(source.substring(start, current));
+        addToken(TokenType.NUMBER, literal);
+    }
+
+    /**
+     * Consume the current identifier.
+     */
+    private void identifier() {
+        while (isAlphaNumeric(peek())) {
+            advance();
+        }
+
+        // If the literal matches one of the reserved keywords, the token
+        // type will be that of the keyword, otherwise a regular identifier
+        String literal = source.substring(start, current);
+        TokenType type = keywords.getOrDefault(literal, TokenType.IDENTIFIER);
+        addToken(type);
     }
 
     /**
@@ -130,28 +202,6 @@ public class Scanner {
         // Remove double quotes from text literal
         String literal = source.substring(start + 1, current - 1);
         addToken(TokenType.TEXT, literal);
-    }
-
-    /**
-     * Consume the current number.
-     */
-    private void number() {
-        while (isDigit(peek())) {
-            advance();
-        }
-
-        // Only consume the dot if there are succeeding digits.
-        // (since it may otherwise be a method call)
-        if (peek() == '.' && isDigit(peekNext())) {
-            // Consume the dot (.) then all following digits
-            advance();
-            while (isDigit(peek())) {
-                advance();
-            }
-        }
-
-        double literal = Double.parseDouble(source.substring(start, current));
-        addToken(TokenType.NUMBER, literal);
     }
 
     private void addToken(TokenType type) {
@@ -223,6 +273,16 @@ public class Scanner {
         }
 
         return source.charAt(current + 1);
+    }
+
+    private boolean isAlpha(char character) {
+        return (character >= 'a' && character <= 'z')
+                || (character >= 'A' && character <= 'Z')
+                || (character == '_');
+    }
+
+    private boolean isAlphaNumeric(char character) {
+        return isAlpha(character) || isDigit(character);
     }
 
     private boolean isDigit(char character) {
