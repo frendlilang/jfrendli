@@ -9,6 +9,13 @@ public class Scanner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
     private final Map<String, TokenType> keywords = new HashMap<>();
+    private final int TAB_SIZE = 8;
+    private final int ALT_TAB_SIZE = 1;
+    private final int MAX_INDENT = 100;
+    private int[] indentStack = new int[MAX_INDENT];
+    private int[] altIndentStack = new int[MAX_INDENT];
+    private int indent = 0;
+    private int pendingIndents = 0;
     private int start = 0;              // first character of current lexeme being scanned
     private int current = 0;            // current character of current lexeme being scanned
     private int line = 0;               // current line in source file (for error reporting)
@@ -27,6 +34,7 @@ public class Scanner {
         keywords.put("create", TokenType.CREATE);
         keywords.put("define", TokenType.DEFINE);
         keywords.put("describe", TokenType.DESCRIBE);
+        keywords.put("display", TokenType.DISPLAY);    // TEMPORARY (until built-in function)
         keywords.put("empty", TokenType.EMPTY);
         keywords.put("equals", TokenType.EQUALS_WORD);
         keywords.put("false", TokenType.FALSE);
@@ -59,9 +67,11 @@ public class Scanner {
         // lexeme to the first character in the next one to be scanned.
         while (!isAtEnd()) {
             start = current;
+            isBlankLine = false;
             scanToken();
         }
 
+        resetIndentation();
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
         return tokens;
@@ -71,8 +81,18 @@ public class Scanner {
      * Scan the current lexeme for a token.
      */
     private void scanToken() {
-        char currentCharacter = advance();
-        switch (currentCharacter) {
+        advance();
+
+        if (isAtStartOfLine) {
+            System.out.println("\nSTART OF LINE");      // TEMP: DEBUGGING
+
+            isAtStartOfLine = false;
+            scanIndentation();
+        }
+
+        start = current - 1;
+        char character = getJustConsumed();
+        switch (character) {
             case '\n':
                 if (!isBlankLine) {
                     System.out.println("NEWLINE");      // TEMP: DEBUGGING
@@ -134,16 +154,123 @@ public class Scanner {
             default:
                 // Check digits and alphas here instead
                 // of in individual cases
-                if (isDigit(currentCharacter)) {
+                if (isDigit(character)) {
                     number();
                 }
-                else if (isAlpha(currentCharacter)) {
+                else if (isAlpha(character)) {
                     identifier();
                 }
                 else {
-                    Frendli.error(line, "Found unexpected character " + currentCharacter);
+                    Frendli.error(line, "Found unexpected character " + character);
                 }
                 break;
+        }
+    }
+
+    private void scanIndentation() {
+        char character = getJustConsumed();
+        int column = 0;
+        int altColumn = 0;
+        int tabs = 0;
+        int spaces = 0;
+
+        // Count how many columns the indentation spans
+        while ((character == ' ' || character == '\t') && !isAtEnd()) {
+            if (character == ' ') {
+                spaces++;
+                column++;
+                altColumn++;
+            }
+            else {
+                tabs++;
+                column = tabsToSpaces(column, TAB_SIZE);
+                altColumn = tabsToSpaces(altColumn, ALT_TAB_SIZE);
+            }
+
+            character = advance();
+        }
+
+        boolean isComment = (character == '/' && match('/'));
+        if (isComment) {
+            skipUntilEndOfLine();
+            if (!isAtEnd()) {
+                character = advance();
+            }
+        }
+
+        isBlankLine = (character == '\n' || isComment);
+        if (isBlankLine) {
+            // Do not increment line count here as other reported errors
+            // will then report the next line rather than the current.
+            // (The newline is caught by the switch statement in scanToken.)
+            System.out.println("BLANK LINE");       // TEMP: DEBUGGING
+            return;
+        }
+
+        boolean isMixingTabsAndSpaces = (tabs > 0 && spaces > 0);
+        if (isMixingTabsAndSpaces) {
+            Frendli.error(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
+        }
+
+        // (is as equally indented as previous line)
+        if (column == indentStack[indent]) {
+            if (altColumn != altIndentStack[indent]) {
+                Frendli.error(line, "There is a problem with the indentation.");
+            }
+        }
+        // (is more indented than previous line)
+        else if (column > indentStack[indent]) {
+            // Check if next level of indentation exceeds allowed limit
+            if (indent + 1 >= MAX_INDENT) {
+                Frendli.error(line, "The max indentation has been reached. You cannot indent further.");
+            }
+            if (altColumn <= altIndentStack[indent]) {
+                Frendli.error(line, "There is a problem with the indentation.");
+            }
+
+            // If the current line is more indented than the previous one,
+            // add a new indentation level to the stack and increment
+            // pending indents so INDENT tokens can be added later.
+            pendingIndents++;
+            indent++;
+            indentStack[indent] = column;
+            altIndentStack[indent] = altColumn;
+        }
+        // (is less indented than previous line)
+        else /* column < indentStack[indent] */ {
+            // If the current line is less indented than the previous one, pop
+            // indentation levels off of the stack until the indentation is consistent
+            // and decrement pending indents so DEDENT tokens can be added later.
+            while (indent > 0 && column < indentStack[indent]) {
+                pendingIndents--;
+                indent--;
+            }
+
+            // (is not consistently indented)
+            if (column != indentStack[indent] || altColumn != altIndentStack[indent] ) {
+                System.out.println("col: " + column + ", stack: " + indentStack[indent] + ", indent: " + indent);   // TEMP: DEBUGGING
+                System.out.println("col: " + altColumn + ", stack: " + altIndentStack[indent] + ", indent: " + indent);   // TEMP: DEBUGGING
+
+                Frendli.error(line, "There are inconsistencies in the level of indentation used.");
+            }
+        }
+
+        indentation();
+    }
+
+    /**
+     * Add the pending indentations.
+     */
+    private void indentation() {
+        while (pendingIndents != 0) {
+            if (pendingIndents > 0) {
+                addToken(TokenType.INDENT);
+                pendingIndents--;
+            }
+            else {
+                addToken(TokenType.DEDENT);
+                pendingIndents++;
+            }
         }
     }
 
@@ -217,10 +344,14 @@ public class Scanner {
      * the list of tokens.
      *
      * @param type The type of the token.
-     * @param literal The literal of the token type (e.g. "Hello World").
+     * @param literal The literal of the token type.
      */
     private void addToken(TokenType type, Object literal) {
         String lexeme = source.substring(start, current);
+        if (type == TokenType.NEWLINE || type == TokenType.INDENT || type == TokenType.DEDENT) {
+            lexeme = ""; // To not cause reformatting when printing
+        }
+
         tokens.add(new Token(type, lexeme, literal, line));
     }
 
@@ -303,7 +434,23 @@ public class Scanner {
         }
     }
 
+    private void resetIndentation() {
+        while (indent > 0) {
+            pendingIndents--;
+            indent--;
+        }
+        indentation();
+    }
+
+    private int tabsToSpaces(int column, int tabSize) {
+        return (column / tabSize + 1) * tabSize;
+    }
+
     private char getCurrentUnconsumed() {
         return source.charAt(current);
+    }
+
+    private char getJustConsumed() {
+        return source.charAt(current - 1);
     }
 }
