@@ -12,13 +12,17 @@ public class Scanner {
     private final int TAB_SIZE = 8;
     private final int ALT_TAB_SIZE = 1;
     private final int MAX_INDENT = 100;
-    private int[] indentStack = new int[MAX_INDENT];
+    private int[] indentStack = new int[MAX_INDENT];        // Stacks all indents
     private int[] altIndentStack = new int[MAX_INDENT];
-    private int indent = 0;
+    private int indentLevel = 0;
     private int pendingIndents = 0;
-    private int start = 0;              // first character of current lexeme being scanned
-    private int current = 0;            // current character of current lexeme being scanned
-    private int line = 0;               // current line in source file (for error reporting)
+    private int columnsInIndent = 0;
+    private int altColumnsInIndent = 0;
+    private int spacesInIndent = 0;
+    private int tabsInIndent = 0;
+    private int start = 0;                                  // First character of current lexeme being scanned
+    private int current = 0;                                // Current character of current lexeme being scanned
+    private int line = 1;                                   // Current line in source file (for error reporting)
     private boolean isAtStartOfLine = true;
     private boolean isBlankLine = false;
 
@@ -67,10 +71,9 @@ public class Scanner {
         // lexeme to the first character in the next one to be scanned.
         while (!isAtEnd()) {
             start = current;
-            isBlankLine = false;
             scanToken();
         }
-
+        // Reset indentation if the file ends without full dedentation
         resetIndentation();
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
@@ -84,10 +87,9 @@ public class Scanner {
         advance();
 
         if (isAtStartOfLine) {
-            System.out.println("\nSTART OF LINE");      // TEMP: DEBUGGING
-
             isAtStartOfLine = false;
-            scanIndentation();
+            isBlankLine = false;
+            indentation();
         }
 
         start = current - 1;
@@ -95,7 +97,6 @@ public class Scanner {
         switch (character) {
             case '\n':
                 if (!isBlankLine) {
-                    System.out.println("NEWLINE");      // TEMP: DEBUGGING
                     addToken(TokenType.NEWLINE);
                 }
                 line++;
@@ -167,64 +168,43 @@ public class Scanner {
         }
     }
 
-    private void scanIndentation() {
+    /**
+     * Consume the current indentation.
+     */
+    private void indentation() {
+        // Count and consume the spaces and tabs
+        countColumnsInIndent();
+
         char character = getJustConsumed();
-        int column = 0;
-        int altColumn = 0;
-        int tabs = 0;
-        int spaces = 0;
 
-        // Count how many columns the indentation spans
-        while ((character == ' ' || character == '\t') && !isAtEnd()) {
-            if (character == ' ') {
-                spaces++;
-                column++;
-                altColumn++;
-            }
-            else {
-                tabs++;
-                column = tabsToSpaces(column, TAB_SIZE);
-                altColumn = tabsToSpaces(altColumn, ALT_TAB_SIZE);
-            }
-
-            character = advance();
-        }
-
-        boolean isComment = (character == '/' && match('/'));
-        if (isComment) {
-            skipUntilEndOfLine();
-            if (!isAtEnd()) {
-                character = advance();
-            }
-        }
-
-        isBlankLine = (character == '\n' || isComment);
+        // Skip blank lines (lines with only whitespace, comments, and/or newline)
+        boolean isComment = (character == '/' && peek() == '/');
+        isBlankLine = (isComment || character == '\n');
         if (isBlankLine) {
             // Do not increment line count here as other reported errors
             // will then report the next line rather than the current.
             // (The newline is caught by the switch statement in scanToken.)
-            System.out.println("BLANK LINE");       // TEMP: DEBUGGING
             return;
         }
 
-        boolean isMixingTabsAndSpaces = (tabs > 0 && spaces > 0);
+        boolean isMixingTabsAndSpaces = (tabsInIndent > 0 && spacesInIndent > 0);
         if (isMixingTabsAndSpaces) {
             Frendli.error(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
         }
 
         // (is as equally indented as previous line)
-        if (column == indentStack[indent]) {
-            if (altColumn != altIndentStack[indent]) {
+        if (columnsInIndent == indentStack[indentLevel]) {
+            if (altColumnsInIndent != altIndentStack[indentLevel]) {
                 Frendli.error(line, "There is a problem with the indentation.");
             }
         }
         // (is more indented than previous line)
-        else if (column > indentStack[indent]) {
+        else if (columnsInIndent > indentStack[indentLevel]) {
             // Check if next level of indentation exceeds allowed limit
-            if (indent + 1 >= MAX_INDENT) {
+            if (indentLevel + 1 >= MAX_INDENT) {
                 Frendli.error(line, "The max indentation has been reached. You cannot indent further.");
             }
-            if (altColumn <= altIndentStack[indent]) {
+            if (altColumnsInIndent <= altIndentStack[indentLevel]) {
                 Frendli.error(line, "There is a problem with the indentation.");
             }
 
@@ -232,36 +212,59 @@ public class Scanner {
             // add a new indentation level to the stack and increment
             // pending indents so INDENT tokens can be added later.
             pendingIndents++;
-            indent++;
-            indentStack[indent] = column;
-            altIndentStack[indent] = altColumn;
+            indentLevel++;
+            indentStack[indentLevel] = columnsInIndent;
+            altIndentStack[indentLevel] = altColumnsInIndent;
         }
         // (is less indented than previous line)
-        else /* column < indentStack[indent] */ {
+        else {
             // If the current line is less indented than the previous one, pop
             // indentation levels off of the stack until the indentation is consistent
             // and decrement pending indents so DEDENT tokens can be added later.
-            while (indent > 0 && column < indentStack[indent]) {
+            while (indentLevel > 0 && columnsInIndent < indentStack[indentLevel]) {
                 pendingIndents--;
-                indent--;
+                indentLevel--;
             }
 
             // (is not consistently indented)
-            if (column != indentStack[indent] || altColumn != altIndentStack[indent] ) {
-                System.out.println("col: " + column + ", stack: " + indentStack[indent] + ", indent: " + indent);   // TEMP: DEBUGGING
-                System.out.println("col: " + altColumn + ", stack: " + altIndentStack[indent] + ", indent: " + indent);   // TEMP: DEBUGGING
-
+            if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
                 Frendli.error(line, "There are inconsistencies in the level of indentation used.");
             }
         }
 
-        indentation();
+        addPendingIndents();
     }
 
     /**
-     * Add the pending indentations.
+     * Count and consume the columns in the indentation.
      */
-    private void indentation() {
+    private void countColumnsInIndent() {
+        columnsInIndent = 0;
+        altColumnsInIndent = 0;
+        spacesInIndent = 0;
+        tabsInIndent = 0;
+
+        char character = getJustConsumed();
+        while ((character == ' ' || character == '\t') && !isAtEnd()) {
+            if (character == ' ') {
+                spacesInIndent++;
+                columnsInIndent++;
+                altColumnsInIndent++;
+            }
+            else {
+                tabsInIndent++;
+                columnsInIndent = tabsToSpaces(columnsInIndent, TAB_SIZE);
+                altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_SIZE);
+            }
+
+            character = advance();
+        }
+    }
+
+    /**
+     * Add the pending indents or dedents.
+     */
+    private void addPendingIndents() {
         while (pendingIndents != 0) {
             if (pendingIndents > 0) {
                 addToken(TokenType.INDENT);
@@ -435,11 +438,11 @@ public class Scanner {
     }
 
     private void resetIndentation() {
-        while (indent > 0) {
+        while (indentLevel > 0) {
             pendingIndents--;
-            indent--;
+            indentLevel--;
         }
-        indentation();
+        addPendingIndents();
     }
 
     private int tabsToSpaces(int column, int tabSize) {
