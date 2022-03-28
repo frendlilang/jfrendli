@@ -23,6 +23,7 @@ public enum TokenType {
     CREATE,
     DEFINE,
     DESCRIBE,
+    DISPLAY,    // TEMPORARY (until built-in function)
     EMPTY,
     EQUALS_WORD,
     FALSE,

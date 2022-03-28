@@ -39,6 +39,8 @@ public class Frendli {
         BufferedReader reader = new BufferedReader(input);
 
         while (true) {
+            System.out.println("\nHowdy! Welcome to the Frendli interactive prompt!\n");
+            System.out.println("Go ahead and enter one line of code to be executed.");
             System.out.print("> ");
             String line = reader.readLine();
             boolean hasExitedPrompt = (line == null);   // Caused when killed by Ctrl + D
@@ -73,6 +75,7 @@ public class Frendli {
     }
 
     private static void printUsage() {
-        System.out.println("Usage: jfrendli <script>");
+        System.out.println("Run the compiled program from the src directory:");
+        System.out.println("\tjava dev.frendli.Frendli <file>");
     }
 }
