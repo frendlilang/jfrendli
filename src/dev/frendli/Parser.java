@@ -94,6 +94,27 @@ public class Parser {
         return primary();
     }
 
+    // primary: NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
+    private Expression primary() {
+        if (match(TokenType.NUMBER, TokenType.TEXT)) {
+            return new Expression.Literal(getJustConsumed().literal);
+        }
+        if (match(TokenType.TRUE)) {
+            return new Expression.Literal(true);
+        }
+        if (match(TokenType.FALSE)) {
+            return new Expression.Literal(false);
+        }
+        if (match(TokenType.EMPTY)) {
+            return new Expression.Literal(null);
+        }
+        if (match(TokenType.OPEN_PAREN)) {
+            Expression expression = expression();
+            consume(TokenType.CLOSE_PAREN, "A close parenthesis ')' is missing.");
+            return new Expression.Grouping(expression);
+        }
+    }
+
     /**
      * Consume the current token (advance).
      *
