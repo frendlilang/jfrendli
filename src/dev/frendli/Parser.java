@@ -83,6 +83,17 @@ public class Parser {
         return left;
     }
 
+    // unary: ( "not" | "-" ) unary | primary ;
+    private Expression unary() {
+        if (match(TokenType.NOT, TokenType.MINUS)) {
+            Token operator = getJustConsumed();
+            Expression right = unary();
+            return new Expression.Unary(operator, right);
+        }
+
+        return primary();
+    }
+
     /**
      * Consume the current token (advance).
      *
