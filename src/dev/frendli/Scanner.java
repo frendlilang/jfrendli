@@ -89,7 +89,7 @@ public class Scanner {
         if (isAtStartOfLine) {
             isAtStartOfLine = false;
             isBlankLine = false;
-            indentation();
+            consumeIndentation();
         }
 
         start = current - 1;
@@ -150,16 +150,16 @@ public class Scanner {
             case '\t':
                 break;
             case '"':
-                text();
+                consumeText();
                 break;
             default:
                 // Check digits and alphas here instead
                 // of in individual cases
                 if (isDigit(character)) {
-                    number();
+                    consumeNumber();
                 }
                 else if (isAlpha(character)) {
-                    identifier();
+                    consumeIdentifier();
                 }
                 else {
                     Frendli.error(line, "Found unexpected character " + character);
@@ -171,7 +171,7 @@ public class Scanner {
     /**
      * Consume the current indentation.
      */
-    private void indentation() {
+    private void consumeIndentation() {
         // Count and consume the spaces and tabs
         countColumnsInIndent();
 
@@ -280,7 +280,7 @@ public class Scanner {
     /**
      * Consume the current number.
      */
-    private void number() {
+    private void consumeNumber() {
         while (isDigit(peek())) {
             advance();
         }
@@ -302,7 +302,7 @@ public class Scanner {
     /**
      * Consume the current identifier.
      */
-    private void identifier() {
+    private void consumeIdentifier() {
         while (isAlphaNumeric(peek())) {
             advance();
         }
@@ -317,7 +317,7 @@ public class Scanner {
     /**
      * Consume the current text literal.
      */
-    private void text() {
+    private void consumeText() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
                 Frendli.error(line++, "Found a newline in text. Text cannot contain newline characters.");
