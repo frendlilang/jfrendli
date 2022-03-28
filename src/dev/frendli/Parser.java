@@ -28,7 +28,7 @@ public class Parser {
 
     // equality: comparison ( ( "not"? "equals" ) comparison )* ;
     private Expression equality() {
-        Expression expression = comparison();
+        Expression left = comparison();
 
         while (match(TokenType.NOT, TokenType.EQUALS_WORD)) {
             Token operator = getJustConsumed();
@@ -37,10 +37,50 @@ public class Parser {
                 operator = new Token(TokenType.NOT_EQUALS, "not equals", null, operator.line);
             }
             Expression right = comparison();
-            expression = new Expression.Binary(expression, operator, right);
+            left = new Expression.Binary(left, operator, right);
         }
 
-        return expression;
+        return left;
+    }
+
+    // comparison: term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
+    private Expression comparison() {
+        Expression left = term();
+
+        while (match(TokenType.LESS_THAN, TokenType.LESS_THAN_EQUALS,
+                TokenType.GREATER_THAN, TokenType.GREATER_THAN_EQUALS)) {
+            Token operator = getJustConsumed();
+            Expression right = term();
+            left = new Expression.Binary(left, operator, right);
+        }
+
+        return left;
+    }
+
+    // term: factor ( ( "+" | "-" ) factor )* ;
+    private Expression term() {
+        Expression left = factor();
+
+        while (match(TokenType.PLUS, TokenType.MINUS)) {
+            Token operator = getJustConsumed();
+            Expression right = factor();
+            left = new Expression.Binary(left, operator, right);
+        }
+
+        return left;
+    }
+
+    // factor: unary ( ( "*" | "/" ) unary )* ;
+    private Expression factor() {
+        Expression left = unary();
+
+        while (match(TokenType.STAR, TokenType.SLASH)) {
+            Token operator = getJustConsumed();
+            Expression right = unary();
+            left = new Expression.Binary(left, operator, right);
+        }
+
+        return left;
     }
 
     /**
