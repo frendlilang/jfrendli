@@ -132,13 +132,17 @@ public class Scanner {
                 text();
                 break;
             default:
+                // Check digits and alphas here instead
+                // of in individual cases
                 if (isDigit(currentCharacter)) {
                     number();
                 }
                 else if (isAlpha(currentCharacter)) {
                     identifier();
                 }
-                Frendli.error(line, "Found unexpected character " + currentCharacter);
+                else {
+                    Frendli.error(line, "Found unexpected character " + currentCharacter);
+                }
                 break;
         }
     }

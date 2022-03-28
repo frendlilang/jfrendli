@@ -39,7 +39,7 @@ public class Frendli {
         BufferedReader reader = new BufferedReader(input);
 
         while (true) {
-            System.out.println("> ");
+            System.out.print("> ");
             String line = reader.readLine();
             boolean hasExitedPrompt = (line == null);   // Caused when killed by Ctrl + D
             if (hasExitedPrompt) {
@@ -67,7 +67,7 @@ public class Frendli {
 
     private static void reportError(int line, String location, String message) {
         System.err.println("Error " + location + "\n" +
-                line + " |" + "\t" + message
+                "\tLine " + line + " |\t" + message
         );
         errorFound = true;
     }
