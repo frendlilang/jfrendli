@@ -35,7 +35,7 @@ public class Frendli {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()).replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
-        if (reporter.hadError()) {
+        if (reporter.hadSyntaxError()) {
             System.exit(65);    // UNIX sysexits.h
         }
         if (reporter.hadRuntimeError()) {
@@ -70,7 +70,7 @@ public class Frendli {
         Expression expression = parser.parse();
 
         // If any syntax errors were found, do not continue interpreting.
-        if (reporter.hadError()) {
+        if (reporter.hadSyntaxError()) {
             return;
         }
 

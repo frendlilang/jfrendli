@@ -5,30 +5,30 @@ package dev.frendli;
  * error reporters must extend the ErrorReporter base class.
  */
 public abstract class ErrorReporter {
-    private boolean errorReported = false;
+    private boolean syntaxErrorReported = false;
     private boolean runtimeErrorReported = false;
 
-    public boolean hadError() {
-        return errorReported;
+    public boolean hadSyntaxError() {
+        return syntaxErrorReported;
     }
 
     public boolean hadRuntimeError() {
         return runtimeErrorReported;
     }
 
-    public void report(int line, String message) {
+    public void syntaxError(int line, String message) {
         report(line, "", message);
-        errorReported = true;
+        syntaxErrorReported = true;
     }
 
-    public void report(Token token, String message) {
+    public void syntaxError(Token token, String message) {
         if (token.type == TokenType.EOF) {
             report(token.line, "at the end of the file", message);
         }
         else {
             report(token.line, "at '" + token.lexeme + "'", message);
         }
-        errorReported = true;
+        syntaxErrorReported = true;
     }
 
     public void runtimeError(RuntimeError error) {
@@ -37,7 +37,7 @@ public abstract class ErrorReporter {
     }
 
     public void resetError() {
-        errorReported = false;
+        syntaxErrorReported = false;
     }
 
     public abstract void report(int line, String location, String message);
