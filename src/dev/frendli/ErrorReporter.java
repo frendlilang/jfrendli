@@ -1,5 +1,9 @@
 package dev.frendli;
 
+/**
+ * The error reporter - reports any errors found. All
+ * error reporters must extend the ErrorReporter base class.
+ */
 public abstract class ErrorReporter {
     private boolean errorReported = false;
 
@@ -28,6 +32,9 @@ public abstract class ErrorReporter {
 
     public abstract void report(int line, String location, String message);
 
+    /**
+     * The console error reporter - reports errors to the console.
+     */
     public static class Console extends ErrorReporter {
         @Override
         public void report(int line, String location, String message) {

@@ -8,6 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+/**
+ * The main class of jfrendli.
+ */
 public class Frendli {
     private static ErrorReporter reporter = new ErrorReporter.Console();
 
@@ -71,7 +74,10 @@ public class Frendli {
     }
 
     private static void printUsage() {
-        System.out.println("Run the compiled program from the src directory:");
-        System.out.println("\tjava dev.frendli.Frendli <file>");
+        System.out.println("Usage:");
+        System.out.println("\tRun a file:");
+        System.out.println("\t   java dev.frendli.Frendli <file>");
+        System.out.println("\tOr run the interactive prompt:");
+        System.out.println("\t   java dev.frendli.Frendli");
     }
 }

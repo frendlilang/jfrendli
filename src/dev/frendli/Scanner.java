@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The scanner - traverses the characters in the source code and detects
+ * the corresponding tokens as well as errors in individual tokens.
+ */
 public class Scanner {
     private final ErrorReporter reporter;
     private final String source;

@@ -13,6 +13,13 @@ import java.util.List;
 // unary:               ( "not" | "-" ) unary | primary ;
 // primary:             NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
 
+/**
+ * The parser - traverses the tokens produced by the scanner and
+ * maps them to rules in the grammar to form an abstract syntax tree,
+ * as well as detecting and reporting parse errors.
+ * (It performs recursive descent/top-down parsing, starting with
+ * the lowest-precedence.)
+ */
 public class Parser {
     private static class ParseError extends RuntimeException {}
 
