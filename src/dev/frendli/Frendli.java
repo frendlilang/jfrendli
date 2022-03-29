@@ -57,6 +57,13 @@ public class Frendli {
     private static void run(String source) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
+        Parser parser = new Parser(tokens);
+        parser.parse();
+
+        // If any syntax errors were found, do not continue interpreting.
+        if (errorFound) {
+            return;
+        }
 
         for (Token token : tokens) {
             System.out.println(token);
@@ -65,6 +72,15 @@ public class Frendli {
 
     public static void error(int line, String message) {
         reportError(line, "", message);
+    }
+
+    public static void error(Token token, String message) {
+        if (token.type == TokenType.EOF) {
+            reportError(token.line, "at the end of the file", message);
+        }
+        else {
+            reportError(token.line, "at '" + token.lexeme + "'", message);
+        }
     }
 
     private static void reportError(int line, String location, String message) {
