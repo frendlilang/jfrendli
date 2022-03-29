@@ -16,14 +16,19 @@ public class Interpreter implements Expression.Visitor<Object> {
             case EQUALS_WORD:
                 return isEqual(left, right);
             case GREATER_THAN:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left > (double)right;
             case GREATER_THAN_EQUALS:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left >= (double)right;
             case LESS_THAN:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left < (double)right;
             case LESS_THAN_EQUALS:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left <= (double)right;
             case MINUS:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left - (double)right;
             case NOT_EQUALS:
                 return !isEqual(left, right);
@@ -35,10 +40,12 @@ public class Interpreter implements Expression.Visitor<Object> {
                 if (left instanceof String && right instanceof String) {
                     return (String)left + (String)right;
                 }
-                break;
+                throw new RuntimeError(expression.operator, "The operands must be either only numbers or only texts.");
             case SLASH:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left / (double)right;
             case STAR:
+                verifyNumberOperands(expression.operator, left, right);
                 return (double)left * (double)right;
         }
 
@@ -65,8 +72,7 @@ public class Interpreter implements Expression.Visitor<Object> {
         // after the expression has been evaluated.
         switch (expression.operator.type) {
             case MINUS:
-                // Cast the right value to a double
-                // before applying the operator.
+                verifyNumberOperand(expression.operator, right);
                 return -(double)right;
             case NOT:
                 return !isTruthy(right);
@@ -75,6 +81,12 @@ public class Interpreter implements Expression.Visitor<Object> {
         return null;
     }
 
+    /**
+     * Evaluate an expression.
+     *
+     * @param expression The expression to evaluate.
+     * @return The resulting value.
+     */
     private Object evaluate(Expression expression) {
         return expression.accept(this);
     }
@@ -117,5 +129,35 @@ public class Interpreter implements Expression.Visitor<Object> {
         }
 
         return true;
+    }
+
+    /**
+     * Verify that the operand is a number and throw a RuntimeError if not.
+     *
+     * @param operator The operator.
+     * @param operand The operand.
+     */
+    private void verifyNumberOperand(Token operator, Object operand) {
+        if (operand instanceof Double) {
+            return;
+        }
+
+        throw new RuntimeError(operator, "The operand must be a number.");
+    }
+
+    /**
+     * Verify that the operands are numbers and throw a RuntimeError if not.
+     *
+     * @param operator The operator.
+     * @param left The left operand.
+     * @param right The right operand.
+     */
+    private void verifyNumberOperands(Token operator, Object left, Object right) {
+        // Evaluate both operands before reporting the error.
+        if (left instanceof Double && right instanceof Double) {
+            return;
+        }
+
+        throw new RuntimeError(operator, "The operands must be numbers.");
     }
 }
