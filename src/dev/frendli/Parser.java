@@ -21,8 +21,6 @@ import java.util.List;
  * the lowest-precedence.)
  */
 public class Parser {
-    private static class ParseError extends RuntimeException {}
-
     private final ErrorReporter reporter;
     private final List<Token> tokens;
     private int current = 0;
