@@ -33,6 +33,7 @@ public enum TokenType {
     ME,
     NEW,
     NOT,
+    NOT_EQUALS,     // The replacement when "not" "equals" is encountered
     OR,
     OTHERWISE,
     PARENT,
