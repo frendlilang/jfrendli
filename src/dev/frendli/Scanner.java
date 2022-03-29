@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Scanner {
+    private final ErrorReporter reporter;
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
     private final Map<String, TokenType> keywords = new HashMap<>();
@@ -26,8 +27,9 @@ public class Scanner {
     private boolean isAtStartOfLine = true;
     private boolean isBlankLine = false;
 
-    public Scanner(String source) {
+    public Scanner(String source, ErrorReporter reporter) {
         this.source = source;
+        this.reporter = reporter;
         fillKeywords();
     }
 
@@ -162,7 +164,7 @@ public class Scanner {
                     consumeIdentifier();
                 }
                 else {
-                    Frendli.error(line, "Found unexpected character " + character);
+                    reporter.report(line, "Found unexpected character " + character);
                 }
                 break;
         }
@@ -189,23 +191,23 @@ public class Scanner {
 
         boolean isMixingTabsAndSpaces = (tabsInIndent > 0 && spacesInIndent > 0);
         if (isMixingTabsAndSpaces) {
-            Frendli.error(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
+            reporter.report(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
         }
 
         // (is as equally indented as previous line)
         if (columnsInIndent == indentStack[indentLevel]) {
             if (altColumnsInIndent != altIndentStack[indentLevel]) {
-                Frendli.error(line, "There is a problem with the indentation.");
+                reporter.report(line, "There is a problem with the indentation.");
             }
         }
         // (is more indented than previous line)
         else if (columnsInIndent > indentStack[indentLevel]) {
             // Check if next level of indentation exceeds allowed limit
             if (indentLevel + 1 >= MAX_INDENT) {
-                Frendli.error(line, "The max indentation has been reached. You cannot indent further.");
+                reporter.report(line, "The max indentation has been reached. You cannot indent further.");
             }
             if (altColumnsInIndent <= altIndentStack[indentLevel]) {
-                Frendli.error(line, "There is a problem with the indentation.");
+                reporter.report(line, "There is a problem with the indentation.");
             }
 
             // If the current line is more indented than the previous one,
@@ -228,7 +230,7 @@ public class Scanner {
 
             // (is not consistently indented)
             if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
-                Frendli.error(line, "There are inconsistencies in the level of indentation used.");
+                reporter.report(line, "There are inconsistencies in the level of indentation used.");
             }
         }
 
@@ -320,13 +322,13 @@ public class Scanner {
     private void consumeText() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
-                Frendli.error(line++, "Found a newline in text. Text cannot contain newline characters.");
+                reporter.report(line++, "Found a newline in text. Text cannot contain newline characters.");
             }
             advance();
         }
 
         if (isAtEnd()) {
-            Frendli.error(line, "Text is not terminated. Text must be terminated by a \"");
+            reporter.report(line, "Text is not terminated. Text must be terminated by a \"");
             return;
         }
 
@@ -359,7 +361,7 @@ public class Scanner {
     }
 
     /**
-     * Consume the current character (advance the pointer).
+     * Advance to the next character.
      *
      * @return The consumed character.
      */
@@ -369,7 +371,7 @@ public class Scanner {
 
     /**
      * Check if the current unconsumed character matches an expected
-     * character and consume if it does.
+     * character and consume it if it does.
      *
      * @param expected The expected character.
      * @return Whether they match or not.
@@ -413,6 +415,20 @@ public class Scanner {
         return source.charAt(current + 1);
     }
 
+    private void skipUntilEndOfLine() {
+        while (peek() != '\n' && !isAtEnd()) {
+            advance();
+        }
+    }
+
+    private void resetIndentation() {
+        while (indentLevel > 0) {
+            pendingIndents--;
+            indentLevel--;
+        }
+        addPendingIndents();
+    }
+
     private boolean isAlpha(char character) {
         return (character >= 'a' && character <= 'z')
                 || (character >= 'A' && character <= 'Z')
@@ -429,20 +445,6 @@ public class Scanner {
 
     private boolean isAtEnd() {
         return current >= source.length();
-    }
-
-    private void skipUntilEndOfLine() {
-        while (peek() != '\n' && !isAtEnd()) {
-            advance();
-        }
-    }
-
-    private void resetIndentation() {
-        while (indentLevel > 0) {
-            pendingIndents--;
-            indentLevel--;
-        }
-        addPendingIndents();
     }
 
     private int tabsToSpaces(int column, int tabSize) {

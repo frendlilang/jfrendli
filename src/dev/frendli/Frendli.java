@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Frendli {
-    private static boolean errorFound = false;
+    private static ErrorReporter reporter = new ErrorReporter.Console();
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -29,7 +29,7 @@ public class Frendli {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()).replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
-        if (errorFound) {
+        if (reporter.hadError()) {
             System.exit(65);    // UNIX sysexits.h
         }
     }
@@ -38,9 +38,9 @@ public class Frendli {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
+        System.out.println("\nHowdy! Welcome to the Frendli interactive prompt!\n");
+        System.out.println("Go ahead and enter one line of code to be executed.");
         while (true) {
-            System.out.println("\nHowdy! Welcome to the Frendli interactive prompt!\n");
-            System.out.println("Go ahead and enter one line of code to be executed.");
             System.out.print("> ");
             String line = reader.readLine();
             boolean hasExitedPrompt = (line == null);   // Caused when killed by Ctrl + D
@@ -50,44 +50,24 @@ public class Frendli {
             run(line);
 
             // Do not kill user's process in interactive mode
-            errorFound = false;
+            reporter.resetError();
         }
     }
 
     private static void run(String source) {
-        Scanner scanner = new Scanner(source);
+        Scanner scanner = new Scanner(source, reporter);
         List<Token> tokens = scanner.scanTokens();
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, reporter);
         parser.parse();
 
         // If any syntax errors were found, do not continue interpreting.
-        if (errorFound) {
+        if (reporter.hadError()) {
             return;
         }
 
         for (Token token : tokens) {
             System.out.println(token);
         }
-    }
-
-    public static void error(int line, String message) {
-        reportError(line, "", message);
-    }
-
-    public static void error(Token token, String message) {
-        if (token.type == TokenType.EOF) {
-            reportError(token.line, "at the end of the file", message);
-        }
-        else {
-            reportError(token.line, "at '" + token.lexeme + "'", message);
-        }
-    }
-
-    private static void reportError(int line, String location, String message) {
-        System.err.println("Error " + location + "\n" +
-                "\tLine " + line + " |\t" + message
-        );
-        errorFound = true;
     }
 
     private static void printUsage() {

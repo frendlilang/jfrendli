@@ -16,11 +16,13 @@ import java.util.List;
 public class Parser {
     private static class ParseError extends RuntimeException {}
 
+    private final ErrorReporter reporter;
     private final List<Token> tokens;
     private int current = 0;
 
-    public Parser (List<Token> tokens) {
+    public Parser (List<Token> tokens, ErrorReporter reporter) {
         this.tokens = tokens;
+        this.reporter = reporter;
     }
 
     /**
@@ -236,7 +238,7 @@ public class Parser {
      * @return The ParseError.
      */
     private ParseError error(Token token, String message) {
-        Frendli.error(token, message);
+        reporter.report(token, message);
 
         // Let the caller decide what to do with the error,
         // as synchronization may not be needed for all errors.
