@@ -6,6 +6,27 @@ package dev.frendli;
  * values. The current node always evaluates its children first (post-order traversal).
  */
 public class Interpreter implements Expression.Visitor<Object> {
+    private ErrorReporter reporter;
+
+    public Interpreter(ErrorReporter reporter) {
+        this.reporter = reporter;
+    }
+
+    /**
+     * Interpret and evaluate a syntax tree.
+     *
+     * @param expression The expression to interpret.
+     */
+    public void interpret(Expression expression){
+        try {
+            Object value = evaluate(expression);
+            System.out.println(stringify(value));
+        }
+        catch (RuntimeError error) {
+            reporter.runtimeError(error);
+        }
+    }
+
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         // Evaluate the operands left to right
@@ -40,7 +61,7 @@ public class Interpreter implements Expression.Visitor<Object> {
                 if (left instanceof String && right instanceof String) {
                     return (String)left + (String)right;
                 }
-                throw new RuntimeError(expression.operator, "The operands must be either only numbers or only texts.");
+                throw new RuntimeError(expression.operator, "The operands must be only numbers or only texts.");
             case SLASH:
                 verifyNumberOperands(expression.operator, left, right);
                 return (double)left / (double)right;
@@ -129,6 +150,27 @@ public class Interpreter implements Expression.Visitor<Object> {
         }
 
         return true;
+    }
+
+    /**
+     * Convert a value to the Frendli representation.
+     *
+     * @param value The value to convert.
+     * @return The Frendli value.
+     */
+    private String stringify(Object value) {
+        if (value == null) {
+            return "empty";
+        }
+        if (value instanceof Double) {
+            String text = value.toString();
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
+        }
+
+        return value.toString();
     }
 
     /**

@@ -12,7 +12,10 @@ import java.util.List;
  * The main class of jfrendli.
  */
 public class Frendli {
-    private static ErrorReporter reporter = new ErrorReporter.Console();
+    private static final ErrorReporter reporter = new ErrorReporter.Console();
+    // The interpreter is static to allow the user's session in the interactive
+    // prompt to keep using the same interpreter without creating a new one.
+    private static final Interpreter interpreter = new Interpreter(reporter);
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -34,6 +37,9 @@ public class Frendli {
 
         if (reporter.hadError()) {
             System.exit(65);    // UNIX sysexits.h
+        }
+        if (reporter.hadRuntimeError()) {
+            System.exit(70);    // UNIX sysexits.h
         }
     }
 
@@ -61,16 +67,14 @@ public class Frendli {
         Scanner scanner = new Scanner(source, reporter);
         List<Token> tokens = scanner.scanTokens();
         Parser parser = new Parser(tokens, reporter);
-        parser.parse();
+        Expression expression = parser.parse();
 
         // If any syntax errors were found, do not continue interpreting.
         if (reporter.hadError()) {
             return;
         }
 
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+        interpreter.interpret(expression);
     }
 
     private static void printUsage() {

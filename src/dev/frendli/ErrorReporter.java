@@ -6,9 +6,14 @@ package dev.frendli;
  */
 public abstract class ErrorReporter {
     private boolean errorReported = false;
+    private boolean runtimeErrorReported = false;
 
     public boolean hadError() {
         return errorReported;
+    }
+
+    public boolean hadRuntimeError() {
+        return runtimeErrorReported;
     }
 
     public void report(int line, String message) {
@@ -24,6 +29,11 @@ public abstract class ErrorReporter {
             report(token.line, "at '" + token.lexeme + "'", message);
         }
         errorReported = true;
+    }
+
+    public void runtimeError(RuntimeError error) {
+        report(error.token.line, "", error.getMessage());
+        runtimeErrorReported = true;
     }
 
     public void resetError() {
