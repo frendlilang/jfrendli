@@ -1,11 +1,13 @@
 package dev.frendli;
 
+import java.util.List;
+
 /**
  * The interpreter - recursively traverses the syntax tree produced
  * by the parser and interprets the nodes by computing the corresponding
  * values. The current node always evaluates its children first (post-order traversal).
  */
-public class Interpreter implements Expression.Visitor<Object> {
+public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     private ErrorReporter reporter;
 
     public Interpreter(ErrorReporter reporter) {
@@ -13,14 +15,15 @@ public class Interpreter implements Expression.Visitor<Object> {
     }
 
     /**
-     * Interpret and evaluate a syntax tree.
+     * Interpret and evaluate a syntax tree of statements.
      *
-     * @param expression The expression to interpret.
+     * @param statements The statements.
      */
-    public void interpret(Expression expression){
+    public void interpret(List<Statement> statements) {
         try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
+            for (Statement statement : statements) {
+                execute(statement);
+            }
         }
         catch (RuntimeError error) {
             reporter.runtimeError(error);
@@ -81,7 +84,7 @@ public class Interpreter implements Expression.Visitor<Object> {
     @Override
     public Object visitGroupingExpression(Expression.Grouping expression) {
         // The Grouping expression object references another expression
-        // (the one in between the parentheses) which need to be evaluated.
+        // (the one in between the parentheses) which needs to be evaluated.
         return evaluate(expression.expression);
     }
 
@@ -102,6 +105,21 @@ public class Interpreter implements Expression.Visitor<Object> {
         return null;
     }
 
+    @Override
+    public Void visitDisplayStatement(Statement.Display statement) {
+        Object value = evaluate(statement.expression);
+        print(stringify(value));
+
+        return null;
+    }
+
+    @Override
+    public Void visitExpressionStatement(Statement.ExpressionStatement statement) {
+        evaluate(statement.expression);
+
+        return null;
+    }
+
     /**
      * Evaluate an expression.
      *
@@ -110,6 +128,15 @@ public class Interpreter implements Expression.Visitor<Object> {
      */
     private Object evaluate(Expression expression) {
         return expression.accept(this);
+    }
+
+    /**
+     * Execute a statement.
+     *
+     * @param statement The statement to execute.
+     */
+    private void execute(Statement statement) {
+        statement.accept(this);
     }
 
     /**
@@ -163,6 +190,8 @@ public class Interpreter implements Expression.Visitor<Object> {
             return "empty";
         }
         if (value instanceof Double) {
+            // Even though all numbers are treated as doubles,
+            // show integers without the decimal point.
             String text = value.toString();
             if (text.endsWith(".0")) {
                 text = text.substring(0, text.length() - 2);
@@ -201,5 +230,9 @@ public class Interpreter implements Expression.Visitor<Object> {
         }
 
         throw new RuntimeError(operator, "The operands must be numbers.");
+    }
+
+    private void print(String value) {
+        System.out.println(value);
     }
 }

@@ -33,7 +33,8 @@ public class Frendli {
     private static void runFile(String path) throws IOException {
         final String REGEX_ALL_NEWLINES = "(\\r\\n)|(\\r)/g";
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()).replaceAll(REGEX_ALL_NEWLINES, "\n"));
+        String source = new String(bytes, Charset.defaultCharset());
+        run(source.replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
         if (reporter.hadSyntaxError()) {
             System.exit(65);    // UNIX sysexits.h
@@ -49,6 +50,7 @@ public class Frendli {
 
         System.out.println("\nHowdy! Welcome to the Frendli interactive prompt!\n");
         System.out.println("Go ahead and enter one line of code to be executed.");
+
         while (true) {
             System.out.print("> ");
             String line = reader.readLine();
@@ -58,7 +60,7 @@ public class Frendli {
             }
             run(line);
 
-            // Do not kill user's process in interactive mode
+            // Do not kill user's process in interactive mode.
             reporter.resetError();
         }
     }
@@ -67,14 +69,14 @@ public class Frendli {
         Scanner scanner = new Scanner(source, reporter);
         List<Token> tokens = scanner.scanTokens();
         Parser parser = new Parser(tokens, reporter);
-        Expression expression = parser.parse();
+        List<Statement> statements = parser.parse();
 
         // If any syntax errors were found, do not continue interpreting.
         if (reporter.hadSyntaxError()) {
             return;
         }
 
-        interpreter.interpret(expression);
+        interpreter.interpret(statements);
     }
 
     private static void printUsage() {
