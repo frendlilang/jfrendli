@@ -22,12 +22,17 @@ public abstract class ErrorReporter {
     }
 
     public void syntaxError(Token token, String message) {
+        String location = "at '" + token.lexeme + "'";
         if (token.type == TokenType.EOF) {
-            report(token.line, "at the end of the file", message);
+            location = "at the end of the file";
         }
-        else {
-            report(token.line, "at '" + token.lexeme + "'", message);
+        else if (token.type == TokenType.NEWLINE) {
+            location = "at the end of the line";
         }
+        else if (token.type == TokenType.INDENT || token.type == TokenType.DEDENT) {
+            location = "at the indentation";
+        }
+        report(token.line, location, message);
         syntaxErrorReported = true;
     }
 
@@ -51,6 +56,7 @@ public abstract class ErrorReporter {
             System.err.println("Error " + location + "\n" +
                     "   Line " + line + " |\t" + message
             );
+            System.out.println();
         }
     }
 }

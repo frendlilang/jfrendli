@@ -248,7 +248,7 @@ public class Parser {
      * @return The consumed newline token.
      */
     private Token consumeNewline() {
-        return consume(TokenType.NEWLINE, "A new line must be added at the end of the statement.");
+        return consume(TokenType.NEWLINE, "Expected a new line.");
     }
 
     /**

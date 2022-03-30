@@ -16,9 +16,9 @@ public class Scanner {
     private final Map<String, TokenType> keywords = new HashMap<>();
     private final int TAB_SIZE = 8;
     private final int ALT_TAB_SIZE = 1;
-    private final int MAX_INDENT = 100;
-    private int[] indentStack = new int[MAX_INDENT];        // Stacks all indents
-    private int[] altIndentStack = new int[MAX_INDENT];
+    private final int MAX_INDENT_LEVEL = 100;
+    private int[] indentStack = new int[MAX_INDENT_LEVEL];        // Stacks all indents
+    private int[] altIndentStack = new int[MAX_INDENT_LEVEL];
     private int indentLevel = 0;
     private int pendingIndents = 0;
     private int columnsInIndent = 0;
@@ -207,7 +207,7 @@ public class Scanner {
         // (is more indented than previous line)
         else if (columnsInIndent > indentStack[indentLevel]) {
             // Check if next level of indentation exceeds allowed limit
-            if (indentLevel + 1 >= MAX_INDENT) {
+            if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
                 reporter.syntaxError(line, "The max indentation has been reached. You cannot indent further.");
             }
             if (altColumnsInIndent <= altIndentStack[indentLevel]) {
@@ -357,8 +357,11 @@ public class Scanner {
      */
     private void addToken(TokenType type, Object literal) {
         String lexeme = source.substring(start, current);
-        if (type == TokenType.NEWLINE || type == TokenType.INDENT || type == TokenType.DEDENT) {
-            lexeme = ""; // To not cause reformatting when printing
+        if (type == TokenType.NEWLINE) {
+            lexeme = "new line";
+        }
+        else if (type == TokenType.INDENT || type == TokenType.DEDENT) {
+            lexeme = "indentation";
         }
 
         tokens.add(new Token(type, lexeme, literal, line));
