@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     private ErrorReporter reporter;
+    private Environment environment = new Environment();
 
     public Interpreter(ErrorReporter reporter) {
         this.reporter = reporter;
@@ -28,6 +29,29 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         catch (RuntimeError error) {
             reporter.runtimeError(error);
         }
+    }
+
+    @Override
+    public Void visitCreateStatement(Statement.Create statement) {
+        Object value = evaluate(statement.initializer);
+        environment.define(statement.name, value);
+
+        return null;
+    }
+
+    @Override
+    public Void visitDisplayStatement(Statement.Display statement) {
+        Object value = evaluate(statement.expression);
+        print(stringify(value));
+
+        return null;
+    }
+
+    @Override
+    public Void visitExpressionStatement(Statement.ExpressionStatement statement) {
+        evaluate(statement.expression);
+
+        return null;
     }
 
     @Override
@@ -104,20 +128,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
         return null;
     }
-
+    
     @Override
-    public Void visitDisplayStatement(Statement.Display statement) {
-        Object value = evaluate(statement.expression);
-        print(stringify(value));
-
-        return null;
-    }
-
-    @Override
-    public Void visitExpressionStatement(Statement.ExpressionStatement statement) {
-        evaluate(statement.expression);
-
-        return null;
+    public Object visitVariableExpression(Expression.Variable expression) {
+        return environment.get(expression.name);
     }
 
     /**

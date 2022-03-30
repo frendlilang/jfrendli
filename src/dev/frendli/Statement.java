@@ -7,6 +7,7 @@ package dev.frendli;
 
 public abstract class Statement {
     public interface Visitor<R> {
+        R visitCreateStatement(Create statement);
         R visitExpressionStatement(ExpressionStatement statement);
         R visitDisplayStatement(Display statement);
     }
