@@ -7,16 +7,18 @@ package dev.frendli;
 
 public abstract class Statement {
     public interface Visitor<R> {
-        R visitExpressionStatement(Expression statement);
+        R visitExpressionStatement(ExpressionStatement statement);
         R visitDisplayStatement(Display statement);
     }
 
     public abstract <R> R accept(Visitor<R> visitor);
 
-    public static class Expression extends Statement {
+    // This name of this class also includes "Statement" in order
+    // to not conflict with the "Expression" abstract class
+    public static class ExpressionStatement extends Statement {
         public final Expression expression;
 
-        public Expression(Expression expression) {
+        public ExpressionStatement(Expression expression) {
             this.expression = expression;
         }
 

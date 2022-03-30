@@ -1,10 +1,16 @@
 package dev.frendli;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // ========
 // GRAMMAR: (incrementally added to and modified)
 // ========
+// file:                statement* EOF ;
+// statement:           displayStmt
+//                      | expressionStmt ;
+// expressionStmt:      expression NEWLINE ;
+// displayStmt:         "display" expression NEWLINE ;
 // expression:          equality ;
 // equality:            comparison ( ( "not"? "equals" ) comparison )* ;
 // comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
@@ -33,17 +39,41 @@ public class Parser {
     /**
      * Parse the tokens.
      *
-     * @return The resulting expression.
+     * @return The syntax tree of statements.
      */
-    public Expression parse() {
-        // Catch parse errors here as the point being
-        // synchronized to in the Java call stack.
-        try {
-            return expression();
+    public List<Statement> parse() {
+        List<Statement> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
-        catch (ParseError error) {
-            return null;
+
+        return statements;
+    }
+
+    // statement: displayStmt
+    //            | expressionStmt ;
+    private Statement statement() {
+        if (match(TokenType.DISPLAY)) {
+            return displayStatement();
         }
+
+        return expressionStatement();
+    }
+
+    // displayStmt: "display" expression NEWLINE ;
+    private Statement displayStatement() {
+        Expression value = expression();
+        consume(TokenType.NEWLINE, "A new line must be added at the end of the statement.");
+
+        return new Statement.Display(value);
+    }
+
+    // expressionStmt: expression NEWLINE ;
+    private Statement expressionStatement() {
+        Expression expression = expression();
+        consume(TokenType.NEWLINE, "A new line must be added at the end of the statement.");
+
+        return new Statement.ExpressionStatement(expression);
     }
 
     // expression: equality ;
