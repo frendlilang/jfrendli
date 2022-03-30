@@ -13,18 +13,18 @@ public abstract class Statement {
 
     public abstract <R> R accept(Visitor<R> visitor);
 
-    // This name of this class also includes "Statement" in order
-    // to not conflict with the "Expression" abstract class
-    public static class ExpressionStatement extends Statement {
-        public final Expression expression;
+    public static class Create extends Statement {
+        public final Token name;
+        public final Expression initializer;
 
-        public ExpressionStatement(Expression expression) {
-            this.expression = expression;
+        public Create(Token name, Expression initializer) {
+            this.name = name;
+            this.initializer = initializer;
         }
 
         @Override
         public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitExpressionStatement(this);
+            return visitor.visitCreateStatement(this);
         }
     }
 
@@ -38,6 +38,21 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitDisplayStatement(this);
+        }
+    }
+
+    // This name of this class also includes "Statement" in order
+    // to not conflict with the "Expression" abstract class
+    public static class ExpressionStatement extends Statement {
+        public final Expression expression;
+
+        public ExpressionStatement(Expression expression) {
+            this.expression = expression;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitExpressionStatement(this);
         }
     }
 }

@@ -6,18 +6,21 @@ import java.util.List;
 // ========
 // GRAMMAR: (incrementally added to and modified)
 // ========
-// file:                statement* EOF ;
+// file:                declaration* EOF ;
+// declarationStmt:     variableDecl
+//                      | statement ;
+// variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
 // statement:           displayStmt
 //                      | expressionStmt ;
-// expressionStmt:      expression NEWLINE ;
 // displayStmt:         "display" expression NEWLINE ;
+// expressionStmt:      expression NEWLINE ;
 // expression:          equality ;
 // equality:            comparison ( ( "not"? "equals" ) comparison )* ;
 // comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 // term:                factor ( ( "+" | "-" ) factor )* ;
 // factor:              unary ( ( "*" | "/" ) unary )* ;
 // unary:               ( "not" | "-" ) unary | primary ;
-// primary:             NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
+// primary:             IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
 
 /**
  * The parser - traverses the tokens produced by the scanner and
@@ -39,15 +42,45 @@ public class Parser {
     /**
      * Parse the tokens.
      *
-     * @return The syntax tree of statements.
+     * @return The statement syntax trees.
      */
     public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(statement());
+            statements.add(declaration());
         }
 
         return statements;
+    }
+
+    // declarationStmt: variableDecl
+    //                  | statement ;
+    private Statement declaration() {
+        try {
+            if (match(TokenType.CREATE)) {
+                return variableDeclaration();
+            }
+
+            return statement();
+        }
+        // Catch parse errors here as the point being synchronized
+        // to in the Java call stack when needed. This method is
+        // suitable to synchronize to since it always gets called
+        // for each statement in the code.
+        catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
+
+    // variableDecl: "create" IDENTIFIER "=" expression NEWLINE ;
+    private Statement variableDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "A name for what is created must be provided.");
+        consume(TokenType.EQUALS_SIGN, "'" + name.lexeme + "' must be initialized using '='. You may set it to 'empty' if needed.");
+        Expression initializer = expression();
+        consumeNewline();
+
+        return new Statement.Create(name, initializer);
     }
 
     // statement: displayStmt
@@ -63,7 +96,7 @@ public class Parser {
     // displayStmt: "display" expression NEWLINE ;
     private Statement displayStatement() {
         Expression value = expression();
-        consume(TokenType.NEWLINE, "A new line must be added at the end of the statement.");
+        consumeNewline();
 
         return new Statement.Display(value);
     }
@@ -71,7 +104,7 @@ public class Parser {
     // expressionStmt: expression NEWLINE ;
     private Statement expressionStatement() {
         Expression expression = expression();
-        consume(TokenType.NEWLINE, "A new line must be added at the end of the statement.");
+        consumeNewline();
 
         return new Statement.ExpressionStatement(expression);
     }
@@ -149,8 +182,11 @@ public class Parser {
         return primary();
     }
 
-    // primary: NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
+    // primary: IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
     private Expression primary() {
+        if (match(TokenType.IDENTIFIER)) {
+            return new Expression.Variable(getJustConsumed());
+        }
         if (match(TokenType.NUMBER, TokenType.TEXT)) {
             return new Expression.Literal(getJustConsumed().literal);
         }
@@ -203,6 +239,16 @@ public class Parser {
         }
 
         throw error(peek(), errorMessage);
+    }
+
+    /**
+     * Consume the current token if it is a newline, otherwise
+     * report an error.
+     *
+     * @return The consumed newline token.
+     */
+    private Token consumeNewline() {
+        return consume(TokenType.NEWLINE, "A new line must be added at the end of the statement.");
     }
 
     /**

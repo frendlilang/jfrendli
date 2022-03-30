@@ -72,4 +72,17 @@ public abstract class Expression {
             return visitor.visitUnaryExpression(this);
         }
     }
+
+    public static class Variable extends Expression {
+        public final Token name;
+
+        public Variable(Token name) {
+            this.name = name;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitVariableExpression(this);
+        }
+    }
 }
