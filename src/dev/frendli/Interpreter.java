@@ -40,6 +40,14 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitChangeStatement(Statement.Change statement) {
+        Object value = evaluate(statement.assignment);
+        environment.assign(statement.name, value);
+
+        return null;
+    }
+
+    @Override
     public Void visitDisplayStatement(Statement.Display statement) {
         Object value = evaluate(statement.expression);
         print(stringify(value));

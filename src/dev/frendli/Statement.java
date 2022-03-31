@@ -32,11 +32,11 @@ public abstract class Statement {
 
     public static class Change extends Statement {
         public final Token name;
-        public final Expression value;
+        public final Expression assignment;
 
-        public Change(Token name, Expression value) {
+        public Change(Token name, Expression assignment) {
             this.name = name;
-            this.value = value;
+            this.assignment = assignment;
         }
 
         @Override

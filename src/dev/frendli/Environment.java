@@ -39,4 +39,18 @@ public class Environment {
 
         values.put(token.lexeme, value);
     }
+
+    /**
+     * Assign a value to an already-existing variable.
+     *
+     * @param token The variable token.
+     * @param value The value.
+     */
+    public void assign(Token token, Object value) {
+        if (!values.containsKey(token.lexeme)) {
+            throw new RuntimeError(token, "'" + token.lexeme + "' has not been created. First create it and set it to a value.");
+        }
+
+        values.put(token.lexeme, value);
+    }
 }
