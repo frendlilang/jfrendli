@@ -10,8 +10,10 @@ import java.util.List;
 // declarationStmt:     variableDecl
 //                      | statement ;
 // variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
-// statement:           displayStmt
+// statement:           changeStmt
+//                      | displayStmt
 //                      | expressionStmt ;
+// changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // displayStmt:         "display" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
 // expression:          equality ;
@@ -83,14 +85,41 @@ public class Parser {
         return new Statement.Create(name, initializer);
     }
 
-    // statement: displayStmt
+    // statement: changeStmt
+    //            | displayStmt
     //            | expressionStmt ;
     private Statement statement() {
+        if (match(TokenType.CHANGE)) {
+            return changeStmt();
+        }
         if (match(TokenType.DISPLAY)) {
             return displayStatement();
         }
 
         return expressionStatement();
+    }
+
+    // changeStmt: "change" IDENTIFIER "=" expression NEWLINE ;
+    private Statement changeStmt() {
+        // The identifier can come from the result of an expression that can be
+        // of any size. Thus, do not consume IDENTIFIER directly in the 1st step.
+        // E.g. change point.x = 2, where point.x is an expression that produces
+        // an l-value (the storage location rather than an r-value).
+        Expression expression = expression();
+        Token equalsSign = consume(TokenType.EQUALS_SIGN, "A value must be assigned using '='.");
+
+        // Report an error if the target is invalid, but since the parser is not in
+        // a confused state, there is no need to synchronize by throwing the error.
+        if (!(expression instanceof Expression.Variable)) {
+            error(equalsSign, "Values cannot be assigned to that target.");
+        }
+
+        // Convert the r-value expression into an l-value (the variable name)
+        Token name = ((Expression.Variable)expression).name;
+        Expression value = expression();
+        consumeNewline();
+
+        return new Statement.Change(name, value);
     }
 
     // displayStmt: "display" expression NEWLINE ;

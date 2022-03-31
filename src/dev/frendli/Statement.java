@@ -8,6 +8,7 @@ package dev.frendli;
 public abstract class Statement {
     public interface Visitor<R> {
         R visitCreateStatement(Create statement);
+        R visitChangeStatement(Change statement);
         R visitExpressionStatement(ExpressionStatement statement);
         R visitDisplayStatement(Display statement);
     }
@@ -26,6 +27,21 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitCreateStatement(this);
+        }
+    }
+
+    public static class Change extends Statement {
+        public final Token name;
+        public final Expression value;
+
+        public Change(Token name, Expression value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitChangeStatement(this);
         }
     }
 
