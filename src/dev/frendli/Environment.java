@@ -8,7 +8,19 @@ import java.util.Map;
  * of inner and outer scopes as blocks are entered and exited.
  */
 public class Environment {
+    // Each environment stores a reference to its enclosing environment
+    // in order to look up variables in outer scopes.
+    private final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>(); // Maps variable names to values
+
+    // Global scope
+    public Environment() {
+        enclosing = null;
+    }
+    // Local scope
+    public Environment(Environment enclosing) {
+        this.enclosing = enclosing;
+    }
 
     /**
      * Look up a variable.
@@ -19,6 +31,12 @@ public class Environment {
     public Object get(Token token) {
         if (values.containsKey(token.lexeme)) {
             return values.get(token.lexeme);
+        }
+
+        // Look in outer scopes. This calls the get method in that
+        // environment, causing recursive lookup up the scope chain.
+        if (enclosing != null) {
+            return enclosing.get(token);
         }
 
         throw new RuntimeError(token, "'" + token.lexeme + "' has not been created. First create it and set it to a value.");
@@ -47,10 +65,18 @@ public class Environment {
      * @param value The value.
      */
     public void assign(Token token, Object value) {
-        if (!values.containsKey(token.lexeme)) {
-            throw new RuntimeError(token, "'" + token.lexeme + "' has not been created. First create it and set it to a value.");
+        if (values.containsKey(token.lexeme)) {
+            values.put(token.lexeme, value);
+            return;
         }
 
-        values.put(token.lexeme, value);
+        // Look in outer scopes. This calls the assign method in that
+        // environment, causing recursive lookup up the scope chain.
+        if (enclosing != null) {
+            enclosing.assign(token, value);
+            return;
+        }
+
+        throw new RuntimeError(token, "'" + token.lexeme + "' has not been created. First create it and set it to a value.");
     }
 }
