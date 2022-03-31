@@ -108,14 +108,17 @@ public class Parser {
         Expression expression = expression();
         Token equalsSign = consume(TokenType.EQUALS_SIGN, "A value must be assigned using '='.");
 
-        // Report an error if the target is invalid, but since the parser is not in
-        // a confused state, there is no need to synchronize by throwing the error.
-        if (!(expression instanceof Expression.Variable)) {
+        Token name = null;
+        if (expression instanceof Expression.Variable) {
+            // Convert the r-value expression into an l-value (the variable name)
+            name = ((Expression.Variable)expression).name;
+        }
+        else {
+            // Report an error if the target is invalid, but since the parser is not in
+            // a confused state, there is no need to synchronize by throwing the error.
             error(equalsSign, "Values cannot be assigned to that target.");
         }
 
-        // Convert the r-value expression into an l-value (the variable name)
-        Token name = ((Expression.Variable)expression).name;
         Expression value = expression();
         consumeNewline();
 
