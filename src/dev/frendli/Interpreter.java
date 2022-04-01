@@ -133,6 +133,24 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Object visitLogicalExpression(Expression.Logical expression) {
+        // Evaluate the left operand first.
+        Object left = evaluate(expression.left);
+        if (expression.operator.type == TokenType.OR) {
+            if (isTruthy(left)) {
+                return true;
+            }
+        }
+        else /* operator == AND */ {
+            if (!isTruthy(left)) {
+                return false;
+            }
+        }
+
+        return isTruthy(evaluate(expression.right));
+    }
+
+    @Override
     public Object visitGroupingExpression(Expression.Grouping expression) {
         // The Grouping expression object references another expression
         // (the one in between the parentheses) which needs to be evaluated.
