@@ -15,6 +15,7 @@ public abstract class Statement {
         R visitDisplayStatement(Display statement);
         R visitExpressionStatement(ExpressionStatement statement);
         R visitIfStatement(If statement);
+        R visitRepeatWhileStatement(RepeatWhile statement);
     }
 
     public abstract <R> R accept(Visitor<R> visitor);
@@ -106,6 +107,21 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitIfStatement(this);
+        }
+    }
+
+    public static class RepeatWhile extends Statement {
+        Expression condition;
+        Block body;
+
+        public RepeatWhile(Expression condition, Block body) {
+            this.condition = condition;
+            this.body = body;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitRepeatWhileStatement(this);
         }
     }
 }

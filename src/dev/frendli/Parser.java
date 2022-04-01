@@ -13,11 +13,16 @@ import java.util.List;
 // statement:           changeStmt
 //                      | displayStmt
 //                      | expressionStmt
-//                      | ifStmt ;
+//                      | ifStmt
+//                      | repeatStmt ;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // displayStmt:         "display" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
 // ifStmt:              "if" expression block ( "otherwise" block )? ;
+// repeatStmt:          repeatTimesStmt
+//                      | repeatWhileStmt ;
+// repeatTimesStmt:     "repeat" expression "times" block ;
+// repeatWhileStmt:     "repeat" "while" expression block ;
 // block:               NEWLINE INDENT declarationStmt+ DEDENT ;
 // expression:          logicOr ;
 // logicOr:             logicAnd ( "or" logicAnd )* ;
@@ -93,7 +98,8 @@ public class Parser {
     // statement: changeStmt
     //            | displayStmt
     //            | expressionStmt
-    //            | ifStmt ;
+    //            | ifStmt
+    //            | repeatStmt ;
     private Statement statement() {
         if (match(TokenType.CHANGE)) {
             return changeStmt();
@@ -103,6 +109,9 @@ public class Parser {
         }
         if (match(TokenType.IF)) {
             return ifStatement();
+        }
+        if (match(TokenType.REPEAT)) {
+            return repeatStatement();
         }
 
         return expressionStatement();
@@ -170,6 +179,32 @@ public class Parser {
         }
 
         return new Statement.If(start, condition, thenBranch, otherwiseBranch);
+    }
+
+    // repeatStmt: repeatTimesStmt
+    //             | repeatWhileStmt ;
+    private Statement repeatStatement() {
+        if (match(TokenType.WHILE)) {
+            return repeatWhileStatement();
+        }
+
+        return repeatTimesStatement();
+    }
+
+    // repeatTimesStmt: "repeat" expression "times" block ;
+    private Statement repeatTimesStatement() {
+
+        // TODO: Implement next
+
+        return null;
+    }
+
+    // repeatWhileStmt: "repeat" "while" expression block ;
+    private Statement repeatWhileStatement() {
+        Expression condition = expression();
+        Statement.Block body = (Statement.Block)block();
+
+        return new Statement.RepeatWhile(condition, body);
     }
 
     // block: NEWLINE INDENT declarationStmt+ DEDENT ;
