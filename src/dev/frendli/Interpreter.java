@@ -70,6 +70,18 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitIfStatement(Statement.If statement) {
+        if (isTruthy(evaluate(statement.condition))) {
+            execute(statement.thenBranch);
+        }
+        else if (statement.otherwiseBranch != null) {
+            execute(statement.otherwiseBranch);
+        }
+
+        return null;
+    }
+
+    @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         // Evaluate the operands left to right
         Object left = evaluate(expression.left);
