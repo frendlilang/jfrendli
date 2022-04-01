@@ -10,7 +10,7 @@ import java.util.Map;
 public class Environment {
     // Each environment stores a reference to its enclosing environment
     // in order to look up variables in outer scopes.
-    private final Environment enclosing;
+    public final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>(); // Maps variable names to values
 
     // Global scope

@@ -32,6 +32,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitBlockStatement(Statement.Block block) {
+        executeBlock(block.statements, new Environment(environment));
+
+        return null;
+    }
+
+    @Override
     public Void visitCreateStatement(Statement.Create statement) {
         Object value = evaluate(statement.initializer);
         environment.define(statement.name, value);
@@ -159,6 +166,32 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
      */
     private void execute(Statement statement) {
         statement.accept(this);
+    }
+
+    /**
+     * Execute a block in its corresponding scope/environment.
+     *
+     * @param statements The statements within the block.
+     * @param innerEnvironment The environment.
+     */
+    private void executeBlock(List<Statement> statements, Environment innerEnvironment) {
+        // Save the enclosing/outer environment so that it can be
+        // restored once execution in an inner environment is done
+        Environment enclosingEnvironment = innerEnvironment.enclosing;
+
+        try {
+            // Set the current environment to the environment of the
+            // block to be executed, then execute the statements.
+            this.environment = innerEnvironment;
+            for (Statement statement : statements) {
+                execute(statement);
+            }
+        }
+        finally {
+            // Restore the enclosing/outer environment. (Use a
+            // "finally" clause in case an exception is thrown.)
+            this.environment = enclosingEnvironment;
+        }
     }
 
     /**
