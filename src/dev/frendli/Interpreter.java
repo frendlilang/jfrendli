@@ -82,6 +82,21 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitRepeatTimesStatement(Statement.RepeatTimes statement) {
+        Object times = evaluate(statement.times);
+        verifyPositiveNumber(statement.start, times);
+
+        // Positive non-integers are allowed but will be rounded off to
+        // the nearest integer less than or equal to the given number.
+        int exactTimes = (int)((double)times);
+        for (int i = 0; i < exactTimes; i++) {
+            execute(statement.body);
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visitRepeatWhileStatement(Statement.RepeatWhile statement) {
         while (isTrue(statement.start, evaluate(statement.condition))) {
             execute(statement.body);
@@ -334,6 +349,21 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         }
 
         throw new RuntimeError(location, "The operands must be numbers.");
+    }
+
+    /**
+     * Verify that the number is positive and throw a RuntimeError if not.
+     *
+     * @param location The location of the nearest token.
+     * @param number The number.
+     */
+    private void verifyPositiveNumber(Token location, Object number) {
+        verifyNumberOperand(location, number);
+        if ((double)number > 0) {
+            return;
+        }
+
+        throw new RuntimeError(location, "The number must be positive.");
     }
 
     private void print(String value) {
