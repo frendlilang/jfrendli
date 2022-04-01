@@ -201,10 +201,11 @@ public class Parser {
 
     // repeatWhileStmt: "repeat" "while" expression block ;
     private Statement repeatWhileStatement() {
+        Token start = getJustConsumed();
         Expression condition = expression();
-        Statement.Block body = (Statement.Block)block();
+        Statement body = block();
 
-        return new Statement.RepeatWhile(condition, body);
+        return new Statement.RepeatWhile(start, condition, body);
     }
 
     // block: NEWLINE INDENT declarationStmt+ DEDENT ;

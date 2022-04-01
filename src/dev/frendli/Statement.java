@@ -92,7 +92,7 @@ public abstract class Statement {
     }
 
     public static class If extends Statement {
-        public final Token start;   // For reporting location of error if condition is not a boolean
+        public final Token start;               // For reporting location of possible error
         public final Expression condition;
         public final Block thenBranch;
         public final Block otherwiseBranch;
@@ -111,10 +111,12 @@ public abstract class Statement {
     }
 
     public static class RepeatWhile extends Statement {
-        Expression condition;
-        Block body;
+        public final Token start;               // For reporting location of possible error
+        public final Expression condition;
+        public final Statement body;
 
-        public RepeatWhile(Expression condition, Block body) {
+        public RepeatWhile(Token start, Expression condition, Statement body) {
+            this.start = start;
             this.condition = condition;
             this.body = body;
         }

@@ -82,6 +82,15 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitRepeatWhileStatement(Statement.RepeatWhile statement) {
+        while (isTrue(statement.start, evaluate(statement.condition))) {
+            execute(statement.body);
+        }
+        
+        return null;
+    }
+
+    @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         // Evaluate the operands left to right
         Object left = evaluate(expression.left);
