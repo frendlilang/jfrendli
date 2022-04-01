@@ -37,7 +37,7 @@ public abstract class ErrorReporter {
     }
 
     public void runtimeError(RuntimeError error) {
-        report(error.token.line, "", error.getMessage());
+        report(error.token.line, "at '" + error.token.lexeme + "'", error.getMessage());
         runtimeErrorReported = true;
     }
 
