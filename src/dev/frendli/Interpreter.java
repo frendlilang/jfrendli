@@ -86,7 +86,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         while (isTrue(statement.start, evaluate(statement.condition))) {
             execute(statement.body);
         }
-        
+
         return null;
     }
 

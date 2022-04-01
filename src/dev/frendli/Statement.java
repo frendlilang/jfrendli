@@ -94,10 +94,10 @@ public abstract class Statement {
     public static class If extends Statement {
         public final Token start;               // For reporting location of possible error
         public final Expression condition;
-        public final Block thenBranch;
-        public final Block otherwiseBranch;
+        public final Statement thenBranch;
+        public final Statement otherwiseBranch;
 
-        public If(Token start, Expression condition, Block thenBranch, Block otherwiseBranch) {
+        public If(Token start, Expression condition, Statement thenBranch, Statement otherwiseBranch) {
             this.start = start;
             this.condition = condition;
             this.thenBranch = thenBranch;

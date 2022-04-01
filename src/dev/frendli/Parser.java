@@ -172,10 +172,10 @@ public class Parser {
     private Statement ifStatement() {
         Token start = getJustConsumed();
         Expression condition = expression();
-        Statement.Block thenBranch = (Statement.Block)block();
-        Statement.Block otherwiseBranch = null;
+        Statement thenBranch = block();
+        Statement otherwiseBranch = null;
         if (match(TokenType.OTHERWISE)) {
-            otherwiseBranch = (Statement.Block)block();
+            otherwiseBranch = block();
         }
 
         return new Statement.If(start, condition, thenBranch, otherwiseBranch);
