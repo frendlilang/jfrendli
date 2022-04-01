@@ -19,7 +19,9 @@ import java.util.List;
 // expressionStmt:      expression NEWLINE ;
 // ifStmt:              "if" expression block ( "otherwise" block )? ;
 // block:               NEWLINE INDENT declarationStmt+ DEDENT ;
-// expression:          equality ;
+// expression:          logicOr ;
+// logicOr:             logicAnd ( "or" logicAnd )* ;
+// logicAnd:            equality ( "and" equality )* ;
 // equality:            comparison ( ( "not"? "equals" ) comparison )* ;
 // comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 // term:                factor ( ( "+" | "-" ) factor )* ;
@@ -190,9 +192,35 @@ public class Parser {
         return new Statement.Block(statements);
     }
 
-    // expression: equality ;
+    // expression: logicOr ;
     private Expression expression() {
-        return equality();
+        return or();
+    }
+
+    // logicOr: logicAnd ( "or" logicAnd )* ;
+    private Expression or() {
+        Expression left = and();
+        
+        while (match(TokenType.OR)) {
+            Token operator = getJustConsumed();
+            Expression right = and();
+            left = new Expression.Logical(left, operator, right);
+        }
+        
+        return left;
+    }
+
+    // logicAnd: equality ( "and" equality )* ;
+    private Expression and() {
+        Expression left = equality();
+
+        while (match(TokenType.AND)) {
+            Token operator = getJustConsumed();
+            Expression right = equality();
+            left = new Expression.Logical(left, operator, right);
+        }
+
+        return left;
     }
 
     // equality: comparison ( ( "not"? "equals" ) comparison )* ;
