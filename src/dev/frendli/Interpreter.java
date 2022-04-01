@@ -109,25 +109,26 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     public Object visitBinaryExpression(Expression.Binary expression) {
         // Evaluate the operands left to right
         Object left = evaluate(expression.left);
+        Token operator = expression.operator;
         Object right = evaluate(expression.right);
 
-        switch (expression.operator.type) {
+        switch (operator.type) {
             case EQUALS_WORD:
                 return isEqual(left, right);
             case GREATER_THAN:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
                 return (double)left > (double)right;
             case GREATER_THAN_EQUALS:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
                 return (double)left >= (double)right;
             case LESS_THAN:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
                 return (double)left < (double)right;
             case LESS_THAN_EQUALS:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
                 return (double)left <= (double)right;
             case MINUS:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
                 return (double)left - (double)right;
             case NOT_EQUALS:
                 return !isEqual(left, right);
@@ -139,12 +140,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                 if (left instanceof String && right instanceof String) {
                     return (String)left + (String)right;
                 }
-                throw new RuntimeError(expression.operator, "The operands must be only numbers or only texts.");
+                throw new RuntimeError(operator, "The operands must be only numbers or only texts.");
             case SLASH:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
+                verifyNonZeroOperand(operator, right);
                 return (double)left / (double)right;
             case STAR:
-                verifyNumberOperands(expression.operator, left, right);
+                verifyNumberOperands(operator, left, right);
                 return (double)left * (double)right;
         }
 
@@ -319,6 +321,21 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         }
 
         throw new RuntimeError(location, "The operand must be a boolean ('true' or 'false').");
+    }
+
+    /**
+     * Verify that the operand/denominator is a non-zero number and throw
+     * a RuntimeError if not.
+     *
+     * @param location The location of the nearest token.
+     * @param operand The operand.
+     */
+    private void verifyNonZeroOperand(Token location, Object operand) {
+        if (operand instanceof Double && (double)operand != 0) {
+            return;
+        }
+
+        throw new RuntimeError(location, "Division by zero is not allowed. The operand must be a non-zero number.");
     }
 
     /**
