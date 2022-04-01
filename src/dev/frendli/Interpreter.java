@@ -71,7 +71,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitIfStatement(Statement.If statement) {
-        if (isTruthy(evaluate(statement.condition))) {
+        if (isTrue(statement.start, evaluate(statement.condition))) {
             execute(statement.thenBranch);
         }
         else if (statement.otherwiseBranch != null) {
@@ -136,18 +136,19 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     public Object visitLogicalExpression(Expression.Logical expression) {
         // Evaluate the left operand first.
         Object left = evaluate(expression.left);
-        if (expression.operator.type == TokenType.OR) {
-            if (isTruthy(left)) {
+        Token operator = expression.operator;
+        if (operator.type == TokenType.OR) {
+            if (isTrue(operator, left)) {
                 return true;
             }
         }
         else /* operator == AND */ {
-            if (!isTruthy(left)) {
+            if (!isTrue(operator, left)) {
                 return false;
             }
         }
 
-        return isTruthy(evaluate(expression.right));
+        return isTrue(operator, evaluate(expression.right));
     }
 
     @Override
@@ -160,15 +161,16 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitUnaryExpression(Expression.Unary expression) {
         Object right = evaluate(expression.right);
+        Token operator = expression.operator;
 
         // Apply the operator to the right expression
         // after the expression has been evaluated.
-        switch (expression.operator.type) {
+        switch (operator.type) {
             case MINUS:
-                verifyNumberOperand(expression.operator, right);
+                verifyNumberOperand(operator, right);
                 return -(double)right;
             case NOT:
-                return !isTruthy(right);
+                return !isTrue(operator, right);
         }
 
         return null;
@@ -246,22 +248,16 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     /**
-     * Checks if an object is truthy (everything except the
-     * literals "false" and "empty" are truthy).
+     * Check if an operand is true.
      *
-     * @param object The object to be checked.
-     * @return Whether it is truthy.
+     * @param location The location of the nearest token.
+     * @param operand The operand to be checked.
+     * @return Whether it is true.
      */
-    private boolean isTruthy(Object object) {
-        // "empty" is equivalent to Java's "null"
-        if (object == null) {
-            return false;
-        }
-        if (object instanceof Boolean) {
-            return (boolean)object;
-        }
+    private boolean isTrue(Token location, Object operand) {
+        verifyBooleanOperand(location, operand);
 
-        return true;
+        return (boolean)operand;
     }
 
     /**
@@ -288,33 +284,47 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     /**
-     * Verify that the operand is a number and throw a RuntimeError if not.
+     * Verify that the operand is a boolean and throw a RuntimeError if not.
      *
-     * @param operator The operator.
+     * @param location The location of the nearest token.
      * @param operand The operand.
      */
-    private void verifyNumberOperand(Token operator, Object operand) {
+    private void verifyBooleanOperand(Token location, Object operand) {
+        if (operand instanceof Boolean) {
+            return;
+        }
+
+        throw new RuntimeError(location, "The operand must be a boolean ('true' or 'false').");
+    }
+
+    /**
+     * Verify that the operand is a number and throw a RuntimeError if not.
+     *
+     * @param location The location of the nearest token.
+     * @param operand The operand.
+     */
+    private void verifyNumberOperand(Token location, Object operand) {
         if (operand instanceof Double) {
             return;
         }
 
-        throw new RuntimeError(operator, "The operand must be a number.");
+        throw new RuntimeError(location, "The operand must be a number.");
     }
 
     /**
      * Verify that the operands are numbers and throw a RuntimeError if not.
      *
-     * @param operator The operator.
+     * @param location The location of the nearest token.
      * @param left The left operand.
      * @param right The right operand.
      */
-    private void verifyNumberOperands(Token operator, Object left, Object right) {
+    private void verifyNumberOperands(Token location, Object left, Object right) {
         // Evaluate both operands before reporting the error.
         if (left instanceof Double && right instanceof Double) {
             return;
         }
 
-        throw new RuntimeError(operator, "The operands must be numbers.");
+        throw new RuntimeError(location, "The operands must be numbers.");
     }
 
     private void print(String value) {

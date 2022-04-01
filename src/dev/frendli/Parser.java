@@ -161,6 +161,7 @@ public class Parser {
 
     // ifStmt: "if" expression block ( "otherwise" block )? ;
     private Statement ifStatement() {
+        Token start = getJustConsumed();
         Expression condition = expression();
         Statement.Block thenBranch = (Statement.Block)block();
         Statement.Block otherwiseBranch = null;
@@ -168,7 +169,7 @@ public class Parser {
             otherwiseBranch = (Statement.Block)block();
         }
 
-        return new Statement.If(condition, thenBranch, otherwiseBranch);
+        return new Statement.If(start, condition, thenBranch, otherwiseBranch);
     }
 
     // block: NEWLINE INDENT declarationStmt+ DEDENT ;

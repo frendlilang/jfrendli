@@ -91,11 +91,13 @@ public abstract class Statement {
     }
 
     public static class If extends Statement {
+        public final Token start;   // For reporting location of error if condition is not a boolean
         public final Expression condition;
         public final Block thenBranch;
         public final Block otherwiseBranch;
 
-        public If(Expression condition, Block thenBranch, Block otherwiseBranch) {
+        public If(Token start, Expression condition, Block thenBranch, Block otherwiseBranch) {
+            this.start = start;
             this.condition = condition;
             this.thenBranch = thenBranch;
             this.otherwiseBranch = otherwiseBranch;
