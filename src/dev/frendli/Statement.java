@@ -14,6 +14,7 @@ public abstract class Statement {
         R visitChangeStatement(Change statement);
         R visitDisplayStatement(Display statement);
         R visitExpressionStatement(ExpressionStatement statement);
+        R visitIfStatement(If statement);
     }
 
     public abstract <R> R accept(Visitor<R> visitor);
@@ -86,6 +87,23 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitExpressionStatement(this);
+        }
+    }
+
+    public static class If extends Statement {
+        public final Expression condition;
+        public final Block thenBranch;
+        public final Block otherwiseBranch;
+
+        public If(Expression condition, Block thenBranch, Block otherwiseBranch) {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.otherwiseBranch = otherwiseBranch;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitIfStatement(this);
         }
     }
 }

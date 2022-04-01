@@ -12,10 +12,12 @@ import java.util.List;
 // variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
 // statement:           changeStmt
 //                      | displayStmt
-//                      | expressionStmt ;
+//                      | expressionStmt
+//                      | ifStmt ;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // displayStmt:         "display" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
+// ifStmt:              "if" expression block ( "otherwise" block )? ;
 // block:               NEWLINE INDENT declarationStmt+ DEDENT ;
 // expression:          equality ;
 // equality:            comparison ( ( "not"? "equals" ) comparison )* ;
@@ -88,13 +90,17 @@ public class Parser {
 
     // statement: changeStmt
     //            | displayStmt
-    //            | expressionStmt ;
+    //            | expressionStmt
+    //            | ifStmt ;
     private Statement statement() {
         if (match(TokenType.CHANGE)) {
             return changeStmt();
         }
         if (match(TokenType.DISPLAY)) {
             return displayStatement();
+        }
+        if (match(TokenType.IF)) {
+            return ifStatement();
         }
 
         return expressionStatement();
@@ -140,6 +146,18 @@ public class Parser {
         consumeNewline();
 
         return new Statement.ExpressionStatement(expression);
+    }
+
+    // ifStmt: "if" expression block ( "otherwise" block )? ;
+    private Statement ifStatement() {
+        Expression condition = expression();
+        Statement.Block thenBranch = (Statement.Block)block();
+        Statement.Block otherwiseBranch = null;
+        if (match(TokenType.OTHERWISE)) {
+            otherwiseBranch = (Statement.Block)block();
+        }
+
+        return new Statement.If(condition, thenBranch, otherwiseBranch);
     }
 
     // block: NEWLINE INDENT declarationStmt+ DEDENT ;
