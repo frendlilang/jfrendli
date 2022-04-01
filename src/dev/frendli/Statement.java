@@ -1,11 +1,11 @@
 package dev.frendli;
 
+import java.util.List;
+
 // All statements reside here as individual classes inheriting
 // from the "Statement" base class. Each subclass must implement
 // the "accept" method and call the corresponding "visit" method
 // on its visitor.
-
-import java.util.List;
 
 public abstract class Statement {
     public interface Visitor<R> {
@@ -15,6 +15,7 @@ public abstract class Statement {
         R visitDisplayStatement(Display statement);
         R visitExpressionStatement(ExpressionStatement statement);
         R visitIfStatement(If statement);
+        R visitRepeatTimesStatement(RepeatTimes statement);
         R visitRepeatWhileStatement(RepeatWhile statement);
     }
 
@@ -107,6 +108,23 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitIfStatement(this);
+        }
+    }
+
+    public static class RepeatTimes extends Statement {
+        public final Token start;               // For reporting location of possible error
+        public final Expression times;
+        public final Statement body;
+
+        public RepeatTimes(Token start, Expression times, Statement body) {
+            this.start = start;
+            this.times = times;
+            this.body = body;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitRepeatTimesStatement(this);
         }
     }
 

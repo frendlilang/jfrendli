@@ -193,10 +193,12 @@ public class Parser {
 
     // repeatTimesStmt: "repeat" expression "times" block ;
     private Statement repeatTimesStatement() {
+        Token start = getJustConsumed();
+        Expression times = expression();
+        consume(TokenType.TIMES, "The expression must be followed by 'times'.");
+        Statement body = block();
 
-        // TODO: Implement next
-
-        return null;
+        return new Statement.RepeatTimes(start, times, body);
     }
 
     // repeatWhileStmt: "repeat" "while" expression block ;
