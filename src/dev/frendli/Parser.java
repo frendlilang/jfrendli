@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // ========
-// GRAMMAR: (incrementally added to and modified)
+// GRAMMAR: (incrementally added to and modified during development when approaching the final grammar version)
 // ========
 // file:                declaration* EOF ;
 // declarationStmt:     variableDecl
@@ -16,6 +16,7 @@ import java.util.List;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // displayStmt:         "display" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
+// block:               NEWLINE INDENT declarationStmt+ DEDENT ;
 // expression:          equality ;
 // equality:            comparison ( ( "not"? "equals" ) comparison )* ;
 // comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
@@ -139,6 +140,27 @@ public class Parser {
         consumeNewline();
 
         return new Statement.ExpressionStatement(expression);
+    }
+
+    // block: NEWLINE INDENT declarationStmt+ DEDENT ;
+    private Statement block() {
+        consumeNewline();
+        consume(TokenType.INDENT, "Blocks must be indented.");
+
+        List<Statement> statements = new ArrayList<>();
+        while (!check(TokenType.DEDENT) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        Token dedent = consume(TokenType.DEDENT, "Blocks must be dedented at the end.");
+        if (statements.size() == 0) {
+            // Report an error if there are no statements in the block.
+            // Synchronization by throwing the error is not needed since
+            // the parser understands that the block has ended with DEDENT.
+            error(dedent, "Blocks must contain at least 1 statement.");
+        }
+
+        return new Statement.Block(statements);
     }
 
     // expression: equality ;

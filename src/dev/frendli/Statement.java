@@ -5,15 +5,31 @@ package dev.frendli;
 // the "accept" method and call the corresponding "visit" method
 // on its visitor.
 
+import java.util.List;
+
 public abstract class Statement {
     public interface Visitor<R> {
+        R visitBlockStatement(Block statement);
         R visitCreateStatement(Create statement);
         R visitChangeStatement(Change statement);
-        R visitExpressionStatement(ExpressionStatement statement);
         R visitDisplayStatement(Display statement);
+        R visitExpressionStatement(ExpressionStatement statement);
     }
 
     public abstract <R> R accept(Visitor<R> visitor);
+
+    public static class Block extends Statement {
+        public final List<Statement> statements;
+
+        public Block(List<Statement> statements) {
+            this.statements = statements;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBlockStatement(this);
+        }
+    }
 
     public static class Create extends Statement {
         public final Token name;
