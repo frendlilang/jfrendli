@@ -143,6 +143,15 @@ public class Parser {
     // expressionStmt: expression NEWLINE ;
     private Statement expressionStatement() {
         Expression expression = expression();
+
+        // Anticipate the error of not writing "create" or "change" when
+        // declaring or assigning variables. E.g. x = 1 will not be parsed
+        // as a "create" or "change" statement; instead, it will end up here.
+        if (expression instanceof Expression.Variable && check(TokenType.EQUALS_SIGN)) {
+            Token name = ((Expression.Variable)expression).name;
+            error(name, "If you meant to create or change " + "'" + name.lexeme + "', use the 'create' or 'change' keywords.");
+        }
+
         consumeNewline();
 
         return new Statement.ExpressionStatement(expression);
