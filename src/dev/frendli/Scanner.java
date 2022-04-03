@@ -10,26 +10,26 @@ import java.util.Map;
  * the corresponding tokens as well as errors in individual tokens.
  */
 public class Scanner {
-    private final ErrorReporter reporter;
-    private final String source;
-    private final List<Token> tokens = new ArrayList<>();
-    private final Map<String, TokenType> keywords = new HashMap<>();
-    private final int TAB_SIZE = 8;
-    private final int ALT_TAB_SIZE = 1;
-    private final int MAX_INDENT_LEVEL = 100;
-    private int[] indentStack = new int[MAX_INDENT_LEVEL];        // Stacks all indents
-    private int[] altIndentStack = new int[MAX_INDENT_LEVEL];
-    private int indentLevel = 0;
-    private int pendingIndents = 0;
-    private int columnsInIndent = 0;
-    private int altColumnsInIndent = 0;
-    private int spacesInIndent = 0;
-    private int tabsInIndent = 0;
-    private int start = 0;                                  // First character of current lexeme being scanned
-    private int current = 0;                                // Current character of current lexeme being scanned
-    private int line = 1;                                   // Current line in source file (for error reporting)
-    private boolean isAtStartOfLine = true;
-    private boolean isBlankLine = false;
+    private final ErrorReporter reporter;                               // Reporter of syntax errors generated
+    private final String source;                                        // Source code
+    private final List<Token> tokens = new ArrayList<>();               // Tokens produced by the scanner
+    private final Map<String, TokenType> keywords = new HashMap<>();    // Reserved keywords
+    private final int TAB_SIZE = 8;                                     // Number of columns in a tab
+    private final int ALT_TAB_SIZE = 1;                                 // Number of alt columns in a tab
+    private final int MAX_INDENT_LEVEL = 100;                           // Max indent level allowed
+    private int[] indentStack = new int[MAX_INDENT_LEVEL];              // Stack with number of columns used in each indent level
+    private int[] altIndentStack = new int[MAX_INDENT_LEVEL];           // Stack with number of alt columns used in each indent level
+    private int indentLevel = 0;                                        // Current indent level (always incremented by 1)
+    private int pendingIndents = 0;                                     // Number of pending indents (if > 0) or dedents (if < 0)
+    private int columnsInIndent = 0;                                    // Number of columns in indentation
+    private int altColumnsInIndent = 0;                                 // Number of alt columns in indentation
+    private int spacesInIndent = 0;                                     // Number of spaces in indentation
+    private int tabsInIndent = 0;                                       // Number of tabs in indentation
+    private int start = 0;                                              // First character of current lexeme being scanned
+    private int current = 0;                                            // Current character of current lexeme being scanned
+    private int line = 1;                                               // Current line in source file (for error reporting)
+    private boolean isAtStartOfLine = true;                             // Whether the scanner is at the start of the line
+    private boolean isBlankLine = false;                                // Whether the current line is blank (only whitespace, comments, and/or newline)
 
     public Scanner(String source, ErrorReporter reporter) {
         this.source = source;
@@ -79,7 +79,7 @@ public class Scanner {
             start = current;
             scanToken();
         }
-        // Reset indentation if the file ends without full dedentation
+        // Reset indentation if the file ends without full dedentation.
         resetIndentation();
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
@@ -151,7 +151,7 @@ public class Scanner {
                 }
                 break;
             // Ignore whitespace and tabs that are
-            // not at the beginning of the lines
+            // not at the beginning of the lines.
             case ' ':
             case '\t':
                 break;
@@ -159,8 +159,8 @@ public class Scanner {
                 consumeText();
                 break;
             default:
-                // Check digits and alphas here instead
-                // of in individual cases
+                // Check digits and alphas here
+                // instead of in individual cases.
                 if (isDigit(character)) {
                     consumeNumber();
                 }
@@ -178,12 +178,12 @@ public class Scanner {
      * Consume the current indentation.
      */
     private void consumeIndentation() {
-        // Count and consume the spaces and tabs
+        // Count and consume the spaces and tabs.
         countColumnsInIndent();
 
         char character = getJustConsumed();
 
-        // Skip blank lines (lines with only whitespace, comments, and/or newline)
+        // Skip blank lines (lines with only whitespace, comments, and/or newline).
         boolean isComment = (character == '/' && peek() == '/');
         isBlankLine = (isComment || character == '\n');
         if (isBlankLine) {
@@ -198,15 +198,15 @@ public class Scanner {
             reporter.syntaxError(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
         }
 
-        // (is as equally indented as previous line)
+        // Check if the line is as equally indented as the previous line.
         if (columnsInIndent == indentStack[indentLevel]) {
             if (altColumnsInIndent != altIndentStack[indentLevel]) {
                 reporter.syntaxError(line, "There is a problem with the indentation.");
             }
         }
-        // (is more indented than previous line)
+        // Check if the line is more indented than the previous line.
         else if (columnsInIndent > indentStack[indentLevel]) {
-            // Check if next level of indentation exceeds allowed limit
+            // Check if the next level of indentation exceeds allowed limit.
             if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
                 reporter.syntaxError(line, "The max indentation has been reached. You cannot indent further.");
             }
@@ -222,7 +222,7 @@ public class Scanner {
             indentStack[indentLevel] = columnsInIndent;
             altIndentStack[indentLevel] = altColumnsInIndent;
         }
-        // (is less indented than previous line)
+        // Check if the line is less indented than the previous line.
         else {
             // If the current line is less indented than the previous one, pop
             // indentation levels off of the stack until the indentation is consistent
@@ -231,8 +231,7 @@ public class Scanner {
                 pendingIndents--;
                 indentLevel--;
             }
-
-            // (is not consistently indented)
+            // Check if the line is still not consistently indented.
             if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
                 reporter.syntaxError(line, "There are inconsistencies in the level of indentation used.");
             }
@@ -291,10 +290,10 @@ public class Scanner {
             advance();
         }
 
-        // Only consume the dot if there are succeeding digits.
-        // (since it may otherwise be a method call)
+        // Only consume the dot if there are succeeding digits
+        // (since it may otherwise be a method call).
         if (peek() == '.' && isDigit(peekNext())) {
-            // Consume the dot (.) then all following digits
+            // Consume the dot (.) then all following digits.
             advance();
             while (isDigit(peek())) {
                 advance();
@@ -314,7 +313,7 @@ public class Scanner {
         }
 
         // If the literal matches one of the reserved keywords, the token
-        // type will be that of the keyword, otherwise a regular identifier
+        // type will be that of the keyword, otherwise a regular identifier.
         String literal = source.substring(start, current);
         TokenType type = keywords.getOrDefault(literal, TokenType.IDENTIFIER);
         addToken(type);
@@ -336,10 +335,10 @@ public class Scanner {
             return;
         }
 
-        // Consume the terminating double quote (")
+        // Consume the terminating double quote (").
         advance();
 
-        // Remove double quotes from text literal
+        // Remove double quotes from text literal.
         String literal = source.substring(start + 1, current - 1);
         addToken(TokenType.TEXT, literal);
     }
@@ -422,12 +421,18 @@ public class Scanner {
         return source.charAt(current + 1);
     }
 
+    /**
+     * Advance to the end of the line.
+     */
     private void skipUntilEndOfLine() {
         while (peek() != '\n' && !isAtEnd()) {
             advance();
         }
     }
 
+    /**
+     * Reset the indentation level to 0 and add the remaining dedents.
+     */
     private void resetIndentation() {
         while (indentLevel > 0) {
             pendingIndents--;
