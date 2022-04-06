@@ -12,7 +12,8 @@ STATEMENT RULES
 ---------------
 
 statement:
-	declarationStmt
+	changeStmt
+	| declarationStmt
 	| displayStmt (TEMPORARY)
 	| expressionStmt
 	| ifStmt
@@ -35,6 +36,9 @@ functionDecl:
 variableDecl:
 	"create" IDENTIFIER "=" expression NEWLINE ;
 
+changeStmt:
+	"change" ( call "." )? IDENTIFIER "=" expression NEWLINE ;
+
 displayStmt:
 	"display" expression NEWLINE ; (TEMPORARY)
 
@@ -42,10 +46,10 @@ expressionStmt:
 	expression NEWLINE ;
 
 ifStmt:
-	"if" expression block ("otherwise" block)? ;
+	"if" expression block ( "otherwise" block )? ;
 
 repeatTimesStmt:
-	"repeat" ( NUMBER | "(" expression ")" ) "times" ;
+	"repeat" expression "times" block ;
 
 repeatWhileStmt:
 	"repeat" "while" expression block ;
@@ -57,10 +61,10 @@ returnWithStmt:
 	"return" "with" expression NEWLINE ;
 
 block:
-	NEWLINE INDENT statement+ DEDENT
+	NEWLINE INDENT statement+ DEDENT ;
 
 classBlock:
-	NEWLINE INDENT classFieldDecl* function* DEDENT ;
+	NEWLINE INDENT classFieldDecl* functionDecl* DEDENT ;
 
 classFieldDecl:
 	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
@@ -74,16 +78,10 @@ function:
 	IDENTIFIER "(" parameters? ")" block ;
 
 parameters:
-	parameter ( "," parameter )* ;
-
-parameter:
-	"accept" IDENTIFIER
+	"accept" IDENTIFIER ( "," IDENTIFIER )* ;
 
 arguments:
-	argument ( "," argument )* ;
-
-argument:
-	"send" expression ;
+	"send" expression ( "," expression )* ;
 
 
 ----------------
@@ -91,11 +89,7 @@ EXPRESSION RULES
 ----------------
 
 expression:
-	assignment
-	| logicOr;
-
-assignment:
-	"change" ( call "." )? IDENTIFIER "=" expression ;
+	logicOr ;
 
 logicOr:
 	logicAnd ( "or" logicAnd )* ;
@@ -127,7 +121,7 @@ primary:
 	| "empty"
 	| "me"
 	| "parent" "." IDENTIFIER
-	| "(" expression ")"
+	| "(" expression ")" ;
 
 
 -------------
