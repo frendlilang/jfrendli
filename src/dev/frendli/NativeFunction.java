@@ -59,17 +59,15 @@ public abstract class NativeFunction implements FrendliCallable {
             if (value == null) {
                 return "empty";
             }
-            if (value instanceof Double) {
+
+            String text = value.toString();
+            if (value instanceof Double && text.endsWith(".0")) {
                 // Even though all numbers are treated as doubles,
                 // show integers without the decimal point.
-                String text = value.toString();
-                if (text.endsWith(".0")) {
-                    text = text.substring(0, text.length() - 2);
-                }
-                return text;
+                text = text.substring(0, text.length() - 2);
             }
 
-            return value.toString();
+            return text;
         }
 
         private void print(String value) {
