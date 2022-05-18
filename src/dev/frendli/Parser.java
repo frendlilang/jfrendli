@@ -328,7 +328,13 @@ public class Parser {
             // of the call and then (through looping) see if the parsed
             // expression is in turn being called. E.g. getFunction()()
             if (match(TokenType.OPEN_PAREN)) {
-                expression = finishCall(expression);
+                // If there is no closing parenthesis, add all arguments.
+                List<Expression> argumentsList = new ArrayList<>();
+                if (!check(TokenType.CLOSE_PAREN)) {
+                    argumentsList = arguments();
+                }
+                Token endToken = consume(TokenType.CLOSE_PAREN, "A closing parenthesis ')' is missing.");
+                expression = new Expression.Call(expression, argumentsList, endToken);;
             }
             else {
                 break;
@@ -338,28 +344,21 @@ public class Parser {
         return expression;
     }
 
-    private Expression finishCall(Expression callee) {
+    // arguments: "send" expression ( "," expression )* ;
+    private List<Expression> arguments() {
         final int MAX_ARGUMENTS = 255;
-        List<Expression> arguments = new ArrayList<>();
-        
-        // If there is no closing parenthesis, add each argument to
-        // the list as long as there is a comma separating them.
-        if (!check(TokenType.CLOSE_PAREN)) {
-            // arguments: "send" expression ( "," expression )* ;
-            do {
-                consume(TokenType.SEND, "The list of arguments must begin with the 'send' keyword.");
+        List<Expression> argumentsList = new ArrayList<>();
+        consume(TokenType.SEND, "The list of arguments must begin with the 'send' keyword.");
 
-                if (arguments.size() >= MAX_ARGUMENTS) {
-                    error(peek(), "You cannot have more than " + MAX_ARGUMENTS + " arguments.");
-                }
-                arguments.add(expression());
+        do {
+            if (argumentsList.size() >= MAX_ARGUMENTS) {
+                error(peek(), "You cannot have more than " + MAX_ARGUMENTS + " arguments.");
             }
-            while (match(TokenType.COMMA));
+            argumentsList.add(expression());
         }
+        while (match(TokenType.COMMA));
 
-        Token endToken = consume(TokenType.CLOSE_PAREN, "A closing parenthesis ')' is missing.");
-
-        return new Expression.Call(callee, arguments, endToken);
+        return argumentsList;
     }
 
     // primary: IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
