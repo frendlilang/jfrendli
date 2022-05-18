@@ -355,7 +355,7 @@ public class Parser {
     private Expression finishCall(Expression callee) {
         final int MAX_ARGUMENTS = 255;
         List<Expression> arguments = new ArrayList<>();
-
+        
         // If there is no closing parenthesis, add each argument to
         // the list as long as there is a comma separating them.
         if (!check(TokenType.CLOSE_PAREN)) {
