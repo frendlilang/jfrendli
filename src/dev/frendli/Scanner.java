@@ -62,6 +62,7 @@ public class Scanner {
         keywords.put("send", TokenType.SEND);
         keywords.put("times", TokenType.TIMES);
         keywords.put("true", TokenType.TRUE);
+        keywords.put("unequals", TokenType.UNEQUALS);
         keywords.put("while", TokenType.WHILE);
         keywords.put("with", TokenType.WITH);
     }
@@ -225,7 +226,7 @@ public class Scanner {
         // Check if the line is less indented than the previous line.
         else {
             // If the current line is less indented than the previous one, pop
-            // indentation levels off of the stack until the indentation is consistent
+            // indentation levels off of the stack until the indentation is consistent,
             // and decrement pending indents so DEDENT tokens can be added later.
             while (indentLevel > 0 && columnsInIndent < indentStack[indentLevel]) {
                 pendingIndents--;
@@ -357,7 +358,7 @@ public class Scanner {
     private void addToken(TokenType type, Object literal) {
         String lexeme = source.substring(start, current);
         if (type == TokenType.NEWLINE) {
-            lexeme = "new line";
+            lexeme = "newline";
         }
         else if (type == TokenType.INDENT || type == TokenType.DEDENT) {
             lexeme = "indentation";

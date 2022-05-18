@@ -27,7 +27,7 @@ import java.util.List;
 // expression:          logicOr ;
 // logicOr:             logicAnd ( "or" logicAnd )* ;
 // logicAnd:            equality ( "and" equality )* ;
-// equality:            comparison ( ( "not"? "equals" ) comparison )* ;
+// equality:            comparison ( ( "equals" | "unequals" ) comparison )* ;
 // comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 // term:                factor ( ( "+" | "-" ) factor )* ;
 // factor:              unary ( ( "*" | "/" ) unary )* ;
@@ -262,16 +262,12 @@ public class Parser {
         return left;
     }
 
-    // equality: comparison ( ( "not"? "equals" ) comparison )* ;
+    // equality: comparison ( ( "equals" | "unequals" ) comparison )* ;
     private Expression equality() {
         Expression left = comparison();
 
-        while (match(TokenType.NOT, TokenType.EQUALS_WORD)) {
+        while (match(TokenType.EQUALS_WORD, TokenType.UNEQUALS)) {
             Token operator = getJustConsumed();
-            if (operator.type == TokenType.NOT) {
-                consume(TokenType.EQUALS_WORD, "'not' must be followed by 'equals' when comparing equality.");
-                operator = new Token(TokenType.NOT_EQUALS, "not equals", null, operator.line);
-            }
             Expression right = comparison();
             left = new Expression.Binary(left, operator, right);
         }
@@ -375,7 +371,7 @@ public class Parser {
 
     /**
      * Consume the current token if it is of the expected type,
-     * otherwise report an error.
+     * otherwise report and throw an error.
      *
      * @param type The expected type.
      * @param errorMessage The error message if unexpected type.
@@ -391,7 +387,7 @@ public class Parser {
 
     /**
      * Consume the current token if it is a newline, otherwise
-     * report an error.
+     * report and throw an error.
      *
      * @return The consumed newline token.
      */

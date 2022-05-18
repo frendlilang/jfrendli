@@ -33,7 +33,6 @@ public enum TokenType {
     ME,
     NEW,
     NOT,
-    NOT_EQUALS,     // The replacement when "not" "equals" is encountered
     OR,
     OTHERWISE,
     PARENT,
@@ -42,6 +41,7 @@ public enum TokenType {
     SEND,
     TIMES,
     TRUE,
+    UNEQUALS,
     WHILE,
     WITH,
 

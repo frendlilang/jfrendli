@@ -64,7 +64,7 @@ block:
 	NEWLINE INDENT statement+ DEDENT ;
 
 classBlock:
-	NEWLINE INDENT classFieldDecl* functionDecl* DEDENT ;
+	NEWLINE INDENT classFieldDecl* functionDecl+ DEDENT ;
 
 classFieldDecl:
 	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
@@ -98,7 +98,7 @@ logicAnd:
 	comparison ( "and" comparison )* ;
 
 comparison:
-	term ( ( "<" | "<=" | ">" | ">=" | "not"? "equals" ) term )* ;
+	term ( ( "<" | "<=" | ">" | ">=" | "equals" | "unequals" ) term )* ;
 
 term:
 	factor ( ( "+" | "-" ) factor )* ;

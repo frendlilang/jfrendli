@@ -113,6 +113,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         switch (operator.type) {
             case EQUALS_WORD:
                 return isEqual(left, right);
+            case UNEQUALS:
+                return !isEqual(left, right);
             case GREATER_THAN:
                 verifyNumberOperands(operator, left, right);
                 return (double)left > (double)right;
@@ -128,8 +130,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             case MINUS:
                 verifyNumberOperands(operator, left, right);
                 return (double)left - (double)right;
-            case NOT_EQUALS:
-                return !isEqual(left, right);
             case PLUS:
                 // Overload the + operator to allow for text concatenation
                 if (left instanceof Double && right instanceof Double) {
@@ -251,8 +251,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     /**
-     * Check if two objects are equal. (Null values and primitives of
-     * the same value are always equal; references are always not equal.)
+     * Check if two objects are equal. (Null values and primitives of the
+     * same value are always equal; different references are always unequal.)
      *
      * @param first The first object.
      * @param second The second object.
