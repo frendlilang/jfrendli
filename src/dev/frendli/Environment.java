@@ -33,7 +33,7 @@ public class Environment {
             return values.get(token.lexeme);
         }
 
-        // Look in outer scopes. This calls the get method in that
+        // Look in outer scopes. This calls the get method in the outer/enclosing
         // environment, causing recursive lookup up the scope chain.
         if (enclosing != null) {
             return enclosing.get(token);
@@ -59,6 +59,18 @@ public class Environment {
     }
 
     /**
+     * Define a native binding (for standard library).
+     *
+     * @param name The native name.
+     * @param value The value.
+     */
+    public void defineNative(String name, Object value) {
+        // Native definitions should occur before anything else and
+        // are not checked if their names already exist.
+        values.put(name, value);
+    }
+
+    /**
      * Assign a value to an already-existing variable.
      *
      * @param token The variable token.
@@ -70,7 +82,7 @@ public class Environment {
             return;
         }
 
-        // Look in outer scopes. This calls the assign method in that
+        // Look in outer scopes. This calls the assign method in the outer/enclosing
         // environment, causing recursive lookup up the scope chain.
         if (enclosing != null) {
             enclosing.assign(token, value);
