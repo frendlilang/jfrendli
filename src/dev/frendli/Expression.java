@@ -5,9 +5,12 @@ package dev.frendli;
 // the "accept" method and call the corresponding "visit" method
 // on its visitor.
 
+import java.util.List;
+
 public abstract class Expression {
     public interface Visitor<R> {
         R visitBinaryExpression(Binary expression);
+        R visitCallExpression(Call expression);
         R visitGroupingExpression(Grouping expression);
         R visitLiteralExpression(Literal expression);
         R visitLogicalExpression(Logical expression);
@@ -31,6 +34,22 @@ public abstract class Expression {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBinaryExpression(this);
+        }
+    }
+
+    public static class Call extends Expression {
+        public final Expression callee;
+        public final List<Expression> arguments;
+        public final Token endToken;
+
+        public Call(Expression callee, List<Expression> arguments, Token endToken) {
+            this.callee = callee;
+            this.arguments = arguments;
+            this.endToken = endToken;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitCallExpression(this);
         }
     }
 

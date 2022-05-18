@@ -31,8 +31,15 @@ import java.util.List;
 // comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 // term:                factor ( ( "+" | "-" ) factor )* ;
 // factor:              unary ( ( "*" | "/" ) unary )* ;
-// unary:               ( "not" | "-" ) unary | primary ;
+// unary:               ( "not" | "-" ) unary | call ;
+// call:                primary ( "(" arguments? ")" )* ;
 // primary:             IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
+
+// ========
+// HELPERS:
+// ========
+// arguments:           "send" expression ( "," expression )* ;
+
 
 /**
  * The parser - traverses the tokens produced by the scanner and
@@ -315,7 +322,7 @@ public class Parser {
         return left;
     }
 
-    // unary: ( "not" | "-" ) unary | primary ;
+    // unary: ( "not" | "-" ) unary | call ;
     private Expression unary() {
         if (match(TokenType.NOT, TokenType.MINUS)) {
             Token operator = getJustConsumed();
@@ -323,7 +330,47 @@ public class Parser {
             return new Expression.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    // call: primary ( "(" arguments? ")" )* ;
+    private Expression call() {
+        Expression expression = primary();
+
+        while (true) {
+            // If there is an open parenthesis, finish parsing the rest
+            // of the call and then (through looping) see if the parsed
+            // expression is in turn being called. E.g. getFunction()()
+            if (match(TokenType.OPEN_PAREN)) {
+                expression = finishCall(expression);
+            }
+            else {
+                break;
+            }
+        }
+
+        return expression;
+    }
+    
+    private Expression finishCall(Expression callee) {
+        final int MAX_ARGUMENTS = 255;
+        List<Expression> arguments = new ArrayList<>();
+
+        // If there is no closing parenthesis, add each argument to
+        // the list as long as there is a comma separating them.
+        if (!check(TokenType.CLOSE_PAREN)) {
+            do {
+                if (arguments.size() >= MAX_ARGUMENTS) {
+                    error(peek(), "You cannot have more than " + MAX_ARGUMENTS + " arguments.");
+                }
+                arguments.add(expression());
+            }
+            while (match(TokenType.COMMA));
+        }
+
+        Token endToken = consume(TokenType.CLOSE_PAREN, "A closing parenthesis ')' is missing.");
+
+        return new Expression.Call(callee, arguments, endToken);
     }
 
     // primary: IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
