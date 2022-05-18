@@ -84,10 +84,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitRepeatTimesStatement(Statement.RepeatTimes statement) {
         Object times = evaluate(statement.times);
-        verifyPositiveNumber(statement.start, times);
+        verifyPositiveInteger(statement.start, times);
 
-        // Positive non-integers are allowed but will be rounded off to
-        // the nearest integer less than or equal to the given number.
         int exactTimes = (int)((double)times);
         for (int i = 0; i < exactTimes; i++) {
             execute(statement.body);
@@ -369,18 +367,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     /**
-     * Verify that the number is positive and throw a RuntimeError if not.
+     * Verify that the number is positive can be represented as integer,
+     * otherwise throw a RuntimeError.
      *
      * @param location The location of the nearest token.
      * @param number The number.
      */
-    private void verifyPositiveNumber(Token location, Object number) {
+    private void verifyPositiveInteger(Token location, Object number) {
         verifyNumberOperand(location, number);
-        if ((double)number > 0) {
+        double numberDouble = (double)number;
+        if (numberDouble > 0 && Math.floor(numberDouble) == numberDouble) {
             return;
         }
 
-        throw new RuntimeError(location, "The number must be positive.");
+        throw new RuntimeError(location, "The number must be a positive integer.");
     }
 
     private void print(String value) {
