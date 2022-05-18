@@ -9,10 +9,13 @@ import java.util.List;
  * values. The current node always evaluates its children first (post-order traversal).
  */
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-    private ErrorReporter reporter;
-    private Environment environment = new Environment();
+    private final ErrorReporter reporter;
+    private final Environment globalEnvironment = new Environment();
+    private Environment currentEnvironment = globalEnvironment;
 
     public Interpreter(ErrorReporter reporter) {
+        globalEnvironment.define("time", new NativeFunction.Time());
+        globalEnvironment.define("display", new NativeFunction.Display());
         this.reporter = reporter;
     }
 
@@ -34,7 +37,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitBlockStatement(Statement.Block block) {
-        executeBlock(block.statements, new Environment(environment));
+        executeBlock(block.statements, new Environment(currentEnvironment));
 
         return null;
     }
@@ -42,7 +45,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitCreateStatement(Statement.Create statement) {
         Object value = evaluate(statement.initializer);
-        environment.define(statement.name, value);
+        currentEnvironment.define(statement.name, value);
 
         return null;
     }
@@ -50,7 +53,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitChangeStatement(Statement.Change statement) {
         Object value = evaluate(statement.assignment);
-        environment.assign(statement.name, value);
+        currentEnvironment.assign(statement.name, value);
 
         return null;
     }
@@ -225,7 +228,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     
     @Override
     public Object visitVariableExpression(Expression.Variable expression) {
-        return environment.get(expression.name);
+        return currentEnvironment.get(expression.name);
     }
 
     /**
@@ -261,7 +264,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         try {
             // Set the current environment to the environment of the
             // block to be executed, then execute the statements.
-            this.environment = innerEnvironment;
+            this.currentEnvironment = innerEnvironment;
             for (Statement statement : statements) {
                 execute(statement);
             }
@@ -269,7 +272,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         finally {
             // Restore the enclosing/outer environment. (Use a
             // "finally" clause in case an exception is thrown.)
-            this.environment = enclosingEnvironment;
+            this.currentEnvironment = enclosingEnvironment;
         }
     }
 
@@ -305,29 +308,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         verifyBooleanOperand(location, operand);
 
         return (boolean)operand;
-    }
-
-    /**
-     * Convert a value to the Frendli representation.
-     *
-     * @param value The value to convert.
-     * @return The Frendli value.
-     */
-    private String stringify(Object value) {
-        if (value == null) {
-            return "empty";
-        }
-        if (value instanceof Double) {
-            // Even though all numbers are treated as doubles,
-            // show integers without the decimal point.
-            String text = value.toString();
-            if (text.endsWith(".0")) {
-                text = text.substring(0, text.length() - 2);
-            }
-            return text;
-        }
-
-        return value.toString();
     }
 
     /**
@@ -404,9 +384,5 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         }
 
         throw new RuntimeError(location, "The number must be a positive integer.");
-    }
-
-    private void print(String value) {
-        System.out.println(value);
     }
 }
