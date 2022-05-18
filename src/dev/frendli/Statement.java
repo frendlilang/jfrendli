@@ -12,7 +12,6 @@ public abstract class Statement {
         R visitBlockStatement(Block statement);
         R visitCreateStatement(Create statement);
         R visitChangeStatement(Change statement);
-        R visitDisplayStatement(Display statement);
         R visitExpressionStatement(ExpressionStatement statement);
         R visitIfStatement(If statement);
         R visitRepeatTimesStatement(RepeatTimes statement);
@@ -64,20 +63,7 @@ public abstract class Statement {
         }
     }
 
-    public static class Display extends Statement {
-        public final Expression expression;
-
-        public Display(Expression expression) {
-            this.expression = expression;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitDisplayStatement(this);
-        }
-    }
-
-    // This name of this class also includes "Statement" in order
+    // The name of this class also includes "Statement" in order
     // to not conflict with the "Expression" abstract class
     public static class ExpressionStatement extends Statement {
         public final Expression expression;

@@ -44,7 +44,6 @@ public class Scanner {
         keywords.put("create", TokenType.CREATE);
         keywords.put("define", TokenType.DEFINE);
         keywords.put("describe", TokenType.DESCRIBE);
-        keywords.put("display", TokenType.DISPLAY);    // TEMPORARY (until built-in function)
         keywords.put("empty", TokenType.EMPTY);
         keywords.put("equals", TokenType.EQUALS_WORD);
         keywords.put("false", TokenType.FALSE);

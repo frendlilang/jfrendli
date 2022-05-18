@@ -14,8 +14,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     private Environment currentEnvironment = globalEnvironment;
 
     public Interpreter(ErrorReporter reporter) {
-        globalEnvironment.define("time", new NativeFunction.Time());
-        globalEnvironment.define("display", new NativeFunction.Display());
+        globalEnvironment.defineNative("time", new NativeFunction.Time());
+        globalEnvironment.defineNative("display", new NativeFunction.Display());
         this.reporter = reporter;
     }
 
@@ -54,14 +54,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     public Void visitChangeStatement(Statement.Change statement) {
         Object value = evaluate(statement.assignment);
         currentEnvironment.assign(statement.name, value);
-
-        return null;
-    }
-
-    @Override
-    public Void visitDisplayStatement(Statement.Display statement) {
-        Object value = evaluate(statement.expression);
-        print(stringify(value));
 
         return null;
     }

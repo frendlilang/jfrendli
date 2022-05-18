@@ -11,12 +11,10 @@ import java.util.List;
 //                      | statement ;
 // variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
 // statement:           changeStmt
-//                      | displayStmt
 //                      | expressionStmt
 //                      | ifStmt
 //                      | repeatStmt ;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
-// displayStmt:         "display" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
 // ifStmt:              "if" expression block ( "otherwise" block )? ;
 // repeatStmt:          repeatTimesStmt
@@ -103,16 +101,12 @@ public class Parser {
     }
 
     // statement: changeStmt
-    //            | displayStmt
     //            | expressionStmt
     //            | ifStmt
     //            | repeatStmt ;
     private Statement statement() {
         if (match(TokenType.CHANGE)) {
             return changeStmt();
-        }
-        if (match(TokenType.DISPLAY)) {
-            return displayStatement();
         }
         if (match(TokenType.IF)) {
             return ifStatement();
@@ -148,14 +142,6 @@ public class Parser {
         consumeNewline();
 
         return new Statement.Change(name, value);
-    }
-
-    // displayStmt: "display" expression NEWLINE ;
-    private Statement displayStatement() {
-        Expression value = expression();
-        consumeNewline();
-
-        return new Statement.Display(value);
     }
 
     // expressionStmt: expression NEWLINE ;
@@ -545,7 +531,6 @@ public class Parser {
             case CREATE:
             case DEFINE:
             case DESCRIBE:
-            case DISPLAY:     // TEMPORARY (until built-in function)
             case HAS:
             case IF:
             case REPEAT:

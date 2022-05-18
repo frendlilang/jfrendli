@@ -14,7 +14,6 @@ STATEMENT RULES
 statement:
 	changeStmt
 	| declarationStmt
-	| displayStmt (TEMPORARY)
 	| expressionStmt
 	| ifStmt
 	| repeatTimesStmt
