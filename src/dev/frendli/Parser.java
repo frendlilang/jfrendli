@@ -15,14 +15,13 @@ import java.util.List;
 // statement:           changeStmt
 //                      | expressionStmt
 //                      | ifStmt
-//                      | repeatStmt
+//                      | repeatTimesStmt
+//                      | repeatWhileStmt
 //                      | returnStmt
 //                      | returnWithStmt ;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
 // ifStmt:              "if" expression block ( "otherwise" block )? ;
-// repeatStmt:          repeatTimesStmt
-//                      | repeatWhileStmt ;
 // repeatTimesStmt:     "repeat" expression "times" block ;
 // repeatWhileStmt:     "repeat" "while" expression block ;
 // returnStmt:          "return" NEWLINE ;
@@ -147,7 +146,8 @@ public class Parser {
     // statement: changeStmt
     //            | expressionStmt
     //            | ifStmt
-    //            | repeatStmt
+    //            | repeatTimesStmt
+    //            | repeatWhileStmt
     //            | returnStmt
     //            | returnWithStmt ;
     private Statement statement() {
@@ -158,7 +158,7 @@ public class Parser {
             return ifStatement();
         }
         if (match(TokenType.REPEAT)) {
-            return repeatStatement();
+            return match(TokenType.WHILE) ? repeatWhileStatement() : repeatTimesStatement();
         }
         if (match(TokenType.RETURN)) {
             return match(TokenType.WITH) ? returnWithStatement() : returnStatement();
@@ -221,16 +221,6 @@ public class Parser {
         }
 
         return new Statement.If(start, condition, thenBranch, otherwiseBranch);
-    }
-
-    // repeatStmt: repeatTimesStmt
-    //             | repeatWhileStmt ;
-    private Statement repeatStatement() {
-        if (match(TokenType.WHILE)) {
-            return repeatWhileStatement();
-        }
-
-        return repeatTimesStatement();
     }
 
     // repeatTimesStmt: "repeat" expression "times" block ;
