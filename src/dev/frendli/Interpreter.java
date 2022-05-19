@@ -108,6 +108,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitReturnStatement(Statement.Return statement) {
+        // The Return exception class is used for control flow.
+        throw new Return(null);
+    }
+
+    @Override
+    public Void visitReturnWithStatement(Statement.ReturnWith statement) {
+        Object value = evaluate(statement.value);
+
+        // The Return exception class is used for control flow.
+        throw new Return(value);
+    }
+
+    @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         // Evaluate the operands left to right
         Object left = evaluate(expression.left);

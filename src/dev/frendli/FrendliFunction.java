@@ -31,8 +31,17 @@ public class FrendliFunction implements FrendliCallable {
             Object value = arguments.get(i);
             currentEnvironment.define(name, value);
         }
-        interpreter.executeBlock(declaration.body.statements, currentEnvironment);
 
+        // When a return statement is executed, it will throw a Return exception
+        // that should be caught by the caller (here), containing the return value.
+        try {
+            interpreter.executeBlock(declaration.body.statements, currentEnvironment);
+        }
+        catch (Return returnObject) {
+            return returnObject.value;
+        }
+
+        // Functions without any return statements will implicitly return "empty".
         return null;
     }
 
