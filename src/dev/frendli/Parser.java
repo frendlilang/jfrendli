@@ -7,9 +7,11 @@ import java.util.List;
 // GRAMMAR: (incrementally added to and modified during development when approaching the final grammar version)
 // ========
 // file:                declaration* EOF ;
-// declarationStmt:     variableDecl
+// declarationStmt:     functionDecl
+//                      | variableDecl
 //                      | statement ;
 // variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
+// functionDecl:        "define" IDENTIFIER "(" parameters? ")" block ;
 // statement:           changeStmt
 //                      | expressionStmt
 //                      | ifStmt
@@ -36,6 +38,7 @@ import java.util.List;
 // ========
 // HELPERS:
 // ========
+// parameters:          "accept" IDENTIFIER ( "," IDENTIFIER )* ;
 // arguments:           "send" expression ( "," expression )* ;
 
 
@@ -70,12 +73,16 @@ public class Parser {
         return statements;
     }
 
-    // declarationStmt: variableDecl
+    // declarationStmt: functionDecl
+    //                  | variableDecl
     //                  | statement ;
     private Statement declaration() {
         try {
             if (match(TokenType.CREATE)) {
                 return variableDeclaration();
+            }
+            if (match(TokenType.DEFINE)) {
+                return functionDeclaration();
             }
 
             return statement();
@@ -88,6 +95,39 @@ public class Parser {
             synchronize();
             return null;
         }
+    }
+
+    // functionDecl: "define" IDENTIFIER "(" parameters? ")" block ;
+    private Statement functionDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "You must provide a name for what you are defining.");
+        consume(TokenType.OPEN_PAREN, "An opening parenthesis '(' is missing.");
+
+        List<Token> parametersList = new ArrayList<>();
+        if (!check(TokenType.CLOSE_PAREN)) {
+            parametersList = parameters();
+        }
+
+        consume(TokenType.CLOSE_PAREN, "A closing parenthesis ')' is missing.");
+        Statement body = block();
+
+        return new Statement.Define(name, parametersList, (Statement.Block)body);
+    }
+
+    // parameters: "accept" IDENTIFIER ( "," IDENTIFIER )* ;
+    private List<Token> parameters() {
+        final int MAX_PARAMETERS = 255;
+        List<Token> parametersList = new ArrayList<>();
+        consume(TokenType.ACCEPT, "The list of parameters to accept must begin with the 'accept' keyword.");
+
+        do {
+            if (parametersList.size() >= MAX_PARAMETERS) {
+                error(peek(), "You cannot accept more than " + MAX_PARAMETERS + " parameters.");
+            }
+            parametersList.add(consume(TokenType.IDENTIFIER, "You must provide a name for each parameter to accept."));
+        }
+        while (match(TokenType.COMMA));
+
+        return parametersList;
     }
 
     // variableDecl: "create" IDENTIFIER "=" expression NEWLINE ;
@@ -348,11 +388,11 @@ public class Parser {
     private List<Expression> arguments() {
         final int MAX_ARGUMENTS = 255;
         List<Expression> argumentsList = new ArrayList<>();
-        consume(TokenType.SEND, "The list of arguments must begin with the 'send' keyword.");
+        consume(TokenType.SEND, "The list of arguments to send must begin with the 'send' keyword.");
 
         do {
             if (argumentsList.size() >= MAX_ARGUMENTS) {
-                error(peek(), "You cannot have more than " + MAX_ARGUMENTS + " arguments.");
+                error(peek(), "You cannot send more than " + MAX_ARGUMENTS + " arguments.");
             }
             argumentsList.add(expression());
         }

@@ -30,7 +30,7 @@ classDecl:
 	"describe" IDENTIFIER ( "inherit" IDENTIFIER )? classBlock ;
 
 functionDecl:
-	"define" function ;
+	"define" IDENTIFIER "(" parameters? ")" block ;
 
 variableDecl:
 	"create" IDENTIFIER "=" expression NEWLINE ;
@@ -72,9 +72,6 @@ classFieldDecl:
 ------------
 HELPER RULES
 ------------
-
-function:
-	IDENTIFIER "(" parameters? ")" block ;
 
 parameters:
 	"accept" IDENTIFIER ( "," IDENTIFIER )* ;

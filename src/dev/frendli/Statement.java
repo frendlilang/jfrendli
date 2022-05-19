@@ -12,6 +12,7 @@ public abstract class Statement {
         R visitBlockStatement(Block statement);
         R visitCreateStatement(Create statement);
         R visitChangeStatement(Change statement);
+        R visitDefineStatement(Define statement);
         R visitExpressionStatement(ExpressionStatement statement);
         R visitIfStatement(If statement);
         R visitRepeatTimesStatement(RepeatTimes statement);
@@ -60,6 +61,23 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitChangeStatement(this);
+        }
+    }
+
+    public static class Define extends Statement {
+        public final Token name;
+        public final List<Token> parameters;
+        public final Statement.Block body;
+
+        public Define(Token name, List<Token> parameters, Statement.Block body) {
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitDefineStatement(this);
         }
     }
 
