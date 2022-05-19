@@ -102,32 +102,32 @@ public class Parser {
         Token name = consume(TokenType.IDENTIFIER, "You must provide a name for what you are defining.");
         consume(TokenType.OPEN_PAREN, "An opening parenthesis '(' is missing.");
 
-        List<Token> parametersList = new ArrayList<>();
+        List<Token> parameterList = new ArrayList<>();
         if (!check(TokenType.CLOSE_PAREN)) {
-            parametersList = parameters();
+            parameterList = parameters();
         }
 
         consume(TokenType.CLOSE_PAREN, "A closing parenthesis ')' is missing.");
         Statement body = block();
 
-        return new Statement.Define(name, parametersList, (Statement.Block)body);
+        return new Statement.Define(name, parameterList, (Statement.Block)body);
     }
 
     // parameters: "accept" IDENTIFIER ( "," IDENTIFIER )* ;
     private List<Token> parameters() {
         final int MAX_PARAMETERS = 255;
-        List<Token> parametersList = new ArrayList<>();
+        List<Token> parameterList = new ArrayList<>();
         consume(TokenType.ACCEPT, "The list of parameters to accept must begin with the 'accept' keyword.");
 
         do {
-            if (parametersList.size() >= MAX_PARAMETERS) {
+            if (parameterList.size() >= MAX_PARAMETERS) {
                 error(peek(), "You cannot accept more than " + MAX_PARAMETERS + " parameters.");
             }
-            parametersList.add(consume(TokenType.IDENTIFIER, "You must provide a name for each parameter to accept."));
+            parameterList.add(consume(TokenType.IDENTIFIER, "You must provide a name for each parameter to accept."));
         }
         while (match(TokenType.COMMA));
 
-        return parametersList;
+        return parameterList;
     }
 
     // variableDecl: "create" IDENTIFIER "=" expression NEWLINE ;
@@ -369,12 +369,12 @@ public class Parser {
             // expression is in turn being called. E.g. getFunction()()
             if (match(TokenType.OPEN_PAREN)) {
                 // If there is no closing parenthesis, add all arguments.
-                List<Expression> argumentsList = new ArrayList<>();
+                List<Expression> argumentList = new ArrayList<>();
                 if (!check(TokenType.CLOSE_PAREN)) {
-                    argumentsList = arguments();
+                    argumentList = arguments();
                 }
                 Token endToken = consume(TokenType.CLOSE_PAREN, "A closing parenthesis ')' is missing.");
-                expression = new Expression.Call(expression, argumentsList, endToken);;
+                expression = new Expression.Call(expression, argumentList, endToken);;
             }
             else {
                 break;
@@ -387,18 +387,18 @@ public class Parser {
     // arguments: "send" expression ( "," expression )* ;
     private List<Expression> arguments() {
         final int MAX_ARGUMENTS = 255;
-        List<Expression> argumentsList = new ArrayList<>();
+        List<Expression> argumentList = new ArrayList<>();
         consume(TokenType.SEND, "The list of arguments to send must begin with the 'send' keyword.");
 
         do {
-            if (argumentsList.size() >= MAX_ARGUMENTS) {
+            if (argumentList.size() >= MAX_ARGUMENTS) {
                 error(peek(), "You cannot send more than " + MAX_ARGUMENTS + " arguments.");
             }
-            argumentsList.add(expression());
+            argumentList.add(expression());
         }
         while (match(TokenType.COMMA));
 
-        return argumentsList;
+        return argumentList;
     }
 
     // primary: IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;

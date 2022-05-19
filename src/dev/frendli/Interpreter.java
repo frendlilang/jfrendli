@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     private final ErrorReporter reporter;
-    private final Environment globalEnvironment = new Environment();
+    public final Environment globalEnvironment = new Environment();
     private Environment currentEnvironment = globalEnvironment;
 
     public Interpreter(ErrorReporter reporter) {
@@ -54,6 +54,14 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     public Void visitChangeStatement(Statement.Change statement) {
         Object value = evaluate(statement.assignment);
         currentEnvironment.assign(statement.name, value);
+
+        return null;
+    }
+    
+    @Override
+    public Void visitDefineStatement(Statement.Define statement) {
+        FrendliFunction function = new FrendliFunction(statement);
+        currentEnvironment.define(statement.name, function);
 
         return null;
     }
@@ -248,7 +256,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
      * @param statements The statements within the block.
      * @param innerEnvironment The environment.
      */
-    private void executeBlock(List<Statement> statements, Environment innerEnvironment) {
+    public void executeBlock(List<Statement> statements, Environment innerEnvironment) {
         // Save the enclosing/outer environment so that it can be
         // restored once execution in an inner environment is done
         Environment enclosingEnvironment = innerEnvironment.enclosing;
