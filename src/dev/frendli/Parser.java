@@ -15,7 +15,9 @@ import java.util.List;
 // statement:           changeStmt
 //                      | expressionStmt
 //                      | ifStmt
-//                      | repeatStmt ;
+//                      | repeatStmt
+//                      | returnStmt
+//                      | returnWithStmt ;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
 // ifStmt:              "if" expression block ( "otherwise" block )? ;
@@ -23,6 +25,8 @@ import java.util.List;
 //                      | repeatWhileStmt ;
 // repeatTimesStmt:     "repeat" expression "times" block ;
 // repeatWhileStmt:     "repeat" "while" expression block ;
+// returnStmt:          "return" NEWLINE ;
+// returnWithStmt:      "return" "with" expression NEWLINE ;
 // block:               NEWLINE INDENT declarationStmt+ DEDENT ;
 // expression:          logicOr ;
 // logicOr:             logicAnd ( "or" logicAnd )* ;
@@ -143,7 +147,9 @@ public class Parser {
     // statement: changeStmt
     //            | expressionStmt
     //            | ifStmt
-    //            | repeatStmt ;
+    //            | repeatStmt
+    //            | returnStmt
+    //            | returnWithStmt ;
     private Statement statement() {
         if (match(TokenType.CHANGE)) {
             return changeStmt();
@@ -153,6 +159,9 @@ public class Parser {
         }
         if (match(TokenType.REPEAT)) {
             return repeatStatement();
+        }
+        if (match(TokenType.RETURN)) {
+            return match(TokenType.WITH) ? returnWithStatement() : returnStatement();
         }
 
         return expressionStatement();
@@ -241,6 +250,23 @@ public class Parser {
         Statement body = block();
 
         return new Statement.RepeatWhile(start, condition, body);
+    }
+
+    // returnStmt: "return" NEWLINE ;
+    private Statement returnStatement() {
+        Token closest = getJustConsumed();
+        consume(TokenType.NEWLINE, "You must add a new line after 'return'. To return with a value, use 'return with' instead.");
+
+        return new Statement.Return(closest);
+    }
+
+    // returnWithStmt: "return" "with" expression NEWLINE ;
+    private Statement returnWithStatement() {
+        Token closest = getJustConsumed();
+        Expression value = expression();
+        consumeNewline();
+
+        return new Statement.ReturnWith(closest, value);
     }
 
     // block: NEWLINE INDENT declarationStmt+ DEDENT ;

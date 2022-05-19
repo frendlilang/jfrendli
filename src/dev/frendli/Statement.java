@@ -17,6 +17,8 @@ public abstract class Statement {
         R visitIfStatement(If statement);
         R visitRepeatTimesStatement(RepeatTimes statement);
         R visitRepeatWhileStatement(RepeatWhile statement);
+        R visitReturnStatement(Return statement);
+        R visitReturnWithStatement(ReturnWith statement);
     }
 
     public abstract <R> R accept(Visitor<R> visitor);
@@ -146,6 +148,34 @@ public abstract class Statement {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitRepeatWhileStatement(this);
+        }
+    }
+
+    public static class Return extends Statement {
+        public final Token closest;
+
+        public Return(Token closest) {
+            this.closest = closest;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitReturnStatement(this);
+        }
+    }
+
+    public static class ReturnWith extends Statement {
+        public final Token closest;
+        public final Expression value;
+
+        public ReturnWith(Token closest, Expression value) {
+            this.closest = closest;
+            this.value = value;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitReturnWithStatement(this);
         }
     }
 }
