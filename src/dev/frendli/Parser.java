@@ -152,7 +152,7 @@ public class Parser {
     //            | returnWithStmt ;
     private Statement statement() {
         if (match(TokenType.CHANGE)) {
-            return changeStmt();
+            return changeStatement();
         }
         if (match(TokenType.IF)) {
             return ifStatement();
@@ -168,7 +168,7 @@ public class Parser {
     }
 
     // changeStmt: "change" IDENTIFIER "=" expression NEWLINE ;
-    private Statement changeStmt() {
+    private Statement changeStatement() {
         // The identifier can come from the result of an expression that can be
         // of any size. Thus, do not consume IDENTIFIER directly in the 1st step.
         // E.g. change point.x = 2, where point.x is an expression that produces
