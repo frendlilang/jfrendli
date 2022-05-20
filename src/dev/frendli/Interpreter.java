@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     private final ErrorReporter reporter;
-    public final Environment globalEnvironment = new Environment();
+    private final Environment globalEnvironment = new Environment();
     private Environment currentEnvironment = globalEnvironment;
 
     public Interpreter(ErrorReporter reporter) {
@@ -60,7 +60,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     
     @Override
     public Void visitDefineStatement(Statement.Define statement) {
-        FrendliFunction function = new FrendliFunction(statement);
+        FrendliFunction function = new FrendliFunction(statement, currentEnvironment);
         currentEnvironment.define(statement.name, function);
 
         return null;

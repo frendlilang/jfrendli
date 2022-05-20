@@ -7,9 +7,11 @@ import java.util.List;
  */
 public class FrendliFunction implements FrendliCallable {
     private final Statement.Define declaration;
+    private final Environment closure;          // The environment used when declared
 
-    public FrendliFunction(Statement.Define declaration) {
+    public FrendliFunction(Statement.Define declaration, Environment closure) {
         this.declaration = declaration;
+        this.closure = closure;
     }
 
     @Override
@@ -23,7 +25,7 @@ public class FrendliFunction implements FrendliCallable {
         // This allows for recursion to work. Parameters are encapsulated
         // by the function, and they are bound to the arguments sent in
         // this newly created environment.
-        Environment currentEnvironment = new Environment(interpreter.globalEnvironment);
+        Environment currentEnvironment = new Environment(closure);
         for (int i = 0; i < declaration.parameters.size(); i++) {
             // The number of arguments are verified before this method is
             // called in "visitCallExpression" in the Interpreter.
