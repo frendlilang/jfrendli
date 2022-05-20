@@ -272,8 +272,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
      */
     public void executeBlock(List<Statement> statements, Environment innerEnvironment) {
         // Save the enclosing/outer environment so that it can be
-        // restored once execution in an inner environment is done
-        Environment enclosingEnvironment = innerEnvironment.enclosing;
+        // restored once execution in an inner environment is done.
+        Environment enclosingEnvironment = this.currentEnvironment;
 
         try {
             // Set the current environment to the environment of the
@@ -303,7 +303,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             return true;
         }
         // Check if "first" is "null" so that the last
-        // line does not throw a NullPointerException
+        // line does not throw a NullPointerException.
         if (first == null) {
             return false;
         }
