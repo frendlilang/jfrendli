@@ -44,21 +44,26 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     @Override
-    public Void visitVariableExpression(Expression.Variable expression) {
-        resolveLocalVariable(expression.name, expression);
+    public Void visitChangeStatement(Statement.Change statement) {
+        resolve(statement.assignment);
+        resolveLocalVariable(statement.name);
 
         return null;
     }
 
-    /**
-     * Resolve a block.
-     *
-     * @param statements The statements to resolve.
-     */
-    private void resolveBlock(List<Statement> statements) {
-        for (Statement statement : statements) {
-            resolve(statement);
-        }
+    @Override
+    public Void visitDefineStatement(Statement.Define statement) {
+        declare(statement.name);
+        resolveFunction(statement);
+
+        return null;
+    }
+
+    @Override
+    public Void visitVariableExpression(Expression.Variable expression) {
+        resolveLocalVariable(expression.name);
+
+        return null;
     }
 
     /**
@@ -82,10 +87,9 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     /**
      * Resolve a local variable.
      *
-     * @param name The variable token.
-     * @param expression The associated expression.
+     * @param name The variable token to resolve.
      */
-    private void resolveLocalVariable(Token name, Expression expression) {
+    private void resolveLocalVariable(Token name) {
         // Search for the name starting from the innermost scope.
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).contains(name.lexeme)) {
@@ -95,13 +99,37 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
 
                 // Add the result to the interpreter so that it can directly
                 // look up the environment in which the variable exists.
-                interpreter.resolve(expression, depth);
+                interpreter.resolve(name, depth);
                 return;
             }
         }
 
         // If this is reached, the variable is assumed to be global.
         // (The interpreter will throw a runtime error if it is not.)
+    }
+
+    /**
+     * Resolve a function.
+     *
+     * @param function The function to resolve.
+     */
+    private void resolveFunction(Statement.Define function) {
+        // Declare the parameters in the function's local scope.
+        createScope();
+        declare(function.parameters);
+        resolveBlock(function.body.statements);
+        discardScope();
+    }
+
+    /**
+     * Resolve a block.
+     *
+     * @param statements The statements to resolve.
+     */
+    private void resolveBlock(List<Statement> statements) {
+        for (Statement statement : statements) {
+            resolve(statement);
+        }
     }
 
     /**
@@ -121,7 +149,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     /**
      * Declare a name in the innermost scope.
      *
-     * @param name The token to be declared.
+     * @param name The name to be declared.
      */
     private void declare(Token name) {
         if (scopes.isEmpty()) {
@@ -129,6 +157,17 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
         }
 
         scopes.peek().add(name.lexeme);
+    }
+
+    /**
+     * Declare names in the innermost scope.
+     *
+     * @param names The names to be declared.
+     */
+    private void declare(List<Token> names) {
+        for (Token name : names) {
+            declare(name);
+        }
     }
 
     /**
