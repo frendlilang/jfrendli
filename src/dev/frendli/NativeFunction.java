@@ -24,7 +24,7 @@ public abstract class NativeFunction implements FrendliCallable {
 
         @Override
         public String toString() {
-            return "<native function: time>";
+            return "<built-in definition: time>";
         }
     }
 
@@ -46,7 +46,7 @@ public abstract class NativeFunction implements FrendliCallable {
 
         @Override
         public String toString() {
-            return "<native function: display>";
+            return "<built-in definition: display>";
         }
 
         /**
