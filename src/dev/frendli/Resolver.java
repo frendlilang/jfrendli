@@ -16,9 +16,10 @@ import java.util.Stack;
  * any statements.
  */
 public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
-    private final ErrorReporter reporter;
-    private final Interpreter interpreter;
-    private final Stack<Set<String>> scopes = new Stack<>();   // Stack of local block scopes containing the variable names
+    private final ErrorReporter reporter;                       // Error reporter for reporting compile time errors
+    private final Interpreter interpreter;                      // The interpreter
+    private final Stack<Set<String>> scopes = new Stack<>();    // Stack of local block scopes containing the variable names
+    private ContextType currentContext = ContextType.NONE;      // The current context in which something is being resolved (e.g. a function or method)
 
     public Resolver(Interpreter interpreter, ErrorReporter reporter) {
         this.interpreter = interpreter;
@@ -65,7 +66,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitDefineStatement(Statement.Define statement) {
         declare(statement.name);
-        resolveFunction(statement);
+        resolveFunction(statement, ContextType.FUNCTION);
 
         return null;
     }
@@ -106,11 +107,19 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
 
     @Override
     public Void visitReturnStatement(Statement.Return statement) {
+        if (currentContext != ContextType.FUNCTION) {
+            error(statement.closest, "You can only return from within a definition.");
+        }
+
         return null;
     }
 
     @Override
     public Void visitReturnWithStatement(Statement.ReturnWith statement) {
+        if (currentContext != ContextType.FUNCTION) {
+            error(statement.closest, "You can only return from within a definition.");
+        }
+
         resolve(statement.value);
 
         return null;
@@ -214,13 +223,23 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
      * Resolve a function.
      *
      * @param function The function to resolve.
+     * @param context The context (function or method).
      */
-    private void resolveFunction(Statement.Define function) {
+    private void resolveFunction(Statement.Define function, ContextType context) {
+        // Before resolving the function, set the current context to
+        // the one passed so that the resolver can generate errors
+        // when, for instance, "return" is used outside a function.
+        ContextType enclosingContext = currentContext;
+        currentContext = context;
+
         // Declare the parameters in the function's local scope.
         createScope();
         declare(function.parameters);
         resolve(function.body.statements);
         discardScope();
+
+        // Reset the context.
+        currentContext = enclosingContext;
 
         // Note:
         // Don't call resolve(function.body) because that will in turn call
@@ -244,6 +263,15 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     /**
+     * Get the innermost scope.
+     *
+     * @return The innermost scope.
+     */
+    private Set<String> getInnermostScope() {
+        return scopes.peek();
+    }
+
+    /**
      * Declare a name in the innermost scope.
      *
      * @param name The name to be declared.
@@ -253,7 +281,12 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
             return;
         }
 
-        scopes.peek().add(name.lexeme);
+        Set<String> scope = getInnermostScope();
+        if (scope.contains(name.lexeme)) {
+            error(name, "'" + name.lexeme + "' has already been created. If you meant to change it, use 'change'.");
+        }
+
+        scope.add(name.lexeme);
     }
 
     /**

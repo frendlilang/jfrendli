@@ -65,7 +65,7 @@ public class Environment {
         // Redefining a variable in the same scope is not allowed
         // (e.g. two "create" statements with the same variable name)
         if (values.containsKey(name.lexeme)) {
-            throw new RuntimeError(name, "'" + name.lexeme + "' has already been created.");
+            throw new RuntimeError(name, "'" + name.lexeme + "' has already been created. If you meant to change it, use 'change'.");
         }
 
         values.put(name.lexeme, value);
