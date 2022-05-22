@@ -46,7 +46,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitChangeStatement(Statement.Change statement) {
         resolve(statement.assignment);
-        resolveLocalVariable(statement.name);
+        resolve(statement.name);
 
         return null;
     }
@@ -106,8 +106,51 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     @Override
+    public Void visitBinaryExpression(Expression.Binary expression) {
+        resolve(expression.left);
+        resolve(expression.right);
+
+        return null;
+    }
+
+    @Override
+    public Void visitCallExpression(Expression.Call expression) {
+        resolve(expression.callee);
+        resolve(expression.arguments);
+
+        return null;
+    }
+
+    @Override
+    public Void visitGroupingExpression(Expression.Grouping expression) {
+        resolve(expression.expression);
+
+        return null;
+    }
+
+    @Override
+    public Void visitLiteralExpression(Expression.Literal expression) {
+        return null;
+    }
+
+    @Override
+    public Void visitLogicalExpression(Expression.Logical expression) {
+        resolve(expression.left);
+        resolve(expression.right);
+
+        return null;
+    }
+
+    @Override
+    public Void visitUnaryExpression(Expression.Unary expression) {
+        resolve(expression.right);
+
+        return null;
+    }
+
+    @Override
     public Void visitVariableExpression(Expression.Variable expression) {
-        resolveLocalVariable(expression.name);
+        resolve(expression.name);
 
         return null;
     }
@@ -131,11 +174,22 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     /**
+     * Resolve a list of expressions.
+     *
+     * @param expressions The expressions to resolve.
+     */
+    private void resolve(List<Expression> expressions) {
+        for (Expression expression : expressions) {
+            resolve(expression);
+        }
+    }
+
+    /**
      * Resolve a local variable.
      *
-     * @param name The variable token to resolve.
+     * @param name The name to resolve.
      */
-    private void resolveLocalVariable(Token name) {
+    private void resolve(Token name) {
         // Search for the name starting from the innermost scope.
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).contains(name.lexeme)) {
