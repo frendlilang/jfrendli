@@ -60,6 +60,52 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     @Override
+    public Void visitExpressionStatement(Statement.ExpressionStatement statement) {
+        resolve(statement.expression);
+
+        return null;
+    }
+
+    @Override
+    public Void visitIfStatement(Statement.If statement) {
+        resolve(statement.condition);
+        resolve(statement.thenBranch);
+        if (statement.otherwiseBranch != null) {
+            resolve(statement.otherwiseBranch);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void visitRepeatTimesStatement(Statement.RepeatTimes statement) {
+        resolve(statement.times);
+        resolve(statement.body);
+
+        return null;
+    }
+
+    @Override
+    public Void visitRepeatWhileStatement(Statement.RepeatWhile statement) {
+        resolve(statement.condition);
+        resolve(statement.body);
+
+        return null;
+    }
+
+    @Override
+    public Void visitReturnStatement(Statement.Return statement) {
+        return null;
+    }
+
+    @Override
+    public Void visitReturnWithStatement(Statement.ReturnWith statement) {
+        resolve(statement.value);
+
+        return null;
+    }
+
+    @Override
     public Void visitVariableExpression(Expression.Variable expression) {
         resolveLocalVariable(expression.name);
 
@@ -119,6 +165,12 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
         declare(function.parameters);
         resolveBlock(function.body.statements);
         discardScope();
+
+        // Note:
+        // Don't call resolve(function.body) because that will in turn call
+        // the visitBlockStatement which creates an additional inner scope.
+        // resolveFunction and resolveBlock are separated in order to declare
+        // the parameters of the function.
     }
 
     /**
