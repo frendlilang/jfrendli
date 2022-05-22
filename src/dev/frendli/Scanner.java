@@ -168,7 +168,7 @@ public class Scanner {
                     consumeIdentifier();
                 }
                 else {
-                    reporter.syntaxError(line, "Found unexpected character " + character);
+                    reporter.compileTimeError(line, "Found an unexpected character " + character);
                 }
                 break;
         }
@@ -195,23 +195,23 @@ public class Scanner {
 
         boolean isMixingTabsAndSpaces = (tabsInIndent > 0 && spacesInIndent > 0);
         if (isMixingTabsAndSpaces) {
-            reporter.syntaxError(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
+            reporter.compileTimeError(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
         }
 
         // Check if the line is as equally indented as the previous line.
         if (columnsInIndent == indentStack[indentLevel]) {
             if (altColumnsInIndent != altIndentStack[indentLevel]) {
-                reporter.syntaxError(line, "There is a problem with the indentation.");
+                reporter.compileTimeError(line, "There is a problem with the indentation.");
             }
         }
         // Check if the line is more indented than the previous line.
         else if (columnsInIndent > indentStack[indentLevel]) {
             // Check if the next level of indentation exceeds allowed limit.
             if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
-                reporter.syntaxError(line, "The max indentation has been reached. You cannot indent further.");
+                reporter.compileTimeError(line, "The max indentation has been reached. You cannot indent further.");
             }
             if (altColumnsInIndent <= altIndentStack[indentLevel]) {
-                reporter.syntaxError(line, "There is a problem with the indentation.");
+                reporter.compileTimeError(line, "There is a problem with the indentation.");
             }
 
             // If the current line is more indented than the previous one,
@@ -233,7 +233,7 @@ public class Scanner {
             }
             // Check if the line is still not consistently indented.
             if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
-                reporter.syntaxError(line, "There are inconsistencies in the level of indentation used.");
+                reporter.compileTimeError(line, "There are inconsistencies in the level of indentation used.");
             }
         }
 
@@ -325,13 +325,13 @@ public class Scanner {
     private void consumeText() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
-                reporter.syntaxError(line++, "Found a newline in text. Text cannot contain newline characters.");
+                reporter.compileTimeError(line++, "Found a newline in the text. Texts cannot contain newline characters.");
             }
             advance();
         }
 
         if (isAtEnd()) {
-            reporter.syntaxError(line, "Text is not terminated. Text must be terminated by a \"");
+            reporter.compileTimeError(line, "The text is not terminated. Texts must be terminated by a \"");
             return;
         }
 

@@ -554,7 +554,7 @@ public class Parser {
      * @return The ParseError.
      */
     private ParseError error(Token token, String message) {
-        reporter.syntaxError(token, message);
+        reporter.compileTimeError(token, message);
 
         // Let the caller decide what to do with the error,
         // as synchronization may not be needed for all errors.

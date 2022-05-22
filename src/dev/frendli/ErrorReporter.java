@@ -5,23 +5,23 @@ package dev.frendli;
  * error reporters must extend the ErrorReporter base class.
  */
 public abstract class ErrorReporter {
-    private boolean syntaxErrorReported = false;
+    private boolean compileTimeErrorReported = false;
     private boolean runtimeErrorReported = false;
 
-    public boolean hadSyntaxError() {
-        return syntaxErrorReported;
+    public boolean hadCompileTimeError() {
+        return compileTimeErrorReported;
     }
 
     public boolean hadRuntimeError() {
         return runtimeErrorReported;
     }
 
-    public void syntaxError(int line, String message) {
+    public void compileTimeError(int line, String message) {
         report(line, "", message);
-        syntaxErrorReported = true;
+        compileTimeErrorReported = true;
     }
 
-    public void syntaxError(Token token, String message) {
+    public void compileTimeError(Token token, String message) {
         String location = "at '" + token.lexeme + "'";
         if (token.type == TokenType.EOF) {
             location = "at the end of the file";
@@ -33,7 +33,7 @@ public abstract class ErrorReporter {
             location = "at the indentation";
         }
         report(token.line, location, message);
-        syntaxErrorReported = true;
+        compileTimeErrorReported = true;
     }
 
     public void runtimeError(RuntimeError error) {
@@ -41,18 +41,19 @@ public abstract class ErrorReporter {
         runtimeErrorReported = true;
     }
 
-    public void resetError() {
-        syntaxErrorReported = false;
+    public void reset() {
+        compileTimeErrorReported = false;
+        runtimeErrorReported = false;
     }
 
-    public abstract void report(int line, String location, String message);
+    protected abstract void report(int line, String location, String message);
 
     /**
      * The console error reporter - reports errors to the console.
      */
     public static class Console extends ErrorReporter {
         @Override
-        public void report(int line, String location, String message) {
+        protected void report(int line, String location, String message) {
             System.err.println("Error " + location + "\n" +
                     "   Line " + line + " |\t" + message
             );

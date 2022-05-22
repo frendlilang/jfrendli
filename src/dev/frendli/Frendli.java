@@ -36,7 +36,7 @@ public class Frendli {
         String source = new String(bytes, Charset.defaultCharset());
         run(source.replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
-        if (reporter.hadSyntaxError()) {
+        if (reporter.hadCompileTimeError()) {
             System.exit(65);    // UNIX sysexits.h
         }
         if (reporter.hadRuntimeError()) {
@@ -61,7 +61,7 @@ public class Frendli {
             run(line);
 
             // Do not kill user's process in interactive mode.
-            reporter.resetError();
+            reporter.reset();
         }
     }
 
@@ -72,7 +72,7 @@ public class Frendli {
         List<Statement> statements = parser.parse();
 
         // If any syntax errors were found, do not continue interpreting.
-        if (reporter.hadSyntaxError()) {
+        if (reporter.hadCompileTimeError()) {
             return;
         }
 
