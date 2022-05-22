@@ -25,10 +25,21 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
         this.reporter = reporter;
     }
 
+    /**
+     * Resolve a list of statements.
+     *
+     * @param statements The statements to resolve.
+     */
+    public void resolve(List<Statement> statements) {
+        for (Statement statement : statements) {
+            resolve(statement);
+        }
+    }
+
     @Override
     public Void visitBlockStatement(Statement.Block statement) {
         createScope();
-        resolveBlock(statement.statements);
+        resolve(statement.statements);
         discardScope();
 
         return null;
@@ -116,7 +127,9 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitCallExpression(Expression.Call expression) {
         resolve(expression.callee);
-        resolve(expression.arguments);
+        for (Expression argument : expression.arguments) {
+            resolve(argument);
+        }
 
         return null;
     }
@@ -174,17 +187,6 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     /**
-     * Resolve a list of expressions.
-     *
-     * @param expressions The expressions to resolve.
-     */
-    private void resolve(List<Expression> expressions) {
-        for (Expression expression : expressions) {
-            resolve(expression);
-        }
-    }
-
-    /**
      * Resolve a local variable.
      *
      * @param name The name to resolve.
@@ -193,13 +195,13 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
         // Search for the name starting from the innermost scope.
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).contains(name.lexeme)) {
-                // Calculate the number of hops from the innermost scope
+                // Calculate the distance from the innermost scope
                 // to the closest scope where the name was defined.
-                int depth = scopes.size() - 1 - i;
+                int distance = scopes.size() - 1 - i;
 
                 // Add the result to the interpreter so that it can directly
                 // look up the environment in which the variable exists.
-                interpreter.resolve(name, depth);
+                interpreter.resolve(name, distance);
                 return;
             }
         }
@@ -217,25 +219,14 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
         // Declare the parameters in the function's local scope.
         createScope();
         declare(function.parameters);
-        resolveBlock(function.body.statements);
+        resolve(function.body.statements);
         discardScope();
 
         // Note:
         // Don't call resolve(function.body) because that will in turn call
-        // the visitBlockStatement which creates an additional inner scope.
-        // resolveFunction and resolveBlock are separated in order to declare
-        // the parameters of the function.
-    }
-
-    /**
-     * Resolve a block.
-     *
-     * @param statements The statements to resolve.
-     */
-    private void resolveBlock(List<Statement> statements) {
-        for (Statement statement : statements) {
-            resolve(statement);
-        }
+        // the visitBlockStatement() which creates an additional inner scope.
+        // resolveFunction() is separated in order to declare the parameters
+        // in its local scope.
     }
 
     /**

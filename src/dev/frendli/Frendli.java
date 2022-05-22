@@ -71,7 +71,15 @@ public class Frendli {
         Parser parser = new Parser(tokens, reporter);
         List<Statement> statements = parser.parse();
 
-        // If any syntax errors were found, do not continue interpreting.
+        // If any syntax errors were found, do not continue resolving.
+        if (reporter.hadCompileTimeError()) {
+            return;
+        }
+
+        Resolver resolver = new Resolver(interpreter, reporter);
+        resolver.resolve(statements);
+
+        // If any resolution errors were found, do not continue interpreting.
         if (reporter.hadCompileTimeError()) {
             return;
         }

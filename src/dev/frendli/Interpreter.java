@@ -1,7 +1,9 @@
 package dev.frendli;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The interpreter - recursively traverses the syntax tree produced
@@ -9,9 +11,10 @@ import java.util.List;
  * values. The current node always evaluates its children first (post-order traversal).
  */
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-    private final ErrorReporter reporter;
-    private final Environment globalEnvironment = new Environment();
-    private Environment currentEnvironment = globalEnvironment;
+    private final ErrorReporter reporter;                               // Error reporter for reporting runtime errors
+    private final Environment globalEnvironment = new Environment();    // The global environment
+    private Environment currentEnvironment = globalEnvironment;         // The current environment which changes during execution as blocks are entered and exited
+    private final Map<Token, Integer> resolved = new HashMap<>();       // Local variables (key) resolved by the resolver (value = distance to corresponding environment)
 
     public Interpreter(ErrorReporter reporter) {
         globalEnvironment.defineNative("time", new NativeFunction.Time());
@@ -53,7 +56,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitChangeStatement(Statement.Change statement) {
         Object value = evaluate(statement.assignment);
-        currentEnvironment.assign(statement.name, value);
+        assignVariable(statement.name, value);
 
         return null;
     }
@@ -192,6 +195,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Object visitGroupingExpression(Expression.Grouping expression) {
+        // The Grouping expression object references another expression
+        // (the one in between the parentheses) which needs to be evaluated.
+        return evaluate(expression.expression);
+    }
+
+    @Override
     public Object visitLiteralExpression(Expression.Literal expression) {
         return expression.value;
     }
@@ -216,13 +226,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Object visitGroupingExpression(Expression.Grouping expression) {
-        // The Grouping expression object references another expression
-        // (the one in between the parentheses) which needs to be evaluated.
-        return evaluate(expression.expression);
-    }
-
-    @Override
     public Object visitUnaryExpression(Expression.Unary expression) {
         Object right = evaluate(expression.right);
         Token operator = expression.operator;
@@ -242,7 +245,40 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     
     @Override
     public Object visitVariableExpression(Expression.Variable expression) {
-        return currentEnvironment.get(expression.name);
+        return getVariable(expression.name);
+    }
+
+    /**
+     * Get the value bound to a variable.
+     *
+     * @param name The variable name.
+     * @return The value.
+     */
+    private Object getVariable(Token name) {
+        Integer distance = resolved.get(name);
+        boolean isLocal = distance != null;
+        if (isLocal) {
+            return currentEnvironment.getAt(distance, name);
+        }
+
+        return globalEnvironment.get(name);
+    }
+
+    /**
+     * Assign a value to a variable.
+     *
+     * @param name The variable name.
+     * @param value The value.
+     */
+    private void assignVariable(Token name, Object value) {
+        Integer distance = resolved.get(name);
+        boolean isLocal = distance != null;
+        if (isLocal) {
+            currentEnvironment.assignAt(distance, name, value);
+        }
+        else {
+            globalEnvironment.assign(name, value);
+        }
     }
 
     /**
@@ -288,6 +324,16 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             // "finally" clause in case an exception is thrown.)
             this.currentEnvironment = enclosingEnvironment;
         }
+    }
+
+    /**
+     * Add a local variable to the resolved data.
+     *
+     * @param name The name to resolve.
+     * @param distance The distance from the innermost scope to where the variable is defined.
+     */
+    public void resolve(Token name, int distance) {
+        resolved.put(name, distance);
     }
 
     /**
