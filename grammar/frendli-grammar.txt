@@ -1,4 +1,36 @@
 
+-------------------
+GRAMMAR TERMINOLOGY
+-------------------
+
+terminal                a literal to be matched and consumed
+nonterminal             a call to the function rule
+
+
+----------------
+GRAMMAR NOTATION
+----------------
+
+<rule name>:<rule>      rule structure
+<quoted string>         exact terminal
+<uppercase word>        varying terminal
+<lowercase word>        nonterminal
+
+:                       start of rule (definer)
+;                       end of rule (terminator)
+*                       match zero or more of its left
++                       match one or more of its left
+?                       match zero or one of its left (optional)
+|                       match its left or right
+(                       start of group
+)                       end of group
+"                       start or end (encloses) of literal
+<                       start of comment
+>                       end of comment
+\                       escape the meaning of its right character
+...                     any value from its left to its right
+
+
 ----------
 START RULE
 ----------
@@ -146,3 +178,6 @@ INDENT:
 
 DEDENT:
     <a decrease in INDENT> ;
+
+EOF:
+    <end of file> ;

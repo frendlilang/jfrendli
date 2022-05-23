@@ -6,7 +6,7 @@ import java.util.List;
 // ========
 // GRAMMAR: (incrementally added to and modified during development when approaching the final grammar version)
 // ========
-// file:                statement* END_OF_FILE ;
+// file:                statement* EOF ;
 // statement:           functionDecl
 //                      | variableDecl
 //                      | changeStmt
