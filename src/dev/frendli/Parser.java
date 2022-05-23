@@ -6,19 +6,18 @@ import java.util.List;
 // ========
 // GRAMMAR: (incrementally added to and modified during development when approaching the final grammar version)
 // ========
-// file:                declaration* EOF ;
-// declarationStmt:     functionDecl
+// file:                statement* END_OF_FILE ;
+// statement:           functionDecl
 //                      | variableDecl
-//                      | statement ;
-// variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
-// functionDecl:        "define" IDENTIFIER "(" parameters? ")" block ;
-// statement:           changeStmt
+//                      | changeStmt
 //                      | expressionStmt
 //                      | ifStmt
 //                      | repeatTimesStmt
 //                      | repeatWhileStmt
 //                      | returnStmt
 //                      | returnWithStmt ;
+// functionDecl:        "define" IDENTIFIER "(" parameters? ")" block ;
+// variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
 // changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
 // expressionStmt:      expression NEWLINE ;
 // ifStmt:              "if" expression block ( "otherwise" block )? ;
@@ -26,12 +25,11 @@ import java.util.List;
 // repeatWhileStmt:     "repeat" "while" expression block ;
 // returnStmt:          "return" NEWLINE ;
 // returnWithStmt:      "return" "with" expression NEWLINE ;
-// block:               NEWLINE INDENT declarationStmt+ DEDENT ;
+// block:               NEWLINE INDENT statement+ DEDENT ;
 // expression:          logicOr ;
 // logicOr:             logicAnd ( "or" logicAnd )* ;
-// logicAnd:            equality ( "and" equality )* ;
-// equality:            comparison ( ( "equals" | "unequals" ) comparison )* ;
-// comparison:          term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
+// logicAnd:            comparison ( "and" comparison )* ;
+// comparison:          term ( ( "<" | "<=" | ">" | ">=" | "equals" | "unequals" ) term )* ;
 // term:                factor ( ( "+" | "-" ) factor )* ;
 // factor:              unary ( ( "*" | "/" ) unary )* ;
 // unary:               ( "not" | "-" ) unary | call ;
@@ -70,25 +68,43 @@ public class Parser {
     public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(declaration());
+            statements.add(statement());
         }
 
         return statements;
     }
 
-    // declarationStmt: functionDecl
-    //                  | variableDecl
-    //                  | statement ;
-    private Statement declaration() {
+    // statement: functionDecl
+    //            | variableDecl
+    //            | changeStmt
+    //            | expressionStmt
+    //            | ifStmt
+    //            | repeatTimesStmt
+    //            | repeatWhileStmt
+    //            | returnStmt
+    //            | returnWithStmt ;
+    private Statement statement() {
         try {
-            if (match(TokenType.CREATE)) {
-                return variableDeclaration();
-            }
             if (match(TokenType.DEFINE)) {
                 return functionDeclaration();
             }
+            if (match(TokenType.CREATE)) {
+                return variableDeclaration();
+            }
+            if (match(TokenType.CHANGE)) {
+                return changeStatement();
+            }
+            if (match(TokenType.IF)) {
+                return ifStatement();
+            }
+            if (match(TokenType.REPEAT)) {
+                return match(TokenType.WHILE) ? repeatWhileStatement() : repeatTimesStatement();
+            }
+            if (match(TokenType.RETURN)) {
+                return match(TokenType.WITH) ? returnWithStatement() : returnStatement();
+            }
 
-            return statement();
+            return expressionStatement();
         }
         // Catch parse errors here as the point being synchronized
         // to in the Java call stack when needed. This method is
@@ -143,30 +159,6 @@ public class Parser {
         return new Statement.Create(name, initializer);
     }
 
-    // statement: changeStmt
-    //            | expressionStmt
-    //            | ifStmt
-    //            | repeatTimesStmt
-    //            | repeatWhileStmt
-    //            | returnStmt
-    //            | returnWithStmt ;
-    private Statement statement() {
-        if (match(TokenType.CHANGE)) {
-            return changeStatement();
-        }
-        if (match(TokenType.IF)) {
-            return ifStatement();
-        }
-        if (match(TokenType.REPEAT)) {
-            return match(TokenType.WHILE) ? repeatWhileStatement() : repeatTimesStatement();
-        }
-        if (match(TokenType.RETURN)) {
-            return match(TokenType.WITH) ? returnWithStatement() : returnStatement();
-        }
-
-        return expressionStatement();
-    }
-
     // changeStmt: "change" IDENTIFIER "=" expression NEWLINE ;
     private Statement changeStatement() {
         // The identifier can come from the result of an expression that can be
@@ -202,7 +194,7 @@ public class Parser {
         // as a "create" or "change" statement; instead, it will end up here.
         if (expression instanceof Expression.Variable && check(TokenType.EQUALS_SIGN)) {
             Token name = ((Expression.Variable)expression).name;
-            error(name, "If you meant to create or change " + "'" + name.lexeme + "', use the 'create' or 'change' keywords.");
+            error(name, "If you meant to create or change " + "'" + name.lexeme + "', use the 'create' or 'change' keyword.");
         }
 
         consumeNewline();
@@ -259,14 +251,14 @@ public class Parser {
         return new Statement.ReturnWith(closest, value);
     }
 
-    // block: NEWLINE INDENT declarationStmt+ DEDENT ;
+    // block: NEWLINE INDENT statement+ DEDENT ;
     private Statement block() {
         consumeNewline();
         consume(TokenType.INDENT, "Blocks must be indented.");
 
         List<Statement> statements = new ArrayList<>();
         while (!check(TokenType.DEDENT) && !isAtEnd()) {
-            statements.add(declaration());
+            statements.add(statement());
         }
 
         Token dedent = consume(TokenType.DEDENT, "Blocks must be dedented at the end.");
@@ -298,38 +290,26 @@ public class Parser {
         return left;
     }
 
-    // logicAnd: equality ( "and" equality )* ;
+    // logicAnd: comparison ( "and" comparison )* ;
     private Expression and() {
-        Expression left = equality();
+        Expression left = comparison();
 
         while (match(TokenType.AND)) {
             Token operator = getJustConsumed();
-            Expression right = equality();
+            Expression right = comparison();
             left = new Expression.Logical(left, operator, right);
         }
 
         return left;
     }
 
-    // equality: comparison ( ( "equals" | "unequals" ) comparison )* ;
-    private Expression equality() {
-        Expression left = comparison();
-
-        while (match(TokenType.EQUALS_WORD, TokenType.UNEQUALS)) {
-            Token operator = getJustConsumed();
-            Expression right = comparison();
-            left = new Expression.Binary(left, operator, right);
-        }
-
-        return left;
-    }
-
-    // comparison: term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
+    // comparison: term ( ( "<" | "<=" | ">" | ">=" | "equals" | "unequals" ) term )* ;
     private Expression comparison() {
         Expression left = term();
 
         while (match(TokenType.LESS_THAN, TokenType.LESS_THAN_EQUALS,
-                TokenType.GREATER_THAN, TokenType.GREATER_THAN_EQUALS)) {
+                TokenType.GREATER_THAN, TokenType.GREATER_THAN_EQUALS,
+                TokenType.EQUALS_WORD, TokenType.UNEQUALS)) {
             Token operator = getJustConsumed();
             Expression right = term();
             left = new Expression.Binary(left, operator, right);

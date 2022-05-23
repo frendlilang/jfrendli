@@ -4,7 +4,7 @@ START RULE
 ----------
 
 file:
-	statement* EOF ;
+	statement* END_OF_FILE ;
 
 
 ---------------
@@ -12,8 +12,11 @@ STATEMENT RULES
 ---------------
 
 statement:
-	changeStmt
-	| declarationStmt
+	classDecl
+	| classFieldDecl
+	| functionDecl
+	| variableDecl
+	| changeStmt
 	| expressionStmt
 	| ifStmt
 	| repeatTimesStmt
@@ -21,13 +24,11 @@ statement:
 	| returnStmt
 	| returnWithStmt ;
 
-declarationStmt:
-	classDecl
-	| functionDecl
-	| variableDecl ;
-
 classDecl:
 	"describe" IDENTIFIER ( "inherit" IDENTIFIER )? classBlock ;
+
+classFieldDecl:
+	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
 
 functionDecl:
 	"define" IDENTIFIER "(" parameters? ")" block ;
@@ -37,9 +38,6 @@ variableDecl:
 
 changeStmt:
 	"change" ( call "." )? IDENTIFIER "=" expression NEWLINE ;
-
-displayStmt:
-	"display" expression NEWLINE ; (TEMPORARY)
 
 expressionStmt:
 	expression NEWLINE ;
@@ -64,9 +62,6 @@ block:
 
 classBlock:
 	NEWLINE INDENT classFieldDecl* functionDecl+ DEDENT ;
-
-classFieldDecl:
-	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
 
 
 ------------
@@ -131,7 +126,7 @@ NUMBER:
 	DIGIT+ ( "." DIGIT+ )? ;
 
 TEXT:
-	"\"" <any ASCII character except "\" or newline>* "\"" ;
+	"\"" <any ASCII character except "\"" or NEWLINE>* "\"" ;
 
 ALPHA:
 	"a" ... "z"
@@ -140,3 +135,14 @@ ALPHA:
 
 DIGIT:
 	"0" ... "9" ;
+
+NEWLINE:
+    "\\n"
+    | "\\r\\n"
+    | "\\r" ;
+
+INDENT:
+    ( " " | "\\t" )+ ;
+
+DEDENT:
+    <a decrease in INDENT> ;
