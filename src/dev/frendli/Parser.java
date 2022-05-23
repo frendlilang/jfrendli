@@ -4,43 +4,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 // ========
-// GRAMMAR: (incrementally added to and modified during development when approaching the final grammar version)
+// GRAMMAR: (current grammar implemented) (final version: jfrendli/grammar/frendli-grammar.txt)
 // ========
-// file:                statement* EOF ;
-// statement:           functionDecl
-//                      | variableDecl
-//                      | changeStmt
-//                      | expressionStmt
-//                      | ifStmt
-//                      | repeatTimesStmt
-//                      | repeatWhileStmt
-//                      | returnStmt
-//                      | returnWithStmt ;
-// functionDecl:        "define" IDENTIFIER "(" parameters? ")" block ;
-// variableDecl:        "create" IDENTIFIER "=" expression NEWLINE ;
-// changeStmt:          "change" IDENTIFIER "=" expression NEWLINE ;
-// expressionStmt:      expression NEWLINE ;
-// ifStmt:              "if" expression block ( "otherwise" block )? ;
-// repeatTimesStmt:     "repeat" expression "times" block ;
-// repeatWhileStmt:     "repeat" "while" expression block ;
-// returnStmt:          "return" NEWLINE ;
-// returnWithStmt:      "return" "with" expression NEWLINE ;
-// block:               NEWLINE INDENT statement+ DEDENT ;
-// expression:          logicOr ;
-// logicOr:             logicAnd ( "or" logicAnd )* ;
-// logicAnd:            comparison ( "and" comparison )* ;
-// comparison:          term ( ( "<" | "<=" | ">" | ">=" | "equals" | "unequals" ) term )* ;
-// term:                factor ( ( "+" | "-" ) factor )* ;
-// factor:              unary ( ( "*" | "/" ) unary )* ;
-// unary:               ( "not" | "-" ) unary | call ;
-// call:                primary ( "(" arguments? ")" )* ;
-// primary:             IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
-
-// ========
-// HELPERS:
-// ========
-// parameters:          "accept" IDENTIFIER ( "," IDENTIFIER )* ;
-// arguments:           "send" expression ( "," expression )* ;
+// file:                    statement* EOF ;
+// statement:               functionDeclaration
+//                          | variableDeclaration
+//                          | changeStatement
+//                          | expressionStatement
+//                          | ifStatement
+//                          | repeatTimesStatement
+//                          | repeatWhileStatement
+//                          | returnStatement
+//                          | returnWithStatement ;
+// functionDeclaration:     "define" IDENTIFIER "(" parameters? ")" block ;
+// parameters:              "accept" IDENTIFIER ( "," IDENTIFIER )* ;
+// variableDeclaration:     "create" IDENTIFIER "=" expression NEWLINE ;
+// changeStatement:         "change" IDENTIFIER "=" expression NEWLINE ;
+// expressionStatement:     expression NEWLINE ;
+// ifStatement:             "if" expression block ( "otherwise" block )? ;
+// repeatTimesStatement:    "repeat" expression "times" block ;
+// repeatWhileStatement:    "repeat" "while" expression block ;
+// returnStatement:         "return" NEWLINE ;
+// returnWithStatement:     "return" "with" expression NEWLINE ;
+// block:                   NEWLINE INDENT statement+ DEDENT ;
+// expression:              logicOr ;
+// logicOr:                 logicAnd ( "or" logicAnd )* ;
+// logicAnd:                comparison ( "and" comparison )* ;
+// comparison:              term ( ( "<" | "<=" | ">" | ">=" | "equals" | "unequals" ) term )* ;
+// term:                    factor ( ( "+" | "-" ) factor )* ;
+// factor:                  unary ( ( "*" | "/" ) unary )* ;
+// unary:                   ( "not" | "-" ) unary | call ;
+// call:                    primary ( "(" arguments? ")" )* ;
+// arguments:               "send" expression ( "," expression )* ;
+// primary:                 IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
 
 
 /**
@@ -74,15 +70,15 @@ public class Parser {
         return statements;
     }
 
-    // statement: functionDecl
-    //            | variableDecl
-    //            | changeStmt
-    //            | expressionStmt
-    //            | ifStmt
-    //            | repeatTimesStmt
-    //            | repeatWhileStmt
-    //            | returnStmt
-    //            | returnWithStmt ;
+    // statement: functionDeclaration
+    //            | variableDeclaration
+    //            | changeStatement
+    //            | expressionStatement
+    //            | ifStatement
+    //            | repeatTimesStatement
+    //            | repeatWhileStatement
+    //            | returnStatement
+    //            | returnWithStatement ;
     private Statement statement() {
         try {
             if (match(TokenType.DEFINE)) {
@@ -116,7 +112,7 @@ public class Parser {
         }
     }
 
-    // functionDecl: "define" IDENTIFIER "(" parameters? ")" block ;
+    // functionDeclaration: "define" IDENTIFIER "(" parameters? ")" block ;
     private Statement functionDeclaration() {
         Token name = consume(TokenType.IDENTIFIER, "You must provide a name for what you are defining.");
         consume(TokenType.OPEN_PAREN, "An opening parenthesis '(' is missing.");
@@ -149,7 +145,7 @@ public class Parser {
         return parameterList;
     }
 
-    // variableDecl: "create" IDENTIFIER "=" expression NEWLINE ;
+    // variableDeclaration: "create" IDENTIFIER "=" expression NEWLINE ;
     private Statement variableDeclaration() {
         Token name = consume(TokenType.IDENTIFIER, "A name for what is created must be provided.");
         consume(TokenType.EQUALS_SIGN, "'" + name.lexeme + "' must be initialized using '='. You may set it to 'empty' if needed.");
@@ -159,7 +155,7 @@ public class Parser {
         return new Statement.Create(name, initializer);
     }
 
-    // changeStmt: "change" IDENTIFIER "=" expression NEWLINE ;
+    // changeStatement: "change" IDENTIFIER "=" expression NEWLINE ;
     private Statement changeStatement() {
         // The identifier can come from the result of an expression that can be
         // of any size. Thus, do not consume IDENTIFIER directly in the 1st step.
@@ -185,7 +181,7 @@ public class Parser {
         return new Statement.Change(name, value);
     }
 
-    // expressionStmt: expression NEWLINE ;
+    // expressionStatement: expression NEWLINE ;
     private Statement expressionStatement() {
         Expression expression = expression();
 
@@ -202,7 +198,7 @@ public class Parser {
         return new Statement.ExpressionStatement(expression);
     }
 
-    // ifStmt: "if" expression block ( "otherwise" block )? ;
+    // ifStatement: "if" expression block ( "otherwise" block )? ;
     private Statement ifStatement() {
         Token start = getJustConsumed();
         Expression condition = expression();
@@ -215,7 +211,7 @@ public class Parser {
         return new Statement.If(start, condition, thenBranch, otherwiseBranch);
     }
 
-    // repeatTimesStmt: "repeat" expression "times" block ;
+    // repeatTimesStatement: "repeat" expression "times" block ;
     private Statement repeatTimesStatement() {
         Token start = getJustConsumed();
         Expression times = expression();
@@ -225,7 +221,7 @@ public class Parser {
         return new Statement.RepeatTimes(start, times, body);
     }
 
-    // repeatWhileStmt: "repeat" "while" expression block ;
+    // repeatWhileStatement: "repeat" "while" expression block ;
     private Statement repeatWhileStatement() {
         Token start = getJustConsumed();
         Expression condition = expression();
@@ -234,7 +230,7 @@ public class Parser {
         return new Statement.RepeatWhile(start, condition, body);
     }
 
-    // returnStmt: "return" NEWLINE ;
+    // returnStatement: "return" NEWLINE ;
     private Statement returnStatement() {
         Token closest = getJustConsumed();
         consume(TokenType.NEWLINE, "You must add a new line after 'return'. To return with a value, use 'return with' instead.");
@@ -242,7 +238,7 @@ public class Parser {
         return new Statement.Return(closest);
     }
 
-    // returnWithStmt: "return" "with" expression NEWLINE ;
+    // returnWithStatement: "return" "with" expression NEWLINE ;
     private Statement returnWithStatement() {
         Token closest = getJustConsumed();
         Expression value = expression();

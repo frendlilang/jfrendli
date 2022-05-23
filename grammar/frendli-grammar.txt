@@ -36,7 +36,7 @@ START RULE
 ----------
 
 file:
-	statement* END_OF_FILE ;
+	statement* EOF ;
 
 
 ---------------
@@ -44,56 +44,56 @@ STATEMENT RULES
 ---------------
 
 statement:
-	classDecl
-	| classFieldDecl
-	| functionDecl
-	| variableDecl
-	| changeStmt
-	| expressionStmt
-	| ifStmt
-	| repeatTimesStmt
-	| repeatWhileStmt
-	| returnStmt
-	| returnWithStmt ;
+	classDeclaration
+	| classFieldDeclaration
+	| functionDeclaration
+	| variableDeclaration
+	| changeStatement
+	| expressionStatement
+	| ifStatement
+	| repeatTimesStatement
+	| repeatWhileStatement
+	| returnStatement
+	| returnWithStatement ;
 
-classDecl:
+classDeclaration:
 	"describe" IDENTIFIER ( "inherit" IDENTIFIER )? classBlock ;
 
-classFieldDecl:
+classFieldDeclaration:
 	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
 
-functionDecl:
+functionDeclaration:
 	"define" IDENTIFIER "(" parameters? ")" block ;
 
-variableDecl:
+variableDeclaration:
 	"create" IDENTIFIER "=" expression NEWLINE ;
 
-changeStmt:
+changeStatement:
 	"change" ( call "." )? IDENTIFIER "=" expression NEWLINE ;
 
-expressionStmt:
+expressionStatement:
 	expression NEWLINE ;
 
-ifStmt:
+ifStatement:
 	"if" expression block ( "otherwise" block )? ;
 
-repeatTimesStmt:
+repeatTimesStatement:
 	"repeat" expression "times" block ;
 
-repeatWhileStmt:
+repeatWhileStatement:
 	"repeat" "while" expression block ;
 
-returnStmt:
+returnStatement:
 	"return" NEWLINE ;
 
-returnWithStmt:
+returnWithStatement:
 	"return" "with" expression NEWLINE ;
 
 block:
 	NEWLINE INDENT statement+ DEDENT ;
 
 classBlock:
-	NEWLINE INDENT classFieldDecl* functionDecl+ DEDENT ;
+	NEWLINE INDENT classFieldDeclaration* functionDeclaration+ DEDENT ;
 
 
 ------------
