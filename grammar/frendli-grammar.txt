@@ -1,0 +1,192 @@
+
+-------------------
+GRAMMAR TERMINOLOGY
+-------------------
+
+terminal                a literal to be matched and consumed
+nonterminal             a call to the function rule
+
+
+----------------
+GRAMMAR NOTATION
+----------------
+
+<rule name>:<rule>      rule structure
+<quoted string>         exact terminal
+<uppercase word>        varying terminal
+<lowercase word>        nonterminal
+
+:                       start of rule (definer)
+;                       end of rule (terminator)
+*                       match zero or more of its left
++                       match one or more of its left
+?                       match zero or one of its left (optional)
+|                       match its left or right
+(                       start of group
+)                       end of group
+"                       start or end (encloses) of literal
+<                       start of comment
+>                       end of comment
+\                       escape the meaning of its right character
+...                     any value from its left to its right
+
+
+----------
+START RULE
+----------
+
+file:
+	statement* EOF ;
+
+
+---------------
+STATEMENT RULES
+---------------
+
+statement:
+	classDeclaration
+	| classFieldDeclaration
+	| functionDeclaration
+	| variableDeclaration
+	| changeStatement
+	| expressionStatement
+	| ifStatement
+	| repeatTimesStatement
+	| repeatWhileStatement
+	| returnStatement
+	| returnWithStatement ;
+
+classDeclaration:
+	"describe" IDENTIFIER ( "inherit" IDENTIFIER )? classBlock ;
+
+classFieldDeclaration:
+	"has" IDENTIFIER ( "=" expression )? NEWLINE ;
+
+functionDeclaration:
+	"define" IDENTIFIER "(" parameters? ")" block ;
+
+variableDeclaration:
+	"create" IDENTIFIER "=" expression NEWLINE ;
+
+changeStatement:
+	"change" ( call "." )? IDENTIFIER "=" expression NEWLINE ;
+
+expressionStatement:
+	expression NEWLINE ;
+
+ifStatement:
+	"if" expression block ( "otherwise" block )? ;
+
+repeatTimesStatement:
+	"repeat" expression "times" block ;
+
+repeatWhileStatement:
+	"repeat" "while" expression block ;
+
+returnStatement:
+	"return" NEWLINE ;
+
+returnWithStatement:
+	"return" "with" expression NEWLINE ;
+
+block:
+	NEWLINE INDENT statement+ DEDENT ;
+
+classBlock:
+	NEWLINE INDENT classFieldDeclaration* functionDeclaration+ DEDENT ;
+
+
+------------
+HELPER RULES
+------------
+
+parameters:
+	"accept" IDENTIFIER ( "," IDENTIFIER )* ;
+
+arguments:
+	"send" expression ( "," expression )* ;
+
+
+----------------
+EXPRESSION RULES
+----------------
+
+expression:
+	logicOr ;
+
+logicOr:
+	logicAnd ( "or" logicAnd )* ;
+
+logicAnd:
+	comparison ( "and" comparison )* ;
+
+comparison:
+	term ( ( "<" | "<=" | ">" | ">=" | "equals" | "unequals" ) term )* ;
+
+term:
+	factor ( ( "+" | "-" ) factor )* ;
+
+factor:
+	unary ( ( "*" | "/" ) unary )* ;
+
+unary:
+	( "not" | "-" ) unary | call ;
+
+call:
+	primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+
+primary:
+	IDENTIFIER
+	| NUMBER
+	| TEXT
+	| "true"
+	| "false"
+	| "empty"
+	| "me"
+	| "parent" "." IDENTIFIER
+	| "(" expression ")" ;
+
+
+-------------
+LEXICAL RULES
+-------------
+
+IDENTIFIER:
+	ALPHA ( ALPHA | DIGIT )* ;
+
+NUMBER:
+	DIGIT+ ( "." DIGIT+ )? ;
+
+TEXT:
+	"\"" <any ASCII character except "\"" or NEWLINE>* "\"" ;
+
+ALPHA:
+	"a" ... "z"
+	| "A" ... "Z"
+	| "_" ;
+
+DIGIT:
+	"0" ... "9" ;
+
+NEWLINE:
+    "\\n"
+    | "\\r\\n"
+    | "\\r" ;
+
+INDENT:
+    ( " " | "\\t" )+ ;
+
+DEDENT:
+    <a decrease in INDENT> ;
+
+EOF:
+    <end of file> ;
+
+
+-----
+NOTES
+-----
+
+* To be added to the grammar:
+    * "new" terminal during instantiation (class call)
+    * "otherwise if" as part of the ifStatement rule
