@@ -430,8 +430,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     /**
-     * Verify that the number is positive can be represented as integer,
-     * otherwise throw a RuntimeError.
+     * Verify that the number is positive and can be represented as an
+     * integer, otherwise throw a RuntimeError.
      *
      * @param location The location of the nearest token.
      * @param number The number.
