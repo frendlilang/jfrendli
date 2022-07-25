@@ -20,7 +20,7 @@ public class Frendli {
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             printUsage();
-            System.exit(64);    // UNIX sysexits.h
+            System.exit(ExitCode.USAGE_ERROR.getValue());
         }
         else if (args.length == 1) {
             runFile(args[0]);
@@ -37,10 +37,10 @@ public class Frendli {
         run(source.replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
         if (reporter.hadCompileTimeError()) {
-            System.exit(65);    // UNIX sysexits.h
+            System.exit(ExitCode.INPUT_DATA_ERROR.getValue());
         }
         if (reporter.hadRuntimeError()) {
-            System.exit(70);    // UNIX sysexits.h
+            System.exit(ExitCode.INTERNAL_SOFTWARE_ERROR.getValue());
         }
     }
 
