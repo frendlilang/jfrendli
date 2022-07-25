@@ -72,7 +72,7 @@ public class Scanner {
      *
      * @return List of tokens.
      */
-    public List<Token> scanTokens() {
+    public List<Token> scan() {
         // As long as the end of the file has not been reached, keep
         // scanning token by token, resetting the start position of the
         // lexeme to the first character in the next one to be scanned.

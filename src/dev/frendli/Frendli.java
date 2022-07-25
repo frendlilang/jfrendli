@@ -69,7 +69,7 @@ public class Frendli {
 
     private static void run(String source) {
         Scanner scanner = new Scanner(source, reporter);
-        List<Token> tokens = scanner.scanTokens();
+        List<Token> tokens = scanner.scan();
         Parser parser = new Parser(tokens, reporter);
         List<Statement> statements = parser.parse();
 
