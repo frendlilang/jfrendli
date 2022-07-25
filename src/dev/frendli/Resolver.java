@@ -108,7 +108,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitReturnStatement(Statement.Return statement) {
         if (currentContext != ContextType.FUNCTION) {
-            error(statement.closest, "You can only return from within a definition.");
+            error(statement.location, "You can only return from within a definition.");
         }
 
         return null;
@@ -117,7 +117,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitReturnWithStatement(Statement.ReturnWith statement) {
         if (currentContext != ContextType.FUNCTION) {
-            error(statement.closest, "You can only return from within a definition.");
+            error(statement.location, "You can only return from within a definition.");
         }
 
         resolve(statement.value);

@@ -200,7 +200,7 @@ public class Parser {
 
     // ifStatement: "if" expression block ( "otherwise" block )? ;
     private Statement ifStatement() {
-        Token start = getJustConsumed();
+        Token location = getJustConsumed();
         Expression condition = expression();
         Statement thenBranch = block();
         Statement otherwiseBranch = null;
@@ -208,43 +208,43 @@ public class Parser {
             otherwiseBranch = block();
         }
 
-        return new Statement.If(start, condition, thenBranch, otherwiseBranch);
+        return new Statement.If(condition, thenBranch, otherwiseBranch, location);
     }
 
     // repeatTimesStatement: "repeat" expression "times" block ;
     private Statement repeatTimesStatement() {
-        Token start = getJustConsumed();
+        Token location = getJustConsumed();
         Expression times = expression();
         consume(TokenType.TIMES, "The expression must be followed by 'times'.");
         Statement body = block();
 
-        return new Statement.RepeatTimes(start, times, body);
+        return new Statement.RepeatTimes(times, body, location);
     }
 
     // repeatWhileStatement: "repeat" "while" expression block ;
     private Statement repeatWhileStatement() {
-        Token start = getJustConsumed();
+        Token location = getJustConsumed();
         Expression condition = expression();
         Statement body = block();
 
-        return new Statement.RepeatWhile(start, condition, body);
+        return new Statement.RepeatWhile(condition, body, location);
     }
 
     // returnStatement: "return" NEWLINE ;
     private Statement returnStatement() {
-        Token closest = getJustConsumed();
+        Token location = getJustConsumed();
         consume(TokenType.NEWLINE, "You must add a new line after 'return'. To return with a value, use 'return with' instead.");
 
-        return new Statement.Return(closest);
+        return new Statement.Return(location);
     }
 
     // returnWithStatement: "return" "with" expression NEWLINE ;
     private Statement returnWithStatement() {
-        Token closest = getJustConsumed();
+        Token location = getJustConsumed();
         Expression value = expression();
         consumeNewline();
 
-        return new Statement.ReturnWith(closest, value);
+        return new Statement.ReturnWith(location, value);
     }
 
     // block: NEWLINE INDENT statement+ DEDENT ;

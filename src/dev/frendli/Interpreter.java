@@ -78,7 +78,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitIfStatement(Statement.If statement) {
-        if (isTrue(statement.start, evaluate(statement.condition))) {
+        if (isTrue(evaluate(statement.condition), statement.location)) {
             execute(statement.thenBranch);
         }
         else if (statement.otherwiseBranch != null) {
@@ -91,7 +91,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitRepeatTimesStatement(Statement.RepeatTimes statement) {
         Object times = evaluate(statement.times);
-        verifyPositiveInteger(statement.start, times);
+        verifyPositiveInteger(times, statement.location);
 
         int exactTimes = (int)((double)times);
         for (int i = 0; i < exactTimes; i++) {
@@ -103,7 +103,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitRepeatWhileStatement(Statement.RepeatWhile statement) {
-        while (isTrue(statement.start, evaluate(statement.condition))) {
+        while (isTrue(evaluate(statement.condition), statement.location)) {
             execute(statement.body);
         }
 
@@ -137,19 +137,19 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             case UNEQUALS:
                 return !isEqual(left, right);
             case GREATER_THAN:
-                verifyNumberOperands(operator, left, right);
+                verifyNumberOperands(left, right, operator);
                 return (double)left > (double)right;
             case GREATER_THAN_EQUALS:
-                verifyNumberOperands(operator, left, right);
+                verifyNumberOperands(left, right, operator);
                 return (double)left >= (double)right;
             case LESS_THAN:
-                verifyNumberOperands(operator, left, right);
+                verifyNumberOperands(left, right, operator);
                 return (double)left < (double)right;
             case LESS_THAN_EQUALS:
-                verifyNumberOperands(operator, left, right);
+                verifyNumberOperands(left, right, operator);
                 return (double)left <= (double)right;
             case MINUS:
-                verifyNumberOperands(operator, left, right);
+                verifyNumberOperands(left, right, operator);
                 return (double)left - (double)right;
             case PLUS:
                 // Overload the + operator to allow for text concatenation
@@ -161,11 +161,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                 }
                 throw new RuntimeError(operator, "The operands must be only numbers or only texts.");
             case SLASH:
-                verifyNumberOperands(operator, left, right);
-                verifyNonZeroOperand(operator, right);
+                verifyNumberOperands(left, right, operator);
+                verifyNonZeroOperand(right, operator);
                 return (double)left / (double)right;
             case STAR:
-                verifyNumberOperands(operator, left, right);
+                verifyNumberOperands(left, right, operator);
                 return (double)left * (double)right;
         }
 
@@ -212,17 +212,17 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         Object left = evaluate(expression.left);
         Token operator = expression.operator;
         if (operator.type == TokenType.OR) {
-            if (isTrue(operator, left)) {
+            if (isTrue(left, operator)) {
                 return true;
             }
         }
         else /* operator == AND */ {
-            if (!isTrue(operator, left)) {
+            if (!isTrue(left, operator)) {
                 return false;
             }
         }
 
-        return isTrue(operator, evaluate(expression.right));
+        return isTrue(evaluate(expression.right), operator);
     }
 
     @Override
@@ -234,10 +234,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         // after the expression has been evaluated.
         switch (operator.type) {
             case MINUS:
-                verifyNumberOperand(operator, right);
+                verifyNumberOperand(right, operator);
                 return -(double)right;
             case NOT:
-                return !isTrue(operator, right);
+                return !isTrue(right, operator);
         }
 
         return null;
@@ -360,12 +360,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     /**
      * Check if an operand is true.
      *
-     * @param location The location of the nearest token.
      * @param operand The operand to be checked.
+     * @param location The location of the nearest token.
      * @return Whether it is true.
      */
-    private boolean isTrue(Token location, Object operand) {
-        verifyBooleanOperand(location, operand);
+    private boolean isTrue(Object operand, Token location) {
+        verifyBooleanOperand(operand, location);
 
         return (boolean)operand;
     }
@@ -373,10 +373,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     /**
      * Verify that the operand is a boolean and throw a RuntimeError if not.
      *
-     * @param location The location of the nearest token.
      * @param operand The operand.
+     * @param location The location of the nearest token.
      */
-    private void verifyBooleanOperand(Token location, Object operand) {
+    private void verifyBooleanOperand(Object operand, Token location) {
         if (operand instanceof Boolean) {
             return;
         }
@@ -388,10 +388,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
      * Verify that the operand/denominator is a non-zero number and throw
      * a RuntimeError if not.
      *
-     * @param location The location of the nearest token.
      * @param operand The operand.
+     * @param location The location of the nearest token.
      */
-    private void verifyNonZeroOperand(Token location, Object operand) {
+    private void verifyNonZeroOperand(Object operand, Token location) {
         if (operand instanceof Double && (double)operand != 0) {
             return;
         }
@@ -402,10 +402,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     /**
      * Verify that the operand is a number and throw a RuntimeError if not.
      *
-     * @param location The location of the nearest token.
      * @param operand The operand.
+     * @param location The location of the nearest token.
      */
-    private void verifyNumberOperand(Token location, Object operand) {
+    private void verifyNumberOperand(Object operand, Token location) {
         if (operand instanceof Double) {
             return;
         }
@@ -416,11 +416,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     /**
      * Verify that the operands are numbers and throw a RuntimeError if not.
      *
-     * @param location The location of the nearest token.
      * @param left The left operand.
      * @param right The right operand.
+     * @param location The location of the nearest token.
      */
-    private void verifyNumberOperands(Token location, Object left, Object right) {
+    private void verifyNumberOperands(Object left, Object right, Token location) {
         // Evaluate both operands before reporting the error.
         if (left instanceof Double && right instanceof Double) {
             return;
@@ -433,11 +433,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
      * Verify that the number is positive and can be represented as an
      * integer, otherwise throw a RuntimeError.
      *
-     * @param location The location of the nearest token.
      * @param number The number.
+     * @param location The location of the nearest token.
      */
-    private void verifyPositiveInteger(Token location, Object number) {
-        verifyNumberOperand(location, number);
+    private void verifyPositiveInteger(Object number, Token location) {
+        verifyNumberOperand(number, location);
         double numberDouble = (double)number;
         if (numberDouble > 0 && Math.floor(numberDouble) == numberDouble) {
             return;

@@ -99,16 +99,16 @@ public abstract class Statement {
     }
 
     public static class If extends Statement {
-        public final Token start;               // For reporting location of possible error
         public final Expression condition;
         public final Statement thenBranch;
         public final Statement otherwiseBranch;
+        public final Token location;
 
-        public If(Token start, Expression condition, Statement thenBranch, Statement otherwiseBranch) {
-            this.start = start;
+        public If(Expression condition, Statement thenBranch, Statement otherwiseBranch, Token location) {
             this.condition = condition;
             this.thenBranch = thenBranch;
             this.otherwiseBranch = otherwiseBranch;
+            this.location = location;
         }
 
         @Override
@@ -118,14 +118,14 @@ public abstract class Statement {
     }
 
     public static class RepeatTimes extends Statement {
-        public final Token start;               // For reporting location of possible error
         public final Expression times;
         public final Statement body;
+        public final Token location;
 
-        public RepeatTimes(Token start, Expression times, Statement body) {
-            this.start = start;
+        public RepeatTimes(Expression times, Statement body, Token location) {
             this.times = times;
             this.body = body;
+            this.location = location;
         }
 
         @Override
@@ -135,14 +135,14 @@ public abstract class Statement {
     }
 
     public static class RepeatWhile extends Statement {
-        public final Token start;               // For reporting location of possible error
         public final Expression condition;
         public final Statement body;
+        public final Token location;
 
-        public RepeatWhile(Token start, Expression condition, Statement body) {
-            this.start = start;
+        public RepeatWhile(Expression condition, Statement body, Token location) {
             this.condition = condition;
             this.body = body;
+            this.location = location;
         }
 
         @Override
@@ -152,10 +152,10 @@ public abstract class Statement {
     }
 
     public static class Return extends Statement {
-        public final Token closest;
+        public final Token location;
 
-        public Return(Token closest) {
-            this.closest = closest;
+        public Return(Token location) {
+            this.location = location;
         }
 
         @Override
@@ -165,12 +165,12 @@ public abstract class Statement {
     }
 
     public static class ReturnWith extends Statement {
-        public final Token closest;
         public final Expression value;
+        public final Token location;
 
-        public ReturnWith(Token closest, Expression value) {
-            this.closest = closest;
+        public ReturnWith(Token location, Expression value) {
             this.value = value;
+            this.location = location;
         }
 
         @Override
