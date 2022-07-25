@@ -31,6 +31,8 @@ public class Frendli {
     }
 
     private static void runFile(String path) throws IOException {
+        verifyExtension(path);
+
         final String REGEX_ALL_NEWLINES = "(\\r\\n)|(\\r)/g";
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         String source = new String(bytes, Charset.defaultCharset());
@@ -85,6 +87,13 @@ public class Frendli {
         }
 
         interpreter.interpret(statements);
+    }
+
+    private static void verifyExtension(String path) {
+        if (!path.toLowerCase().endsWith(".frendli")) {
+            System.out.println("Frendli only understands files with extension '.frendli'");
+            System.exit(ExitCode.INPUT_FILE_ERROR.getValue());
+        }
     }
 
     private static void printUsage() {
