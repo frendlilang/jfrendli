@@ -4,14 +4,14 @@
 
 Frendli is an open source general-purpose programming language designed around empirical data on difficulties and misconceptions held by novice programmers.
 
-> ⚠️ Frendli is currently in development. <u>See latest dev branch</u>.
-
+> ⚠️ Frendli is currently in development. See latest dev branch.
 
 ## Table of Contents
 - [Purpose](#purpose)
 - [General Characteristics](#general-characteristics)
 - [Features (v0.1.0)](#features-v010)
 - [Sample Code](#sample-code)
+    - [Variables, Data Types, and Literals](#variables-data-types-and-literals)
     - [Control Flow](#control-flow)
     - [Functions](#functions)
     - [OOP](#oop)
@@ -48,7 +48,7 @@ Implemented features are marked as completed.
 - [x] Single-line comments (`//`)
 - [x] Lexical scoping
 - [x] Variables
-  - [x] Declaration and initialization (`create`)
+  - [x] Declaration (`create`)
   - [x] Assignment (`change`)
   - [x] Dynamic typing
 - [x] Operators
@@ -88,14 +88,14 @@ Implemented features are marked as completed.
     - [x] Accept parameters (`(accept a, b, c)`)
     - [x] Return without explicit return value (`return`)
     - [x] Return with explicit return value (`return with`)
-  - [x] Call a function
+  - [x] Call a function (`()`)
     - [x] Send arguments (`(send a, b, c)`)
   - [x] Closure
 - [ ] OOP
   - [ ] Classes / user-defined types
     - [ ] Declaration and definition (`describe`)
     - [ ] Fields
-      - [ ] Declaration and initialization (`has`)
+      - [ ] Declaration (`has`)
     - [ ] Methods
       - [x] Declaration and definition (`define`) (same as function)
       - [ ] Constructor (`onNew`)
@@ -103,9 +103,9 @@ Implemented features are marked as completed.
       - [x] Call a method (same as function)
     - [ ] Single inheritance (`inherit`)
       - [ ] Parent reference (`parent`)
-    - [ ] Instances
-      - [ ] Instantiation (`new`)
-      - [ ] Member (field or method) access (`.`)
+  - [ ] Instances
+    - [ ] Instantiation (`new`)
+    - [ ] Member (field or method) access (`.`)
 - [x] Standard library
   - [x] Functions
     - [x] Output text to user (`display`)
@@ -117,6 +117,17 @@ Implemented features are marked as completed.
   - [ ] Provide separate grammar to allow omitting the newline character
 
 ## Sample Code
+
+#### Variables, Data Types, and Literals
+```
+create age = 30               // number
+create price = 4.25           // number
+create isValid = true         // boolean
+create isOnline = false       // boolean
+create firstName = "Jane"     // text
+create middleName = empty     // empty
+change middleName = "Mary"    // text
+```
 
 #### Control Flow
 ```
