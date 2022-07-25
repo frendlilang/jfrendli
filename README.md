@@ -10,6 +10,7 @@ Frendli is an open source general-purpose programming language designed around e
 - [Purpose](#purpose)
 - [General Characteristics](#general-characteristics)
 - [Features (v0.1.0)](#features-v010)
+- [Future Additions](#future-additions)
 - [Sample Code](#sample-code)
     - [Variables, Data Types, and Literals](#variables-data-types-and-literals)
     - [Control Flow](#control-flow)
@@ -35,7 +36,8 @@ Published article: [Designing an Introductory Programming Language Based on Stud
 * General-purpose
 * Dynamically typed
 * Imperative
-* Object-oriented (optional)
+* Optionally object-oriented
+  * *(paused feature, may be removed)*
 * Interpreted
 
 ## Features (v0.1.0)
@@ -93,7 +95,7 @@ Implemented features are marked as completed.
   - [x] Call a function (`()`)
     - [x] Send arguments (`(send a, b, c)`)
   - [x] Closure
-- [ ] OOP
+- [ ] OOP *(paused feature, may be removed)*
   - [ ] Classes / user-defined types
     - [ ] Declaration and definition (`describe`)
     - [ ] Fields
@@ -103,7 +105,7 @@ Implemented features are marked as completed.
       - [ ] Constructor (`onNew`)
       - [ ] Self reference (`me`)
       - [x] Call a method (same as function)
-    - [ ] Single inheritance (`inherit`)
+    - [ ] Single public inheritance (`inherit`)
       - [ ] Parent reference (`parent`)
   - [ ] Instances
     - [ ] Instantiation (`new`)
@@ -117,6 +119,18 @@ Implemented features are marked as completed.
   - [ ] Provide highly user-friendly (and novice-friendly) error messages
 - [ ] REPL (interactive prompt)
   - [ ] Provide separate grammar to allow omitting the newline character
+
+## Future Additions
+
+#### Near to Intermediate-term
+
+* Array data structure
+* Extended standard library
+  * I/O operations (e.g. reading keyboard input)
+  * Data type checking
+  * Data type casting
+* Arithmetic operators (e.g. modulus)
+* Control statements (e.g. terminate execution of a loop)
 
 ## Sample Code
 
@@ -176,6 +190,9 @@ display(send result)                // 5
 ```
 
 #### OOP
+
+*(paused feature, may be removed)*
+
 ```
 describe Point
     has x
