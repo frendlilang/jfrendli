@@ -16,8 +16,8 @@ import java.util.Stack;
  * any statements.
  */
 public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
-    private final ErrorReporter reporter;                       // Error reporter for reporting compile time errors
-    private final Interpreter interpreter;                      // The interpreter
+    private final ErrorReporter reporter;                       // Reporter of compile-time errors
+    private final Interpreter interpreter;                      // The interpreter executing the code (runtime)
     private final Stack<Set<String>> scopes = new Stack<>();    // Stack of local block scopes containing the variable names
     private ContextType currentContext = ContextType.NONE;      // The current context in which something is being resolved (e.g. a function or method)
 

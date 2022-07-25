@@ -6,27 +6,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The scanner - traverses the characters in the source code and detects
- * the corresponding tokens as well as errors in individual tokens.
+ * The scanner/lexer - traverses the characters in the source code
+ * and generates the corresponding tokens as well as detects errors
+ * in individual tokens.
  */
 public class Scanner {
-    private final ErrorReporter reporter;                               // Reporter of syntax errors generated
+    private final ErrorReporter reporter;                               // Reporter of syntax errors
     private final String source;                                        // Source code
     private final List<Token> tokens = new ArrayList<>();               // Tokens produced by the scanner
     private final Map<String, TokenType> keywords = new HashMap<>();    // Reserved keywords
     private final int TAB_SIZE = 8;                                     // Number of columns in a tab
     private final int ALT_TAB_SIZE = 1;                                 // Number of alt columns in a tab
     private final int MAX_INDENT_LEVEL = 100;                           // Max indent level allowed
-    private int[] indentStack = new int[MAX_INDENT_LEVEL];              // Stack with number of columns used in each indent level
-    private int[] altIndentStack = new int[MAX_INDENT_LEVEL];           // Stack with number of alt columns used in each indent level
+    private final int[] indentStack = new int[MAX_INDENT_LEVEL];        // Stack with number of columns used in each indent level
+    private final int[] altIndentStack = new int[MAX_INDENT_LEVEL];     // Stack with number of alt columns used in each indent level
     private int indentLevel = 0;                                        // Current indent level (always incremented by 1)
     private int pendingIndents = 0;                                     // Number of pending indents (if > 0) or dedents (if < 0)
-    private int columnsInIndent = 0;                                    // Number of columns in indentation
-    private int altColumnsInIndent = 0;                                 // Number of alt columns in indentation
-    private int spacesInIndent = 0;                                     // Number of spaces in indentation
-    private int tabsInIndent = 0;                                       // Number of tabs in indentation
-    private int start = 0;                                              // First character of current lexeme being scanned
-    private int current = 0;                                            // Current character of current lexeme being scanned
+    private int columnsInIndent = 0;                                    // Number of columns in current indentation
+    private int altColumnsInIndent = 0;                                 // Number of alt columns in current indentation
+    private int spacesInIndent = 0;                                     // Number of spaces in current indentation
+    private int tabsInIndent = 0;                                       // Number of tabs in current indentation
+    private int start = 0;                                              // Position of first character of current lexeme being scanned
+    private int current = 0;                                            // Position of current unconsumed character of current lexeme being scanned
     private int line = 1;                                               // Current line in source file (for error reporting)
     private boolean isAtStartOfLine = true;                             // Whether the scanner is at the start of the line
     private boolean isBlankLine = false;                                // Whether the current line is blank (only whitespace, comments, and/or newline)
@@ -441,32 +442,72 @@ public class Scanner {
         addPendingIndents();
     }
 
+    /**
+     * Check if a character is alpha (a-Z) or underscore.
+     *
+     * @param character The character to be checked.
+     * @return Whether it is alpha.
+     */
     private boolean isAlpha(char character) {
         return (character >= 'a' && character <= 'z')
                 || (character >= 'A' && character <= 'Z')
                 || (character == '_');
     }
 
+    /**
+     * Check if a character is alphanumeric (a-Z, 0-9) or underscore.
+     *
+     * @param character The character to be checked.
+     * @return Whether it is alphanumeric.
+     */
     private boolean isAlphaNumeric(char character) {
         return isAlpha(character) || isDigit(character);
     }
 
+    /**
+     * Check if a character is a digit (0-9).
+     *
+     * @param character The character to be checked.
+     * @return Whether it is a digit.
+     */
     private boolean isDigit(char character) {
         return character >= '0' && character <= '9';
     }
 
+    /**
+     * Check if the end of the source file has been reached.
+     *
+     * @return Whether it is at the end.
+     */
     private boolean isAtEnd() {
         return current >= source.length();
     }
 
-    private int tabsToSpaces(int column, int tabSize) {
-        return (column / tabSize + 1) * tabSize;
+    /**
+     * Convert tabs to spaces.
+     *
+     * @param startColumnOfTab The column where the tab starts.
+     * @param tabSize The size of the tab.
+     * @return The size in spaces.
+     */
+    private int tabsToSpaces(int startColumnOfTab, int tabSize) {
+        return (startColumnOfTab / tabSize + 1) * tabSize;
     }
 
+    /**
+     * Get the current character that has not yet been consumed.
+     *
+     * @return The current unconsumed character.
+     */
     private char getCurrentUnconsumed() {
         return source.charAt(current);
     }
 
+    /**
+     * Get the character that was most recently consumed.
+     *
+     * @return The most recently consumed character.
+     */
     private char getJustConsumed() {
         return source.charAt(current - 1);
     }

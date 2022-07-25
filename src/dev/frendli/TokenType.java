@@ -1,5 +1,8 @@
 package dev.frendli;
 
+/**
+ * The type of token.
+ */
 public enum TokenType {
     // Single characters
     OPEN_PAREN,

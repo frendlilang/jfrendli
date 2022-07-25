@@ -11,7 +11,7 @@ import java.util.Map;
  * values. The current node always evaluates its children first (post-order traversal).
  */
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-    private final ErrorReporter reporter;                               // Error reporter for reporting runtime errors
+    private final ErrorReporter reporter;                               // Reporter of runtime errors
     private final Environment globalEnvironment = new Environment();    // The global environment
     private Environment currentEnvironment = globalEnvironment;         // The current environment which changes during execution as blocks are entered and exited
     private final Map<Token, Integer> resolved = new HashMap<>();       // Local variables (key) resolved by the resolver (value = distance to corresponding environment)
@@ -63,6 +63,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     
     @Override
     public Void visitDefineStatement(Statement.Define statement) {
+        // When a define statement is visited, a runtime representation of the
+        // function is created (FrendliFunction) holding its compile-time
+        // representation (Statement.Define) and the environment it was declared
+        // in (currentEnvironment) for closure. Thus, the function is NOT called
+        // here, merely saved to a variable name that can later on be called.
         FrendliFunction function = new FrendliFunction(statement, currentEnvironment);
         currentEnvironment.define(statement.name, function);
 

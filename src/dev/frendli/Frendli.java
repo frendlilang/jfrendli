@@ -78,6 +78,7 @@ public class Frendli {
             return;
         }
 
+        // The resolver inserts the resolved data directly into the interpreter.
         Resolver resolver = new Resolver(interpreter, reporter);
         resolver.resolve(statements);
 

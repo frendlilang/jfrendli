@@ -47,9 +47,9 @@ import java.util.List;
  * the lowest-precedence.)
  */
 public class Parser {
-    private final ErrorReporter reporter;
-    private final List<Token> tokens;
-    private int current = 0;
+    private final ErrorReporter reporter;           // Reporter of syntax errors
+    private final List<Token> tokens;               // Tokens to be parsed
+    private int current = 0;                        // Position of current unconsumed token
 
     public Parser (List<Token> tokens, ErrorReporter reporter) {
         this.tokens = tokens;
@@ -523,22 +523,6 @@ public class Parser {
     }
 
     /**
-     * Report a parse error.
-     *
-     * @param token The token that caused the error.
-     * @param message The error message.
-     * @return The ParseError.
-     */
-    private ParseError error(Token token, String message) {
-        reporter.compileTimeError(token, message);
-
-        // Let the caller decide what to do with the error,
-        // as synchronization may not be needed for all errors.
-        // Thus don't throw the error here.
-        return new ParseError();
-    }
-
-    /**
      * Synchronize the tokens to the next statement.
      * (Prevents cascaded errors deriving from an original
      * error to be falsely reported.)
@@ -573,5 +557,21 @@ public class Parser {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Report a parse error.
+     *
+     * @param token The token that caused the error.
+     * @param message The error message.
+     * @return The ParseError.
+     */
+    private ParseError error(Token token, String message) {
+        reporter.compileTimeError(token, message);
+
+        // Let the caller decide what to do with the error,
+        // as synchronization may not be needed for all errors.
+        // Thus don't throw the error here.
+        return new ParseError();
     }
 }
