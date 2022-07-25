@@ -26,6 +26,8 @@ Accordingly, as a novice-oriented language, it aspires to be more self-explanato
 
 It is intended for use in the beginning stages of introductory programming courses, helping the student conceptualize, and thereafter transitioning early or mid-course to a different established language.
 
+Published article: [Designing an Introductory Programming Language Based on Studies on Novices](https://lnu.diva-portal.org/smash/record.jsf?pid=diva2:1670920).
+
 ## General Characteristics
 
 * Text-based
