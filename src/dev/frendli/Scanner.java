@@ -76,6 +76,7 @@ public class Scanner {
         while (!isAtEnd()) {
             scanToken();
         }
+        resetIndents();
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
         return tokens;
@@ -90,7 +91,7 @@ public class Scanner {
         if (isAtStartOfLine) {
             isAtStartOfLine = false;
             isBlankLine = false;
-            consumeIndentation();
+            consumeIndent();
         }
 
         // Reset the start position of the lexeme to the first character
@@ -176,26 +177,20 @@ public class Scanner {
     /**
      * Consume the current indentation.
      */
-    private void consumeIndentation() {
+    private void consumeIndent() {
         // Count and consume the spaces and tabs.
         countColumnsInIndent();
 
         char character = getJustConsumed();
-        if (isAtEnd()) {
-            if (character == '\n') {
-                isBlankLine = true;
-            }
-            else {
-                error(line, "The last line is indented. The file must end with a new line.");
-            }
-            resetIndentation();
-            return;
-        }
 
         // Skip blank lines (lines with only whitespace, comments, and/or newline).
         boolean isComment = (character == '/' && peek() == '/');
-        isBlankLine = (isComment || character == '\n');
+        isBlankLine = (character == ' ' || character == '\t' || isComment || character == '\n');
         if (isBlankLine) {
+            if (isAtEnd() && character != '\n') {
+                error(line, "The last line is indented. The file must end with a new line without indentation.");
+            }
+
             // Do not increment line count here as other reported errors
             // will then report the next line rather than the current.
             // (The newline is caught by the switch statement in scanToken.)
@@ -203,7 +198,7 @@ public class Scanner {
         }
 
         // Only check for mixed tabs and spaces after checking blank lines.
-        // (How they are mixed in blank lines is insignificant.)
+        // (Whether they are mixed in blank lines is insignificant.)
         boolean isMixingTabsAndSpaces = (tabsInIndent > 0 && spacesInIndent > 0);
         if (isMixingTabsAndSpaces) {
             error(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
@@ -217,38 +212,12 @@ public class Scanner {
         }
         // Check if the line is more indented than the previous line.
         else if (columnsInIndent > indentStack[indentLevel]) {
-            // Check if the next level of indentation exceeds allowed limit.
-            if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
-                error(line, "The max indentation has been reached. You cannot indent further.");
-            }
-            if (altColumnsInIndent <= altIndentStack[indentLevel]) {
-                error(line, "There is a problem with the indentation.");
-            }
-
-            // If the current line is more indented than the previous one,
-            // add a new indentation level to the stack and increment
-            // pending indents so INDENT tokens can be added later.
-            pendingIndents++;
-            indentLevel++;
-            indentStack[indentLevel] = columnsInIndent;
-            altIndentStack[indentLevel] = altColumnsInIndent;
+            increaseIndent();
         }
         // Check if the line is less indented than the previous line.
         else {
-            // If the current line is less indented than the previous one, pop
-            // indentation levels off of the stack until the indentation is consistent,
-            // and decrement pending indents so DEDENT tokens can be added later.
-            while (indentLevel > 0 && columnsInIndent < indentStack[indentLevel]) {
-                pendingIndents--;
-                indentLevel--;
-            }
-            // Check if the line is still not consistently indented.
-            if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
-                error(line, "There are inconsistencies in the level of indentation used.");
-            }
+            decreaseIndent();
         }
-
-        addPendingIndents();
     }
 
     /**
@@ -280,6 +249,62 @@ public class Scanner {
             }
             character = advance();
         }
+    }
+
+    /**
+     * Increase the indent level by 1 level and add the remaining indent.
+     */
+    private void increaseIndent() {
+        // Check if the next level of indentation exceeds allowed limit.
+        if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
+            error(line, "The max indentation has been reached. You cannot indent further.");
+        }
+        if (altColumnsInIndent <= altIndentStack[indentLevel]) {
+            error(line, "There is a problem with the indentation.");
+        }
+
+        // When the current line is more indented than the previous one,
+        // add a new indent level to the stack, store the number of columns
+        // used in that indent level, and increment pending indents so
+        // INDENT tokens can be added later.
+        pendingIndents++;
+        indentLevel++;
+        indentStack[indentLevel] = columnsInIndent;
+        altIndentStack[indentLevel] = altColumnsInIndent;
+
+        addPendingIndents();
+    }
+
+    /**
+     * Decrease the indent level down to the next consistent level
+     * and add the remaining dedents.
+     */
+    private void decreaseIndent() {
+        // When the current line is less indented than the previous one, pop
+        // indent levels off of the stack until the current indentation is
+        // consistent with any other indent level, and decrement pending
+        // indents so DEDENT tokens can be added later.
+        while (indentLevel > 0 && columnsInIndent < indentStack[indentLevel]) {
+            pendingIndents--;
+            indentLevel--;
+        }
+        // Check if the line is still not consistently indented.
+        if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
+            error(line, "There are inconsistencies in the level of indentation used in this line compared to previous ones.");
+        }
+
+        addPendingIndents();
+    }
+
+    /**
+     * Reset the indent level to 0 and add the remaining dedents.
+     */
+    private void resetIndents() {
+        while (indentLevel > 0) {
+            pendingIndents--;
+            indentLevel--;
+        }
+        addPendingIndents();
     }
 
     /**
@@ -444,17 +469,6 @@ public class Scanner {
         while (peek() != '\n' && !isAtEnd()) {
             advance();
         }
-    }
-
-    /**
-     * Reset the indentation level to 0 and add the remaining dedents.
-     */
-    private void resetIndentation() {
-        while (indentLevel > 0) {
-            pendingIndents--;
-            indentLevel--;
-        }
-        addPendingIndents();
     }
 
     /**
