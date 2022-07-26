@@ -73,15 +73,9 @@ public class Scanner {
      * @return List of tokens.
      */
     public List<Token> scan() {
-        // As long as the end of the file has not been reached, keep
-        // scanning token by token, resetting the start position of the
-        // lexeme to the first character in the next one to be scanned.
         while (!isAtEnd()) {
-            start = current;
             scanToken();
         }
-        // Reset indentation if the file ends without full dedentation.
-        resetIndentation();
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
         return tokens;
@@ -99,7 +93,11 @@ public class Scanner {
             consumeIndentation();
         }
 
+        // Reset the start position of the lexeme to the first character
+        // in the one being scanned (previous calls to 'advance()' above
+        // will increment 'current', therefore 'current - 1' is needed.)
         start = current - 1;
+
         char character = getJustConsumed();
         switch (character) {
             case '\n':
@@ -183,6 +181,16 @@ public class Scanner {
         countColumnsInIndent();
 
         char character = getJustConsumed();
+        if (isAtEnd()) {
+            if (character == '\n') {
+                isBlankLine = true;
+            }
+            else {
+                error(line, "The last line is indented. The file must end with a new line.");
+            }
+            resetIndentation();
+            return;
+        }
 
         // Skip blank lines (lines with only whitespace, comments, and/or newline).
         boolean isComment = (character == '/' && peek() == '/');
@@ -194,6 +202,8 @@ public class Scanner {
             return;
         }
 
+        // Only check for mixed tabs and spaces after checking blank lines.
+        // (How they are mixed in blank lines is insignificant.)
         boolean isMixingTabsAndSpaces = (tabsInIndent > 0 && spacesInIndent > 0);
         if (isMixingTabsAndSpaces) {
             error(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
@@ -251,7 +261,7 @@ public class Scanner {
         tabsInIndent = 0;
 
         char character = getJustConsumed();
-        while ((character == ' ' || character == '\t') && !isAtEnd()) {
+        while ((character == ' ' || character == '\t')) {
             if (character == ' ') {
                 spacesInIndent++;
                 columnsInIndent++;
@@ -263,6 +273,11 @@ public class Scanner {
                 altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_SIZE);
             }
 
+            // Don't add '&& !isAtEnd()' to the loop condition as
+            // it prevents the last space/tab from being counted.
+            if (isAtEnd()) {
+                return;
+            }
             character = advance();
         }
     }
