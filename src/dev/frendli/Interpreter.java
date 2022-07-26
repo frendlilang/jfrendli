@@ -10,7 +10,7 @@ import java.util.Map;
  * by the parser and interprets the nodes by computing the corresponding
  * values. The current node always evaluates its children first (post-order traversal).
  */
-public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
+public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<Void> {
     private final ErrorReporter reporter;                               // Reporter of runtime errors
     private final Environment globalEnvironment = new Environment();    // The global environment
     private Environment currentEnvironment = globalEnvironment;         // The current environment which changes during execution as blocks are entered and exited

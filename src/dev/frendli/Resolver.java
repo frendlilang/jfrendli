@@ -15,7 +15,7 @@ import java.util.Stack;
  * resolver visits all nodes exactly 1 time (O(n)) and does not execute
  * any statements.
  */
-public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
+public class Resolver implements ExpressionVisitor<Void>, StatementVisitor<Void> {
     private final ErrorReporter reporter;                       // Reporter of compile-time errors
     private final Interpreter interpreter;                      // The interpreter executing the code (runtime)
     private final Stack<Set<String>> scopes = new Stack<>();    // Stack of local block scopes containing the variable names

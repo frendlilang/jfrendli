@@ -7,21 +7,11 @@ import java.util.List;
 // the "accept" method and call the corresponding "visit" method
 // on its visitor.
 
+/**
+ * The compile-time representation of a statement (the tree node).
+ */
 public abstract class Statement {
-    public interface Visitor<R> {
-        R visitBlockStatement(Block statement);
-        R visitCreateStatement(Create statement);
-        R visitChangeStatement(Change statement);
-        R visitDefineStatement(Define statement);
-        R visitExpressionStatement(ExpressionStatement statement);
-        R visitIfStatement(If statement);
-        R visitRepeatTimesStatement(RepeatTimes statement);
-        R visitRepeatWhileStatement(RepeatWhile statement);
-        R visitReturnStatement(Return statement);
-        R visitReturnWithStatement(ReturnWith statement);
-    }
-
-    public abstract <R> R accept(Visitor<R> visitor);
+    public abstract <R> R accept(StatementVisitor<R> visitor);
 
     public static class Block extends Statement {
         public final List<Statement> statements;
@@ -31,7 +21,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitBlockStatement(this);
         }
     }
@@ -46,7 +36,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitCreateStatement(this);
         }
     }
@@ -61,7 +51,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitChangeStatement(this);
         }
     }
@@ -78,7 +68,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitDefineStatement(this);
         }
     }
@@ -93,7 +83,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitExpressionStatement(this);
         }
     }
@@ -112,7 +102,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitIfStatement(this);
         }
     }
@@ -129,7 +119,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitRepeatTimesStatement(this);
         }
     }
@@ -146,7 +136,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitRepeatWhileStatement(this);
         }
     }
@@ -159,7 +149,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitReturnStatement(this);
         }
     }
@@ -174,7 +164,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitReturnWithStatement(this);
         }
     }
