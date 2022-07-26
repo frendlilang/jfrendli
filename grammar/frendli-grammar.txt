@@ -75,7 +75,7 @@ expressionStatement:
 	expression NEWLINE ;
 
 ifStatement:
-	"if" expression block ( "otherwise" block )? ;
+	"if" expression block ( "otherwise" "if" expression block )* ( "otherwise" block )?
 
 repeatTimesStatement:
 	"repeat" expression "times" block ;
@@ -189,4 +189,3 @@ NOTES
 
 * To be added to the grammar:
     * "new" terminal during instantiation (class call)
-    * "otherwise if" as part of the ifStatement rule

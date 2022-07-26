@@ -4,7 +4,7 @@
 
 Frendli is an open source general-purpose programming language designed around empirical data on difficulties and misconceptions held by novice programmers.
 
-> ⚠️ Frendli is currently in development. See latest dev branch.
+> ⚠️ Frendli is currently in development.
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -79,10 +79,10 @@ Implemented features are marked as completed.
     - [x] Concatenation (`+`)
   - [x] Precedence altering
     - [x] Grouping (`()`)
-- [ ] Control
-  - [ ] Selection
+- [x] Control
+  - [x] Selection
     - [x] `if`
-      - [ ] `otherwise if`
+      - [x] `otherwise if`
       - [x] `otherwise`
   - [x] Loop
     - [x] Bounded (`repeat times`)
@@ -124,7 +124,7 @@ Implemented features are marked as completed.
 
 #### Near to Intermediate-term
 
-* Array data structure
+* Array/list data structure
 * Extended standard library
   * I/O operations (e.g. reading keyboard input)
   * Data type checking
@@ -153,6 +153,8 @@ create score = 5
 create message = ""
 
 if score > 10
+    change message = "Very Good"
+otherwise if score > 5
     change message = "Good"
 otherwise
     change message = "Bad"
@@ -186,7 +188,7 @@ define add(accept a, b)
     return with result
 
 create result = add(send 2, 3)
-display(send result)                // 5
+display(send result)
 ```
 
 #### OOP

@@ -86,8 +86,19 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
         if (isTrue(evaluate(statement.condition), statement.location)) {
             execute(statement.thenBranch);
         }
-        else if (statement.otherwiseBranch != null) {
-            execute(statement.otherwiseBranch);
+        else {
+            boolean otherwiseIfIsTrue = false;
+            for (Statement.OtherwiseIf otherwiseIf : statement.otherwiseIfs) {
+                if (isTrue(evaluate(otherwiseIf.condition), otherwiseIf.location)) {
+                    execute(otherwiseIf.thenBranch);
+                    otherwiseIfIsTrue = true;
+                    break;
+                }
+            }
+
+            if (!otherwiseIfIsTrue && statement.otherwiseBranch != null) {
+                execute(statement.otherwiseBranch);
+            }
         }
 
         return null;

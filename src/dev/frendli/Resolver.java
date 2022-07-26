@@ -82,6 +82,12 @@ public class Resolver implements ExpressionVisitor<Void>, StatementVisitor<Void>
     public Void visitIfStatement(Statement.If statement) {
         resolve(statement.condition);
         resolve(statement.thenBranch);
+
+        for (Statement.OtherwiseIf otherwiseIf : statement.otherwiseIfs) {
+            resolve(otherwiseIf.condition);
+            resolve(otherwiseIf.thenBranch);
+        }
+
         if (statement.otherwiseBranch != null) {
             resolve(statement.otherwiseBranch);
         }

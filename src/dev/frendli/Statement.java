@@ -91,12 +91,14 @@ public abstract class Statement {
     public static class If extends Statement {
         public final Expression condition;
         public final Statement thenBranch;
+        public final List<OtherwiseIf> otherwiseIfs;
         public final Statement otherwiseBranch;
         public final Token location;
 
-        public If(Expression condition, Statement thenBranch, Statement otherwiseBranch, Token location) {
+        public If(Expression condition, Statement thenBranch, List<OtherwiseIf> otherwiseIfs, Statement otherwiseBranch, Token location) {
             this.condition = condition;
             this.thenBranch = thenBranch;
+            this.otherwiseIfs = otherwiseIfs;
             this.otherwiseBranch = otherwiseBranch;
             this.location = location;
         }
@@ -104,6 +106,19 @@ public abstract class Statement {
         @Override
         public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitIfStatement(this);
+        }
+    }
+
+    // Helper class to If
+    public static class OtherwiseIf {
+        public final Expression condition;
+        public final Statement thenBranch;
+        public final Token location;
+
+        public OtherwiseIf(Expression condition, Statement thenBranch, Token location) {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.location = location;
         }
     }
 

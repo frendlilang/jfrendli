@@ -21,7 +21,7 @@ import java.util.List;
 // variableDeclaration:     "create" IDENTIFIER "=" expression NEWLINE ;
 // changeStatement:         "change" IDENTIFIER "=" expression NEWLINE ;
 // expressionStatement:     expression NEWLINE ;
-// ifStatement:             "if" expression block ( "otherwise" block )? ;
+// ifStatement:             "if" expression block ( "otherwise" "if" expression block )* ( "otherwise" block )?
 // repeatTimesStatement:    "repeat" expression "times" block ;
 // repeatWhileStatement:    "repeat" "while" expression block ;
 // returnStatement:         "return" NEWLINE ;
@@ -198,17 +198,26 @@ public class Parser {
         return new Statement.ExpressionStatement(expression);
     }
 
-    // ifStatement: "if" expression block ( "otherwise" block )? ;
+    // ifStatement: "if" expression block ( "otherwise" "if" expression block )* ( "otherwise" block )?
     private Statement ifStatement() {
         Token location = getJustConsumed();
         Expression condition = expression();
         Statement thenBranch = block();
+        List<Statement.OtherwiseIf> otherwiseIfs = new ArrayList<>();
         Statement otherwiseBranch = null;
-        if (match(TokenType.OTHERWISE)) {
+
+        while (match(TokenType.OTHERWISE) && match(TokenType.IF)) {
+            Token otherwiseIfLocation = getJustConsumed();
+            Expression otherwiseIfCondition = expression();
+            Statement otherwiseIfBranch = block();
+            otherwiseIfs.add(new Statement.OtherwiseIf(otherwiseIfCondition, otherwiseIfBranch, otherwiseIfLocation));
+        }
+
+        if (getJustConsumed().type == TokenType.OTHERWISE) {
             otherwiseBranch = block();
         }
 
-        return new Statement.If(condition, thenBranch, otherwiseBranch, location);
+        return new Statement.If(condition, thenBranch, otherwiseIfs, otherwiseBranch, location);
     }
 
     // repeatTimesStatement: "repeat" expression "times" block ;
