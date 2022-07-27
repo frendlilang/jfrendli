@@ -39,7 +39,7 @@ public class Environment {
             return enclosing.get(name);
         }
 
-        throw new RuntimeError(name, "'" + name.lexeme + "' has not been created. First create it and set it to a value.");
+        throw new RuntimeError(name, "'" + name.lexeme + "' has not been created or defined. To create it, use 'create', or define it using 'define'.");
     }
 
     /**
@@ -63,9 +63,14 @@ public class Environment {
      */
     public void define(Token name, Object value) {
         // Redefining a variable in the same scope is not allowed
-        // (e.g. two "create" statements with the same variable name)
+        // (e.g. two "create" or "define" statements with the same variable name)
         if (values.containsKey(name.lexeme)) {
-            throw new RuntimeError(name, "'" + name.lexeme + "' has already been created. If you meant to change it, use 'change'.");
+            String message = "'" + name.lexeme + "' has already been created. If you meant to change it, use 'change'.";
+            if (values.get(name.lexeme) instanceof FrendliFunction) {
+                message = "'" + name.lexeme + "' has already been defined.";
+            }
+
+            throw new RuntimeError(name, message);
         }
 
         values.put(name.lexeme, value);
@@ -102,7 +107,7 @@ public class Environment {
             return;
         }
 
-        throw new RuntimeError(name, "'" + name.lexeme + "' has not been created. First create it and set it to a value.");
+        throw new RuntimeError(name, "'" + name.lexeme + "' has not yet been created. To create it, use 'create'. Only then may you later change it using 'change'.");
     }
 
     /**

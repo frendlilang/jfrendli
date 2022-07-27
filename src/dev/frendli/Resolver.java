@@ -289,7 +289,7 @@ public class Resolver implements ExpressionVisitor<Void>, StatementVisitor<Void>
 
         Set<String> scope = getInnermostScope();
         if (scope.contains(name.lexeme)) {
-            error(name, "'" + name.lexeme + "' has already been created. If you meant to change it, use 'change'.");
+            error(name, "'" + name.lexeme + "' already exists.");
         }
 
         scope.add(name.lexeme);
