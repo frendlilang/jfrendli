@@ -76,7 +76,12 @@ public class Scanner {
         while (!isAtEnd()) {
             scanToken();
         }
-        resetIndents();
+
+        // Reset indent level and add remaining DEDENT tokens for correctly ended files.
+        boolean endsWithNewline = (current > 0 && getJustConsumed() == '\n');
+        if (endsWithNewline) {
+            resetIndents();
+        }
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
         return tokens;
@@ -101,6 +106,8 @@ public class Scanner {
 
         char character = getJustConsumed();
         switch (character) {
+            // '\r' and '\r\n' have been replaced with '\n'
+            // prior to sending the source code to Scanner
             case '\n':
                 if (!isBlankLine) {
                     addToken(TokenType.NEWLINE);
@@ -400,8 +407,11 @@ public class Scanner {
         if (type == TokenType.NEWLINE) {
             lexeme = "newline";
         }
-        else if (type == TokenType.INDENT || type == TokenType.DEDENT) {
+        else if (type == TokenType.INDENT) {
             lexeme = "indentation";
+        }
+        else if (type == TokenType.DEDENT) {
+            lexeme = "dedentation";
         }
 
         tokens.add(new Token(type, lexeme, literal, line));
@@ -463,6 +473,24 @@ public class Scanner {
     }
 
     /**
+     * Get the current character that has not yet been consumed.
+     *
+     * @return The current unconsumed character.
+     */
+    private char getCurrentUnconsumed() {
+        return source.charAt(current);
+    }
+
+    /**
+     * Get the character that was most recently consumed.
+     *
+     * @return The most recently consumed character.
+     */
+    private char getJustConsumed() {
+        return source.charAt(current - 1);
+    }
+
+    /**
      * Advance to the end of the line.
      */
     private void skipUntilEndOfLine() {
@@ -521,24 +549,6 @@ public class Scanner {
      */
     private int tabsToSpaces(int startColumnOfTab, int tabSize) {
         return (startColumnOfTab / tabSize + 1) * tabSize;
-    }
-
-    /**
-     * Get the current character that has not yet been consumed.
-     *
-     * @return The current unconsumed character.
-     */
-    private char getCurrentUnconsumed() {
-        return source.charAt(current);
-    }
-
-    /**
-     * Get the character that was most recently consumed.
-     *
-     * @return The most recently consumed character.
-     */
-    private char getJustConsumed() {
-        return source.charAt(current - 1);
     }
 
     /**
