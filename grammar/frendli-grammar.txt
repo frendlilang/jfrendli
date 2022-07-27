@@ -3,32 +3,33 @@
 GRAMMAR TERMINOLOGY
 -------------------
 
-terminal                a literal to be matched and consumed
-nonterminal             a call to the function rule
+terminal                A literal to be matched and consumed
+nonterminal             A call to the function rule
 
 
 ----------------
 GRAMMAR NOTATION
 ----------------
 
-<rule name>:<rule>      rule structure
-<quoted string>         exact terminal
-<uppercase word>        varying terminal
-<lowercase word>        nonterminal
+<rule name>:<rule>      Rule structure
+<double quoted string>  Exact terminal
+<uppercase word>        Varying terminal
+<lowercase word>        Nonterminal
 
-:                       start of rule (definer)
-;                       end of rule (terminator)
-*                       match zero or more of its left
-+                       match one or more of its left
-?                       match zero or one of its left (optional)
-|                       match its left or right
-(                       start of group
-)                       end of group
-"                       start or end (encloses) of literal
-<                       start of comment
->                       end of comment
-\                       escape the meaning of its right character
-...                     any value from its left to its right
+:                       Start of rule (definer)
+;                       End of rule (terminator)
+x*                      Match zero or more of x
+x+                      Match one or more of x
+x?                      Match zero or one of x
+x1 x2                   Match x1 then x2
+x1 | x2                 Match x1 or x2
+( x )                   Match x (everything inside the parentheses)
+\c                      Escape the grammatical meaning of character c
+v1 ... v2               Any value in the range from v1 to v2 inclusive
+"                       Start or end (enclosing) of exact terminal
+'                       Start or end (enclosing) of escape sequence
+<                       Start of comment describing the rule
+>                       End of comment describing the rule
 
 
 ----------
@@ -169,12 +170,12 @@ DIGIT:
 	"0" ... "9" ;
 
 NEWLINE:
-    "\\n"
-    | "\\r\\n"
-    | "\\r" ;
+    '\n'
+    | '\r'
+    | '\r\n' ;
 
 INDENT:
-    ( " " | "\\t" )+ ;
+    ( " " | '\t' )+ ;
 
 DEDENT:
     <a decrease in INDENT> ;
