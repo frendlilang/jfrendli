@@ -14,11 +14,14 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     private final ErrorReporter reporter;                               // Reporter of runtime errors
     private final Environment globalEnvironment = new Environment();    // The global environment
     private Environment currentEnvironment = globalEnvironment;         // The current environment which changes during execution as blocks are entered and exited
-    private final Map<Token, Integer> resolved = new HashMap<>();       // Local variables (key) resolved by the resolver (value = distance to corresponding environment)
+    private final Map<Token, Integer> resolved = new HashMap<>();       // Variables (key) resolved by the resolver (value = distance to corresponding environment)
+    private final List<String> nativeNames = new ArrayList<>();         // The names of standard library members (used by Resolver)
 
     public Interpreter(ErrorReporter reporter) {
         globalEnvironment.defineNative("time", new NativeFunction.Time());
         globalEnvironment.defineNative("display", new NativeFunction.Display());
+        nativeNames.add("time");
+        nativeNames.add("display");
         this.reporter = reporter;
     }
 
@@ -271,13 +274,13 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
      * @return The value.
      */
     private Object getVariable(Token name) {
+        // The distance will always be 0 or greater and never null due to the
+        // Resolver reporting an error if the local or global name (including
+        // native) cannot be resolved (thereby not proceeding to the interpreter).
+        // (I.e. this is a coupling point between Resolver and Interpreter.)
         Integer distance = resolved.get(name);
-        boolean isLocal = distance != null;
-        if (isLocal) {
-            return currentEnvironment.getAt(distance, name);
-        }
 
-        return globalEnvironment.get(name);
+        return currentEnvironment.getAt(distance, name);
     }
 
     /**
@@ -287,14 +290,12 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
      * @param value The value.
      */
     private void assignVariable(Token name, Object value) {
+        // The distance will always be 0 or greater and never null due to the
+        // Resolver reporting an error if the local or global name (including
+        // native) cannot be resolved (thereby not proceeding to the interpreter).
+        // (I.e. this is a coupling point between Resolver and Interpreter.)
         Integer distance = resolved.get(name);
-        boolean isLocal = distance != null;
-        if (isLocal) {
-            currentEnvironment.assignAt(distance, name, value);
-        }
-        else {
-            globalEnvironment.assign(name, value);
-        }
+        currentEnvironment.assignAt(distance, name, value);
     }
 
     /**
@@ -460,5 +461,14 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
         }
 
         throw new RuntimeError(location, "The number must be a positive integer.");
+    }
+
+    /**
+     * Get the names of the native members (standard library).
+     *
+     * @return The names of the native members.
+     */
+    public List<String> getNativeNames() {
+        return List.copyOf(nativeNames);
     }
 }
