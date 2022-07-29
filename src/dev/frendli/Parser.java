@@ -432,7 +432,7 @@ public class Parser {
         if (peek().type == TokenType.INDENT) {
             // If the user starts the expression with an indentation where a
             // new a block is not allowed, provide a more meaningful message.
-            message = "This line is too indented.";
+            message = "This line is too indented. Decrease the level of indentation used.";
         }
         throw error(peek(), message);
     }
@@ -537,28 +537,76 @@ public class Parser {
     }
 
     /**
-     * Synchronize the tokens to the next statement.
-     * (Prevents cascaded errors deriving from an original
-     * error to be falsely reported.)
+     * Synchronize the tokens to the next block or statement.
+     * (Prevents cascaded and falsely reported errors.)
      */
     private void synchronize() {
-        advance();
+        // Errors caused by an illegal increase in indentation tend to cause more
+        // ambiguous cascaded errors in the eyes of a novice compared to other
+        // initial errors. Synchronizing to the next same-level block (i.e. just
+        // after its corresponding dedentation) in these cases allows novices to
+        // focus on the initial errors first while not getting confused about
+        // falsely reported errors. An obvious tradeoff is that the code up until
+        // the next same-level block will not be checked for errors in this pass.
+        Token errorToken = advance();
+        if (errorToken.type == TokenType.INDENT) {
+            synchronizeToNextBlock();
+        }
+        else {
+            synchronizeToNextStatement();
+        }
+    }
 
-        // Advance to the next token until the start of the
-        // next statement likely has been reached.
-        while (!isAtEnd() && !isAtStartOfStatement(peek())) {
+    /**
+     * Synchronize the tokens to the next statement or end
+     * of current block.
+     */
+    private void synchronizeToNextStatement() {
+        // In addition to not advancing passed the start of a statement,
+        // don't discard a DEDENT as it allows blocks to then consume it.
+        // Otherwise, the parser thinks that statements following the DEDENT
+        // belongs to the previous block, causing cascaded indent/dedent errors.
+        while (!isAtEnd() && !isAtStartOfStatement() && !check(TokenType.DEDENT)) {
             advance();
         }
     }
 
     /**
-     * Check if a given token is the start of a statement.
-     *
-     * @param token The token.
-     * @return Whether it is a start token.
+     * Synchronize the tokens to the next block on the same level.
+     * (I.e. tokens in nested blocks will also be discarded.)
      */
-    private boolean isAtStartOfStatement(Token token) {
-        switch (token.type) {
+    private void synchronizeToNextBlock() {
+        TokenType justConsumedType;
+        int nestedLevels = 0;
+
+        while (!isAtEnd()) {
+            // When the corresponding DEDENT has been consumed (i.e.
+            // nestedLevels == 0) the tokens have been synchronized.
+            justConsumedType = advance().type;
+            if (justConsumedType == TokenType.DEDENT && nestedLevels == 0) {
+                return;
+            }
+            if (justConsumedType == TokenType.DEDENT) {
+                nestedLevels--;
+            }
+            else if (justConsumedType == TokenType.INDENT) {
+                nestedLevels++;
+            }
+        }
+    }
+
+    /**
+     * Check if the current unconsumed token is the start
+     * of a statement.
+     *
+     * @return Whether it is the start of a statement.
+     */
+    private boolean isAtStartOfStatement() {
+        if (getJustConsumed().type == TokenType.NEWLINE) {
+            return true;
+        }
+
+        switch (peek().type) {
             case CHANGE:
             case CREATE:
             case DEFINE:
