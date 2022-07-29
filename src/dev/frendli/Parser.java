@@ -425,11 +425,16 @@ public class Parser {
             return new Expression.Grouping(expression);
         }
 
-        // If this is reached, the current token is not the start
-        // of an expression. Hence, an error is thrown to synchronize
-        // the parser's state using Java's call stack, catching the
-        // exception where it's being synchronized to.
-        throw error(peek(), "Cannot find a valid expression.");
+        // If this is reached, the current token is not the start of an expression.
+        // Hence, an error is thrown to synchronize the parser's state using Java's
+        // call stack, catching the exception where it's being synchronized to.
+        String message = "Cannot find a valid expression.";
+        if (peek().type == TokenType.INDENT) {
+            // If the user starts the expression with an indentation where a
+            // new a block is not allowed, provide a more meaningful message.
+            message = "This line is too indented.";
+        }
+        throw error(peek(), message);
     }
 
     /**
