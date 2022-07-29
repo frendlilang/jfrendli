@@ -194,17 +194,16 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     @Override
     public Object visitCallExpression(Expression.Call expression) {
         Object callee = evaluate(expression.callee);
+        if (!(callee instanceof FrendliCallable)) {
+            throw new RuntimeError(expression.location, "You can only call what has previously been defined (with 'define')");
+        }
+        FrendliCallable function = (FrendliCallable)callee;
 
         // Evaluate the arguments from left to right
         List<Object> arguments = new ArrayList<>();
         for (Expression argument : expression.arguments) {
             arguments.add(evaluate(argument));
         }
-
-        if (!(callee instanceof FrendliCallable)) {
-            throw new RuntimeError(expression.location, "You can only call what has previously been defined (with 'define')");
-        }
-        FrendliCallable function = (FrendliCallable)callee;
 
         if (arguments.size() != function.arity()) {
             throw new RuntimeError(expression.location, "The number of arguments sent must be " + function.arity() + " but got " + arguments.size() + ".");
