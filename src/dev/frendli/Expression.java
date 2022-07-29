@@ -33,12 +33,12 @@ public abstract class Expression {
     public static class Call extends Expression {
         public final Expression callee;
         public final List<Expression> arguments;
-        public final Token endToken;
+        public final Token location;
 
-        public Call(Expression callee, List<Expression> arguments, Token endToken) {
+        public Call(Expression callee, List<Expression> arguments, Token location) {
             this.callee = callee;
             this.arguments = arguments;
-            this.endToken = endToken;
+            this.location = location;
         }
 
         public <R> R accept(ExpressionVisitor<R> visitor) {

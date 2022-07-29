@@ -331,26 +331,29 @@ public class Resolver implements ExpressionVisitor<Void>, StatementVisitor<Void>
     }
 
     /**
-     * Verify that the variable being declared is not also being
+     * Verify that the variable being initialized is not also being
      * accessed in its initializer.
      *
-     * @param declared The declared variable.
-     * @param initialized The variable used in the initializer.
+     * @param initialized The initialized variable.
+     * @param initializer The right-hand side initializer.
      */
-    private void verifyNotAccessingItselfInInitializer(Token declared, Expression initialized) {
-        if (!(initialized instanceof Expression.Variable))
+    private void verifyNotAccessingItselfInInitializer(Token initialized, Expression initializer) {
+        if (!(initializer instanceof Expression.Variable))
             return;
 
-        // Accessing a variable that has previously been declared in
+        // Accessing a variable that has previously been initialized in
         // an outer scope with the same name as the one currently being
-        // declared is not allowed in its own initializer. E.g:
+        // initialized is not allowed in its own initializer. E.g:
         // create x = 1
         // if x > 0
         //      create x = x        <-- illegal access on right-hand side
-        Token initializerName = ((Expression.Variable)initialized).name;
-        if (initializerName.lexeme.equals(declared.lexeme)) {
+        Token initializerName = ((Expression.Variable)initializer).name;
+        if (initializerName.lexeme.equals(initialized.lexeme)) {
             error(initializerName, "You cannot use '" + initializerName.lexeme + "' on both sides of '=' when creating it.");
         }
+
+        // TODO: Update implementation. The current implementation applies to
+        //       right-hand sides that are exactly a variable, not e.g. x + 1
     }
 
     /**

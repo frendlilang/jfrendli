@@ -202,12 +202,12 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
         }
 
         if (!(callee instanceof FrendliCallable)) {
-            throw new RuntimeError(expression.endToken, "You can only call what has previously been defined (with 'define') or described (with 'describe').");
+            throw new RuntimeError(expression.location, "You can only call what has previously been defined (with 'define')");
         }
         FrendliCallable function = (FrendliCallable)callee;
 
         if (arguments.size() != function.arity()) {
-            throw new RuntimeError(expression.endToken, "The number of arguments sent must be " + function.arity() + " but got " + arguments.size() + ".");
+            throw new RuntimeError(expression.location, "The number of arguments sent must be " + function.arity() + " but got " + arguments.size() + ".");
         }
 
         return function.call(this, arguments);
