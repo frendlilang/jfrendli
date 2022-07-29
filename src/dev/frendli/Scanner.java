@@ -267,7 +267,7 @@ public class Scanner {
             error(line, "The max indentation has been reached. You cannot indent further.");
         }
         if (altColumnsInIndent <= altIndentStack[indentLevel]) {
-            error(line, "There is a problem with the indentation.");
+            error(line, "You may be using tabs in this indentation, and spaces in the previous one. Use only spaces or tabs.");
         }
 
         // When the current line is more indented than the previous one,
@@ -296,8 +296,8 @@ public class Scanner {
             indentLevel--;
         }
         // Check if the line is still not consistently indented.
-        if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
-            error(line, "There are inconsistencies in the level of indentation used in this line compared to previous ones.");
+        if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel]) {
+            error(line, "The level of indentation does not match any previous lines. (Make sure to use only tabs or only spaces on all lines.)");
         }
 
         addPendingIndents();
