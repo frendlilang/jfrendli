@@ -29,8 +29,11 @@ public abstract class ErrorReporter {
         else if (token.type == TokenType.NEWLINE) {
             location = "at the end of the line";
         }
-        else if (token.type == TokenType.INDENT || token.type == TokenType.DEDENT) {
+        else if (token.type == TokenType.INDENT) {
             location = "at the indentation";
+        }
+        else if (token.type == TokenType.DEDENT) {
+            location = "at the decrease of indentation";
         }
         report(token.line, location, message);
         compileTimeErrorReported = true;
@@ -54,8 +57,8 @@ public abstract class ErrorReporter {
     public static class Console extends ErrorReporter {
         @Override
         protected void report(int line, String location, String message) {
-            System.err.println("Error " + location + "\n" +
-                    "   Line " + line + " |\t" + message
+            System.err.println(" Error " + location + "\n" +
+                    "   > Line " + line + " |\t" + message
             );
             System.out.println();
         }
