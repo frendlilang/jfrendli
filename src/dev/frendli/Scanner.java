@@ -373,7 +373,8 @@ public class Scanner {
     private void consumeText() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
-                error(line++, "Found a newline in the text. Texts cannot contain newline characters.");
+                error(line, "The text is not terminated. Texts must be terminated on the same line by a \"");
+                return;
             }
             advance();
         }
