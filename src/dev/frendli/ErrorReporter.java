@@ -57,8 +57,11 @@ public abstract class ErrorReporter {
     public static class Console extends ErrorReporter {
         @Override
         protected void report(int line, String location, String message) {
-            System.err.println(" Error " + location + "\n" +
-                    "   > Line " + line + " |\t" + message
+            System.err.println(" Error\n" +
+                    "   > Where: \n" +
+                    "      > Line " + line + " " + location + "\n" +
+                    "   > Message: \n" +
+                    "      > " + message + "\n"
             );
             System.out.println();
         }
