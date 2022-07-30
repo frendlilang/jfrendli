@@ -1,15 +1,15 @@
 # The Frendli Programming Language
 
-### dev-v0.1.0
+### v0.1
 
 Frendli is an open source general-purpose programming language designed around empirical data on difficulties and misconceptions held by novice programmers.
 
-> ⚠️ Frendli is currently in development.
+> ⚠️ Frendli is in active development.
 
 ## Table of Contents
 - [Purpose](#purpose)
 - [General Characteristics](#general-characteristics)
-- [Features (v0.1.0)](#features-v010)
+- [Features (v0.1)](#features-v01)
 - [Future Additions](#future-additions)
 - [Sample Code](#sample-code)
     - [Variables, Data Types, and Literals](#variables-data-types-and-literals)
@@ -40,7 +40,7 @@ Published article: [Designing an Introductory Programming Language Based on Stud
   * *(paused feature, may be removed)*
 * Interpreted
 
-## Features (v0.1.0)
+## Features (v0.1)
 
 Implemented features are marked as completed.
 
@@ -135,82 +135,38 @@ Implemented features are marked as completed.
 ## Sample Code
 
 #### Variables, Data Types, and Literals
-```
-create age = 30               // number
-create price = 4.25           // number
-create isValid = true         // boolean
-create isOnline = false       // boolean
-create firstName = "Jane"     // text
-create middleName = empty     // empty
-change middleName = "Mary"    // text
-```
+
+<a href="snippets/snippets.md#variables-data-types-and-literals">
+  <img src="snippets/frendli-snippet-variables.png" width="600" alt="A Frendli code snippet.">
+</a>
 
 #### Control Flow
-```
-// selection
 
-create score = 5
-create message = ""
+<a href="snippets/snippets.md#selection">
+  <img src="snippets/frendli-snippet-selection.png" width="600" alt="A Frendli code snippet.">
+</a>
 
-if score > 10
-    change message = "Very Good"
-otherwise if score > 5
-    change message = "Good"
-otherwise
-    change message = "Bad"
-```
+<a href="snippets/snippets.md#bounded-loop">
+  <img src="snippets/frendli-snippet-loop-bounded.png" width="600" alt="A Frendli code snippet.">
+</a>
 
-```
-// bounded loop
-
-create count = 0
-
-repeat 5 times
-    change count = count + 1
-    display(send count)
-```
-
-```
-// unbounded loop
-
-create max = 5
-create count = 0
-
-repeat while count < max
-    change count = count + 1
-    display(send count)
-```
+<a href="snippets/snippets.md#unbounded-loop">
+  <img src="snippets/frendli-snippet-loop-unbounded.png" width="600" alt="A Frendli code snippet.">
+</a>
 
 #### Functions
-```
-define add(accept a, b)
-    create result = a + b
-    return with result
 
-create result = add(send 2, 3)
-display(send result)
-```
+<a href="snippets/snippets.md#functions">
+  <img src="snippets/frendli-snippet-function.png" width="600" alt="A Frendli code snippet.">
+</a>
 
 #### OOP
 
 *(paused feature, may be removed)*
 
-```
-describe Point
-    has x
-    has y
-
-    define onNew(accept x, y)
-        change me.x = x
-        change me.y = y
-
-    define move(accept x, y)
-        change me.x = me.x + x
-        change me.y = me.y + y
-
-create pointA = new Point(send 1, 2)
-pointA.move(send 3, 4)
-```
+<a href="snippets/snippets.md#oop">
+  <img src="snippets/frendli-snippet-user-defined-type.png" width="600" alt="A Frendli code snippet.">
+</a>
 
 ## License
 
