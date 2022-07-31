@@ -11,11 +11,12 @@ Frendli is an open source general-purpose programming language designed around e
 - [General Characteristics](#general-characteristics)
 - [Features (v0.1)](#features-v01)
 - [Future Additions](#future-additions)
-- [Sample Code](#sample-code)
+- [Frendli Code Snippets](#frendli-code-snippets)
     - [Variables, Data Types, and Literals](#variables-data-types-and-literals)
     - [Control Flow](#control-flow)
     - [Functions](#functions)
     - [OOP](#oop)
+    - [Small Program](#small-program)
 
 ## Purpose
 
@@ -132,32 +133,38 @@ Implemented features are marked as completed.
 * Arithmetic operators (e.g. modulus)
 * Control statements (e.g. terminate execution of a loop)
 
-## Sample Code
+## Frendli Code Snippets
 
 #### Variables, Data Types, and Literals
 
 <a href="snippets/snippets.md#variables-data-types-and-literals">
-  <img src="snippets/frendli-snippet-variables.png" width="600" alt="A Frendli code snippet.">
+  <img src="snippets/frendli-snippet-variables.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
 #### Control Flow
 
 <a href="snippets/snippets.md#selection">
-  <img src="snippets/frendli-snippet-selection.png" width="600" alt="A Frendli code snippet.">
+  <img src="snippets/frendli-snippet-selection.svg" width="600" alt="A Frendli code snippet.">
 </a>
+
+<br>
+<br>
 
 <a href="snippets/snippets.md#bounded-loop">
-  <img src="snippets/frendli-snippet-loop-bounded.png" width="600" alt="A Frendli code snippet.">
+  <img src="snippets/frendli-snippet-bounded-loop.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
+<br>
+<br>
+
 <a href="snippets/snippets.md#unbounded-loop">
-  <img src="snippets/frendli-snippet-loop-unbounded.png" width="600" alt="A Frendli code snippet.">
+  <img src="snippets/frendli-snippet-unbounded-loop.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
 #### Functions
 
 <a href="snippets/snippets.md#functions">
-  <img src="snippets/frendli-snippet-function.png" width="600" alt="A Frendli code snippet.">
+  <img src="snippets/frendli-snippet-function.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
 #### OOP
@@ -165,7 +172,13 @@ Implemented features are marked as completed.
 *(paused feature, may be removed)*
 
 <a href="snippets/snippets.md#oop">
-  <img src="snippets/frendli-snippet-user-defined-type.png" width="600" alt="A Frendli code snippet.">
+  <img src="snippets/frendli-snippet-class.svg" width="600" alt="A Frendli code snippet.">
+</a>
+
+#### Small Program
+
+<a href="snippets/snippets.md#small-program">
+  <img src="snippets/frendli-snippet-small-program.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
 ## License
