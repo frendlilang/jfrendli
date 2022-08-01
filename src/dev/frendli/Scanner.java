@@ -348,7 +348,7 @@ public class Scanner {
             }
         }
 
-        double literal = Double.parseDouble(source.substring(start, current));
+        double literal = Double.parseDouble(getJustConsumedLexeme());
         addToken(TokenType.NUMBER, literal);
     }
 
@@ -360,10 +360,9 @@ public class Scanner {
             advance();
         }
 
-        // If the literal matches one of the reserved keywords, the token
+        // If the lexeme matches one of the reserved keywords, the token
         // type will be that of the keyword, otherwise a regular identifier.
-        String literal = source.substring(start, current);
-        TokenType type = keywords.getOrDefault(literal, TokenType.IDENTIFIER);
+        TokenType type = keywords.getOrDefault(getJustConsumedLexeme(), TokenType.IDENTIFIER);
         addToken(type);
     }
 
@@ -384,7 +383,7 @@ public class Scanner {
         advance();
 
         // Remove double quotes from text literal.
-        String literal = source.substring(start + 1, current - 1);
+        String literal = getLexeme(start + 1, current - 1);
         addToken(TokenType.TEXT, literal);
     }
 
@@ -406,18 +405,7 @@ public class Scanner {
      * @param literal The literal value of the token.
      */
     private void addToken(TokenType type, Object literal) {
-        String lexeme = source.substring(start, current);
-        if (type == TokenType.NEWLINE) {
-            lexeme = "newline";
-        }
-        else if (type == TokenType.INDENT) {
-            lexeme = "indentation";
-        }
-        else if (type == TokenType.DEDENT) {
-            lexeme = "dedentation";
-        }
-
-        tokens.add(new Token(type, lexeme, literal, line));
+        tokens.add(new Token(type, getJustConsumedLexeme(), literal, line));
     }
 
     /**
@@ -491,6 +479,26 @@ public class Scanner {
      */
     private char getJustConsumed() {
         return source.charAt(current - 1);
+    }
+
+    /**
+     * Get a lexeme.
+     *
+     * @param start The start index (inclusive).
+     * @param end The end index (exclusive).
+     * @return The lexeme.
+     */
+    private String getLexeme(int start, int end) {
+        return source.substring(start, end);
+    }
+
+    /**
+     * Get the lexeme that was most recently consumed.
+     *
+     * @return The most recently consumed lexeme.
+     */
+    private String getJustConsumedLexeme() {
+        return source.substring(start, current);
     }
 
     /**
