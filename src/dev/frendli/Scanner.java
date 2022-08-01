@@ -6,27 +6,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The scanner - traverses the characters in the source code and detects
- * the corresponding tokens as well as errors in individual tokens.
+ * The scanner/lexer - traverses the characters in the source code
+ * and generates the corresponding tokens as well as detects errors
+ * in individual tokens.
  */
 public class Scanner {
-    private final ErrorReporter reporter;                               // Reporter of syntax errors generated
+    private final ErrorReporter reporter;                               // Reporter of syntax errors
     private final String source;                                        // Source code
     private final List<Token> tokens = new ArrayList<>();               // Tokens produced by the scanner
     private final Map<String, TokenType> keywords = new HashMap<>();    // Reserved keywords
     private final int TAB_SIZE = 8;                                     // Number of columns in a tab
     private final int ALT_TAB_SIZE = 1;                                 // Number of alt columns in a tab
     private final int MAX_INDENT_LEVEL = 100;                           // Max indent level allowed
-    private int[] indentStack = new int[MAX_INDENT_LEVEL];              // Stack with number of columns used in each indent level
-    private int[] altIndentStack = new int[MAX_INDENT_LEVEL];           // Stack with number of alt columns used in each indent level
+    private final int[] indentStack = new int[MAX_INDENT_LEVEL];        // Stack with number of columns used in each indent level
+    private final int[] altIndentStack = new int[MAX_INDENT_LEVEL];     // Stack with number of alt columns used in each indent level
     private int indentLevel = 0;                                        // Current indent level (always incremented by 1)
     private int pendingIndents = 0;                                     // Number of pending indents (if > 0) or dedents (if < 0)
-    private int columnsInIndent = 0;                                    // Number of columns in indentation
-    private int altColumnsInIndent = 0;                                 // Number of alt columns in indentation
-    private int spacesInIndent = 0;                                     // Number of spaces in indentation
-    private int tabsInIndent = 0;                                       // Number of tabs in indentation
-    private int start = 0;                                              // First character of current lexeme being scanned
-    private int current = 0;                                            // Current character of current lexeme being scanned
+    private int columnsInIndent = 0;                                    // Number of columns in current indentation
+    private int altColumnsInIndent = 0;                                 // Number of alt columns in current indentation
+    private int spacesInIndent = 0;                                     // Number of spaces in current indentation
+    private int tabsInIndent = 0;                                       // Number of tabs in current indentation
+    private int start = 0;                                              // Position of first character of current lexeme being scanned
+    private int current = 0;                                            // Position of current unconsumed character of current lexeme being scanned
     private int line = 1;                                               // Current line in source file (for error reporting)
     private boolean isAtStartOfLine = true;                             // Whether the scanner is at the start of the line
     private boolean isBlankLine = false;                                // Whether the current line is blank (only whitespace, comments, and/or newline)
@@ -71,16 +72,16 @@ public class Scanner {
      *
      * @return List of tokens.
      */
-    public List<Token> scanTokens() {
-        // As long as the end of the file has not been reached, keep
-        // scanning token by token, resetting the start position of the
-        // lexeme to the first character in the next one to be scanned.
+    public List<Token> scan() {
         while (!isAtEnd()) {
-            start = current;
             scanToken();
         }
-        // Reset indentation if the file ends without full dedentation.
-        resetIndentation();
+
+        // Reset indent level and add remaining DEDENT tokens for correctly ended files.
+        boolean endsWithNewline = (current > 0 && getJustConsumed() == Ascii.NEWLINE.get());
+        if (endsWithNewline) {
+            resetIndents();
+        }
         tokens.add(new Token(TokenType.EOF, "", null, line));
 
         return tokens;
@@ -95,67 +96,78 @@ public class Scanner {
         if (isAtStartOfLine) {
             isAtStartOfLine = false;
             isBlankLine = false;
-            consumeIndentation();
+            consumeIndent();
         }
 
+        // Reset the start position of the lexeme to the first character
+        // in the one being scanned (previous calls to 'advance()' above
+        // will increment 'current', therefore 'current - 1' is needed.)
         start = current - 1;
+
         char character = getJustConsumed();
-        switch (character) {
-            case '\n':
+        Ascii ascii = Ascii.find(character);
+        if (ascii == null) {
+            error(line, "Found an unexpected character " + character);
+            return;
+        }
+        switch (ascii) {
+            // '\r' and '\r\n' have been replaced with '\n'
+            // prior to sending the source code to Scanner
+            case NEWLINE:
                 if (!isBlankLine) {
                     addToken(TokenType.NEWLINE);
                 }
                 line++;
                 isAtStartOfLine = true;
                 break;
-            case '(':
+            // Ignore whitespace and tabs that are
+            // not at the beginning of the lines.
+            case SPACE:
+            case TAB:
+                break;
+            case OPEN_PAREN:
                 addToken(TokenType.OPEN_PAREN);
                 break;
-            case ')':
+            case CLOSE_PAREN:
                 addToken(TokenType.CLOSE_PAREN);
                 break;
-            case ',':
+            case COMMA:
                 addToken(TokenType.COMMA);
                 break;
-            case '.':
+            case DOT:
                 addToken(TokenType.DOT);
                 break;
-            case '=':
+            case EQUALS:
                 addToken(TokenType.EQUALS_SIGN);
                 break;
-            case '-':
+            case MINUS:
                 addToken(TokenType.MINUS);
                 break;
-            case '+':
+            case PLUS:
                 addToken(TokenType.PLUS);
                 break;
-            case '*':
+            case STAR:
                 addToken(TokenType.STAR);
                 break;
-            case '>':
-                addToken(match('=')
+            case GREATER_THAN:
+                addToken(match(Ascii.EQUALS.get())
                     ? TokenType.GREATER_THAN_EQUALS
                     : TokenType.GREATER_THAN);
                 break;
-            case '<':
-                addToken(match('=')
+            case LESS_THAN:
+                addToken(match(Ascii.EQUALS.get())
                     ? TokenType.LESS_THAN_EQUALS
                     : TokenType.LESS_THAN);
                 break;
-            case '/':
-                if (match('/')) {
+            case SLASH:
+                if (match(Ascii.SLASH.get())) {
                     skipUntilEndOfLine();
                 }
                 else {
                     addToken(TokenType.SLASH);
                 }
                 break;
-            // Ignore whitespace and tabs that are
-            // not at the beginning of the lines.
-            case ' ':
-            case '\t':
-                break;
-            case '"':
+            case DOUBLE_QUOTE:
                 consumeText();
                 break;
             default:
@@ -167,9 +179,6 @@ public class Scanner {
                 else if (isAlpha(character)) {
                     consumeIdentifier();
                 }
-                else {
-                    error(line, "Found an unexpected character " + character);
-                }
                 break;
         }
     }
@@ -177,22 +186,28 @@ public class Scanner {
     /**
      * Consume the current indentation.
      */
-    private void consumeIndentation() {
+    private void consumeIndent() {
         // Count and consume the spaces and tabs.
         countColumnsInIndent();
 
         char character = getJustConsumed();
 
         // Skip blank lines (lines with only whitespace, comments, and/or newline).
-        boolean isComment = (character == '/' && peek() == '/');
-        isBlankLine = (isComment || character == '\n');
+        boolean isComment = (character == Ascii.SLASH.get() && peek() == Ascii.SLASH.get());
+        isBlankLine = (character == Ascii.SPACE.get() || character == Ascii.TAB.get() || isComment || character == Ascii.NEWLINE.get());
         if (isBlankLine) {
+            if (isAtEnd() && character != Ascii.NEWLINE.get()) {
+                error(line, "The last line is indented. The file must end with a new line without indentation.");
+            }
+
             // Do not increment line count here as other reported errors
             // will then report the next line rather than the current.
             // (The newline is caught by the switch statement in scanToken.)
             return;
         }
 
+        // Only check for mixed tabs and spaces after checking blank lines.
+        // (Whether they are mixed in blank lines is insignificant.)
         boolean isMixingTabsAndSpaces = (tabsInIndent > 0 && spacesInIndent > 0);
         if (isMixingTabsAndSpaces) {
             error(line, "Found both spaces and tabs in the indentation. Use only one or the other.");
@@ -206,38 +221,12 @@ public class Scanner {
         }
         // Check if the line is more indented than the previous line.
         else if (columnsInIndent > indentStack[indentLevel]) {
-            // Check if the next level of indentation exceeds allowed limit.
-            if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
-                error(line, "The max indentation has been reached. You cannot indent further.");
-            }
-            if (altColumnsInIndent <= altIndentStack[indentLevel]) {
-                error(line, "There is a problem with the indentation.");
-            }
-
-            // If the current line is more indented than the previous one,
-            // add a new indentation level to the stack and increment
-            // pending indents so INDENT tokens can be added later.
-            pendingIndents++;
-            indentLevel++;
-            indentStack[indentLevel] = columnsInIndent;
-            altIndentStack[indentLevel] = altColumnsInIndent;
+            increaseIndent();
         }
         // Check if the line is less indented than the previous line.
         else {
-            // If the current line is less indented than the previous one, pop
-            // indentation levels off of the stack until the indentation is consistent,
-            // and decrement pending indents so DEDENT tokens can be added later.
-            while (indentLevel > 0 && columnsInIndent < indentStack[indentLevel]) {
-                pendingIndents--;
-                indentLevel--;
-            }
-            // Check if the line is still not consistently indented.
-            if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel] ) {
-                error(line, "There are inconsistencies in the level of indentation used.");
-            }
+            decreaseIndent();
         }
-
-        addPendingIndents();
     }
 
     /**
@@ -250,8 +239,8 @@ public class Scanner {
         tabsInIndent = 0;
 
         char character = getJustConsumed();
-        while ((character == ' ' || character == '\t') && !isAtEnd()) {
-            if (character == ' ') {
+        while ((character == Ascii.SPACE.get() || character == Ascii.TAB.get())) {
+            if (character == Ascii.SPACE.get()) {
                 spacesInIndent++;
                 columnsInIndent++;
                 altColumnsInIndent++;
@@ -262,8 +251,69 @@ public class Scanner {
                 altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_SIZE);
             }
 
+            // Don't add '&& !isAtEnd()' to the loop condition as
+            // it prevents the last space/tab from being counted.
+            if (isAtEnd()) {
+                return;
+            }
             character = advance();
         }
+    }
+
+    /**
+     * Increase the indent level by 1 level and add the remaining indent.
+     */
+    private void increaseIndent() {
+        // Check if the next level of indentation exceeds allowed limit.
+        if (indentLevel + 1 >= MAX_INDENT_LEVEL) {
+            error(line, "The max indentation has been reached. You cannot indent further.");
+        }
+        if (altColumnsInIndent <= altIndentStack[indentLevel]) {
+            error(line, "You may be using tabs in this indentation, and spaces in the previous one. Use only spaces or tabs.");
+        }
+
+        // When the current line is more indented than the previous one,
+        // add a new indent level to the stack, store the number of columns
+        // used in that indent level, and increment pending indents so
+        // INDENT tokens can be added later.
+        pendingIndents++;
+        indentLevel++;
+        indentStack[indentLevel] = columnsInIndent;
+        altIndentStack[indentLevel] = altColumnsInIndent;
+
+        addPendingIndents();
+    }
+
+    /**
+     * Decrease the indent level down to the next consistent level
+     * and add the remaining dedents.
+     */
+    private void decreaseIndent() {
+        // When the current line is less indented than the previous one, pop
+        // indent levels off of the stack until the current indentation is
+        // consistent with any other indent level, and decrement pending
+        // indents so DEDENT tokens can be added later.
+        while (indentLevel > 0 && columnsInIndent < indentStack[indentLevel]) {
+            pendingIndents--;
+            indentLevel--;
+        }
+        // Check if the line is still not consistently indented.
+        if (columnsInIndent != indentStack[indentLevel] || altColumnsInIndent != altIndentStack[indentLevel]) {
+            error(line, "The level of indentation does not match any previous lines. (Make sure to use only tabs or only spaces on all lines.)");
+        }
+
+        addPendingIndents();
+    }
+
+    /**
+     * Reset the indent level to 0 and add the remaining dedents.
+     */
+    private void resetIndents() {
+        while (indentLevel > 0) {
+            pendingIndents--;
+            indentLevel--;
+        }
+        addPendingIndents();
     }
 
     /**
@@ -292,7 +342,7 @@ public class Scanner {
 
         // Only consume the dot if there are succeeding digits
         // (since it may otherwise be a method call).
-        if (peek() == '.' && isDigit(peekNext())) {
+        if (peek() == Ascii.DOT.get() && isDigit(peekNext())) {
             // Consume the dot (.) then all following digits.
             advance();
             while (isDigit(peek())) {
@@ -300,7 +350,7 @@ public class Scanner {
             }
         }
 
-        double literal = Double.parseDouble(source.substring(start, current));
+        double literal = Double.parseDouble(getJustConsumedLexeme());
         addToken(TokenType.NUMBER, literal);
     }
 
@@ -312,10 +362,9 @@ public class Scanner {
             advance();
         }
 
-        // If the literal matches one of the reserved keywords, the token
+        // If the lexeme matches one of the reserved keywords, the token
         // type will be that of the keyword, otherwise a regular identifier.
-        String literal = source.substring(start, current);
-        TokenType type = keywords.getOrDefault(literal, TokenType.IDENTIFIER);
+        TokenType type = keywords.getOrDefault(getJustConsumedLexeme(), TokenType.IDENTIFIER);
         addToken(type);
     }
 
@@ -323,15 +372,12 @@ public class Scanner {
      * Consume the current text literal.
      */
     private void consumeText() {
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') {
-                error(line++, "Found a newline in the text. Texts cannot contain newline characters.");
-            }
+        while (peek() != Ascii.DOUBLE_QUOTE.get() && peek() != Ascii.NEWLINE.get() && !isAtEnd()) {
             advance();
         }
 
-        if (isAtEnd()) {
-            error(line, "The text is not terminated. Texts must be terminated by a \"");
+        if (isAtEnd() || peek() == Ascii.NEWLINE.get()) {
+            error(line, "The text is not terminated. Texts must be terminated on the same line by a " + Ascii.DOUBLE_QUOTE.get());
             return;
         }
 
@@ -339,10 +385,16 @@ public class Scanner {
         advance();
 
         // Remove double quotes from text literal.
-        String literal = source.substring(start + 1, current - 1);
+        String literal = getLexeme(start + 1, current - 1);
         addToken(TokenType.TEXT, literal);
     }
 
+    /**
+     * Create a token from the current lexeme that does not
+     * have a literal value and add it to the list of tokens.
+     *
+     * @param type The type of the token.
+     */
     private void addToken(TokenType type) {
         addToken(type, null);
     }
@@ -352,18 +404,10 @@ public class Scanner {
      * the list of tokens.
      *
      * @param type The type of the token.
-     * @param literal The literal of the token type.
+     * @param literal The literal value of the token.
      */
     private void addToken(TokenType type, Object literal) {
-        String lexeme = source.substring(start, current);
-        if (type == TokenType.NEWLINE) {
-            lexeme = "newline";
-        }
-        else if (type == TokenType.INDENT || type == TokenType.DEDENT) {
-            lexeme = "indentation";
-        }
-
-        tokens.add(new Token(type, lexeme, literal, line));
+        tokens.add(new Token(type, getJustConsumedLexeme(), literal, line));
     }
 
     /**
@@ -402,7 +446,7 @@ public class Scanner {
      */
     private char peek() {
         if (isAtEnd()) {
-            return '\0';    // null
+            return Ascii.NULL.get();
         }
 
         return getCurrentUnconsumed();
@@ -415,60 +459,109 @@ public class Scanner {
      */
     private char peekNext() {
         if (current + 1 > source.length()) {
-            return '\0';    // null
+            return Ascii.NULL.get();
         }
 
         return source.charAt(current + 1);
     }
 
     /**
+     * Get the current character that has not yet been consumed.
+     *
+     * @return The current unconsumed character.
+     */
+    private char getCurrentUnconsumed() {
+        return source.charAt(current);
+    }
+
+    /**
+     * Get the character that was most recently consumed.
+     *
+     * @return The most recently consumed character.
+     */
+    private char getJustConsumed() {
+        return source.charAt(current - 1);
+    }
+
+    /**
+     * Get a lexeme.
+     *
+     * @param start The start index (inclusive).
+     * @param end The end index (exclusive).
+     * @return The lexeme.
+     */
+    private String getLexeme(int start, int end) {
+        return source.substring(start, end);
+    }
+
+    /**
+     * Get the lexeme that was most recently consumed.
+     *
+     * @return The most recently consumed lexeme.
+     */
+    private String getJustConsumedLexeme() {
+        return source.substring(start, current);
+    }
+
+    /**
      * Advance to the end of the line.
      */
     private void skipUntilEndOfLine() {
-        while (peek() != '\n' && !isAtEnd()) {
+        while (peek() != Ascii.NEWLINE.get() && !isAtEnd()) {
             advance();
         }
     }
 
     /**
-     * Reset the indentation level to 0 and add the remaining dedents.
+     * Check if a character is alpha (a-Z) or underscore.
+     *
+     * @param character The character to be checked.
+     * @return Whether it is alpha.
      */
-    private void resetIndentation() {
-        while (indentLevel > 0) {
-            pendingIndents--;
-            indentLevel--;
-        }
-        addPendingIndents();
-    }
-
     private boolean isAlpha(char character) {
-        return (character >= 'a' && character <= 'z')
-                || (character >= 'A' && character <= 'Z')
-                || (character == '_');
+        return (character >= Ascii.a.get() && character <= Ascii.z.get())
+                || (character >= Ascii.A.get() && character <= Ascii.Z.get())
+                || (character == Ascii.UNDERSCORE.get());
     }
 
+    /**
+     * Check if a character is alphanumeric (a-Z, 0-9) or underscore.
+     *
+     * @param character The character to be checked.
+     * @return Whether it is alphanumeric.
+     */
     private boolean isAlphaNumeric(char character) {
         return isAlpha(character) || isDigit(character);
     }
 
+    /**
+     * Check if a character is a digit (0-9).
+     *
+     * @param character The character to be checked.
+     * @return Whether it is a digit.
+     */
     private boolean isDigit(char character) {
-        return character >= '0' && character <= '9';
+        return character >= Ascii._0.get() && character <= Ascii._9.get();
     }
 
+    /**
+     * Check if the end of the source file has been reached.
+     *
+     * @return Whether it is at the end.
+     */
     private boolean isAtEnd() {
         return current >= source.length();
     }
 
-    private int tabsToSpaces(int column, int tabSize) {
-        return (column / tabSize + 1) * tabSize;
-    }
-
-    private char getCurrentUnconsumed() {
-        return source.charAt(current);
-    }
-
-    private char getJustConsumed() {
-        return source.charAt(current - 1);
+    /**
+     * Convert tabs to spaces.
+     *
+     * @param startColumnOfTab The column where the tab starts.
+     * @param tabSize The size of the tab.
+     * @return The size in spaces.
+     */
+    private int tabsToSpaces(int startColumnOfTab, int tabSize) {
+        return (startColumnOfTab / tabSize + 1) * tabSize;
     }
 
     /**

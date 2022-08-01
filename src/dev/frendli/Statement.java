@@ -7,21 +7,11 @@ import java.util.List;
 // the "accept" method and call the corresponding "visit" method
 // on its visitor.
 
+/**
+ * The compile-time representation of a statement (the tree node).
+ */
 public abstract class Statement {
-    public interface Visitor<R> {
-        R visitBlockStatement(Block statement);
-        R visitCreateStatement(Create statement);
-        R visitChangeStatement(Change statement);
-        R visitDefineStatement(Define statement);
-        R visitExpressionStatement(ExpressionStatement statement);
-        R visitIfStatement(If statement);
-        R visitRepeatTimesStatement(RepeatTimes statement);
-        R visitRepeatWhileStatement(RepeatWhile statement);
-        R visitReturnStatement(Return statement);
-        R visitReturnWithStatement(ReturnWith statement);
-    }
-
-    public abstract <R> R accept(Visitor<R> visitor);
+    public abstract <R> R accept(StatementVisitor<R> visitor);
 
     public static class Block extends Statement {
         public final List<Statement> statements;
@@ -31,7 +21,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitBlockStatement(this);
         }
     }
@@ -46,7 +36,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitCreateStatement(this);
         }
     }
@@ -61,7 +51,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitChangeStatement(this);
         }
     }
@@ -78,7 +68,7 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitDefineStatement(this);
         }
     }
@@ -93,88 +83,103 @@ public abstract class Statement {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitExpressionStatement(this);
         }
     }
 
     public static class If extends Statement {
-        public final Token start;               // For reporting location of possible error
         public final Expression condition;
         public final Statement thenBranch;
+        public final List<OtherwiseIf> otherwiseIfs;
         public final Statement otherwiseBranch;
+        public final Token location;
 
-        public If(Token start, Expression condition, Statement thenBranch, Statement otherwiseBranch) {
-            this.start = start;
+        public If(Expression condition, Statement thenBranch, List<OtherwiseIf> otherwiseIfs, Statement otherwiseBranch, Token location) {
             this.condition = condition;
             this.thenBranch = thenBranch;
+            this.otherwiseIfs = otherwiseIfs;
             this.otherwiseBranch = otherwiseBranch;
+            this.location = location;
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitIfStatement(this);
         }
     }
 
+    // Helper class to If
+    public static class OtherwiseIf {
+        public final Expression condition;
+        public final Statement thenBranch;
+        public final Token location;
+
+        public OtherwiseIf(Expression condition, Statement thenBranch, Token location) {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.location = location;
+        }
+    }
+
     public static class RepeatTimes extends Statement {
-        public final Token start;               // For reporting location of possible error
         public final Expression times;
         public final Statement body;
+        public final Token location;
 
-        public RepeatTimes(Token start, Expression times, Statement body) {
-            this.start = start;
+        public RepeatTimes(Expression times, Statement body, Token location) {
             this.times = times;
             this.body = body;
+            this.location = location;
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitRepeatTimesStatement(this);
         }
     }
 
     public static class RepeatWhile extends Statement {
-        public final Token start;               // For reporting location of possible error
         public final Expression condition;
         public final Statement body;
+        public final Token location;
 
-        public RepeatWhile(Token start, Expression condition, Statement body) {
-            this.start = start;
+        public RepeatWhile(Expression condition, Statement body, Token location) {
             this.condition = condition;
             this.body = body;
+            this.location = location;
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitRepeatWhileStatement(this);
         }
     }
 
     public static class Return extends Statement {
-        public final Token closest;
+        public final Token location;
 
-        public Return(Token closest) {
-            this.closest = closest;
+        public Return(Token location) {
+            this.location = location;
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitReturnStatement(this);
         }
     }
 
     public static class ReturnWith extends Statement {
-        public final Token closest;
         public final Expression value;
+        public final Token location;
 
-        public ReturnWith(Token closest, Expression value) {
-            this.closest = closest;
+        public ReturnWith(Token location, Expression value) {
             this.value = value;
+            this.location = location;
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(StatementVisitor<R> visitor) {
             return visitor.visitReturnWithStatement(this);
         }
     }

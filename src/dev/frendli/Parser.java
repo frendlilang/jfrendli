@@ -21,7 +21,7 @@ import java.util.List;
 // variableDeclaration:     "create" IDENTIFIER "=" expression NEWLINE ;
 // changeStatement:         "change" IDENTIFIER "=" expression NEWLINE ;
 // expressionStatement:     expression NEWLINE ;
-// ifStatement:             "if" expression block ( "otherwise" block )? ;
+// ifStatement:             "if" expression block ( "otherwise" "if" expression block )* ( "otherwise" block )?
 // repeatTimesStatement:    "repeat" expression "times" block ;
 // repeatWhileStatement:    "repeat" "while" expression block ;
 // returnStatement:         "return" NEWLINE ;
@@ -47,9 +47,9 @@ import java.util.List;
  * the lowest-precedence.)
  */
 public class Parser {
-    private final ErrorReporter reporter;
-    private final List<Token> tokens;
-    private int current = 0;
+    private final ErrorReporter reporter;           // Reporter of syntax errors
+    private final List<Token> tokens;               // Tokens to be parsed
+    private int current = 0;                        // Position of current unconsumed token
 
     public Parser (List<Token> tokens, ErrorReporter reporter) {
         this.tokens = tokens;
@@ -198,53 +198,62 @@ public class Parser {
         return new Statement.ExpressionStatement(expression);
     }
 
-    // ifStatement: "if" expression block ( "otherwise" block )? ;
+    // ifStatement: "if" expression block ( "otherwise" "if" expression block )* ( "otherwise" block )?
     private Statement ifStatement() {
-        Token start = getJustConsumed();
+        Token location = getJustConsumed();
         Expression condition = expression();
         Statement thenBranch = block();
+        List<Statement.OtherwiseIf> otherwiseIfs = new ArrayList<>();
         Statement otherwiseBranch = null;
-        if (match(TokenType.OTHERWISE)) {
+
+        while (match(TokenType.OTHERWISE) && match(TokenType.IF)) {
+            Token otherwiseIfLocation = getJustConsumed();
+            Expression otherwiseIfCondition = expression();
+            Statement otherwiseIfBranch = block();
+            otherwiseIfs.add(new Statement.OtherwiseIf(otherwiseIfCondition, otherwiseIfBranch, otherwiseIfLocation));
+        }
+
+        if (getJustConsumed().type == TokenType.OTHERWISE) {
             otherwiseBranch = block();
         }
 
-        return new Statement.If(start, condition, thenBranch, otherwiseBranch);
+        return new Statement.If(condition, thenBranch, otherwiseIfs, otherwiseBranch, location);
     }
 
     // repeatTimesStatement: "repeat" expression "times" block ;
     private Statement repeatTimesStatement() {
-        Token start = getJustConsumed();
+        Token location = getJustConsumed();
         Expression times = expression();
         consume(TokenType.TIMES, "The expression must be followed by 'times'.");
         Statement body = block();
 
-        return new Statement.RepeatTimes(start, times, body);
+        return new Statement.RepeatTimes(times, body, location);
     }
 
     // repeatWhileStatement: "repeat" "while" expression block ;
     private Statement repeatWhileStatement() {
-        Token start = getJustConsumed();
+        Token location = getJustConsumed();
         Expression condition = expression();
         Statement body = block();
 
-        return new Statement.RepeatWhile(start, condition, body);
+        return new Statement.RepeatWhile(condition, body, location);
     }
 
     // returnStatement: "return" NEWLINE ;
     private Statement returnStatement() {
-        Token closest = getJustConsumed();
+        Token location = getJustConsumed();
         consume(TokenType.NEWLINE, "You must add a new line after 'return'. To return with a value, use 'return with' instead.");
 
-        return new Statement.Return(closest);
+        return new Statement.Return(location);
     }
 
     // returnWithStatement: "return" "with" expression NEWLINE ;
     private Statement returnWithStatement() {
-        Token closest = getJustConsumed();
+        Token location = getJustConsumed();
         Expression value = expression();
         consumeNewline();
 
-        return new Statement.ReturnWith(closest, value);
+        return new Statement.ReturnWith(location, value);
     }
 
     // block: NEWLINE INDENT statement+ DEDENT ;
@@ -416,11 +425,16 @@ public class Parser {
             return new Expression.Grouping(expression);
         }
 
-        // If this is reached, the current token is not the start
-        // of an expression. Hence, an error is thrown to synchronize
-        // the parser's state using Java's call stack, catching the
-        // exception where it's being synchronized to.
-        throw error(peek(), "Cannot find a valid expression.");
+        // If this is reached, the current token is not the start of an expression.
+        // Hence, an error is thrown to synchronize the parser's state using Java's
+        // call stack, catching the exception where it's being synchronized to.
+        String message = "Cannot find a valid expression.";
+        if (peek().type == TokenType.INDENT) {
+            // If the user starts the expression with an indentation where a
+            // new a block is not allowed, provide a more meaningful message.
+            message = "This line is too indented. Decrease the level of indentation used.";
+        }
+        throw error(peek(), message);
     }
 
     /**
@@ -523,6 +537,91 @@ public class Parser {
     }
 
     /**
+     * Synchronize the tokens to the next block or statement.
+     * (Prevents cascaded and falsely reported errors.)
+     */
+    private void synchronize() {
+        // Errors caused by an illegal increase in indentation tend to cause more
+        // ambiguous cascaded errors in the eyes of a novice compared to other
+        // initial errors. Synchronizing to the next same-level block (i.e. just
+        // after its corresponding dedentation) in these cases allows novices to
+        // focus on the initial errors first while not getting confused about
+        // falsely reported errors. An obvious tradeoff is that the code up until
+        // the next same-level block will not be checked for errors in this pass.
+        Token errorToken = advance();
+        if (errorToken.type == TokenType.INDENT) {
+            synchronizeToNextBlock();
+        }
+        else {
+            synchronizeToNextStatement();
+        }
+    }
+
+    /**
+     * Synchronize the tokens to the next statement or end
+     * of current block.
+     */
+    private void synchronizeToNextStatement() {
+        // In addition to not advancing passed the start of a statement,
+        // don't discard a DEDENT as it allows blocks to then consume it.
+        // Otherwise, the parser thinks that statements following the DEDENT
+        // belongs to the previous block, causing cascaded indent/dedent errors.
+        while (!isAtEnd() && !isAtStartOfStatement() && !check(TokenType.DEDENT)) {
+            advance();
+        }
+    }
+
+    /**
+     * Synchronize the tokens to the next block on the same level.
+     * (I.e. tokens in nested blocks will also be discarded.)
+     */
+    private void synchronizeToNextBlock() {
+        TokenType justConsumedType;
+        int nestedLevels = 0;
+
+        while (!isAtEnd()) {
+            // When the corresponding DEDENT has been consumed (i.e.
+            // nestedLevels == 0) the tokens have been synchronized.
+            justConsumedType = advance().type;
+            if (justConsumedType == TokenType.DEDENT && nestedLevels == 0) {
+                return;
+            }
+            if (justConsumedType == TokenType.DEDENT) {
+                nestedLevels--;
+            }
+            else if (justConsumedType == TokenType.INDENT) {
+                nestedLevels++;
+            }
+        }
+    }
+
+    /**
+     * Check if the current unconsumed token is the start
+     * of a statement.
+     *
+     * @return Whether it is the start of a statement.
+     */
+    private boolean isAtStartOfStatement() {
+        if (getJustConsumed().type == TokenType.NEWLINE) {
+            return true;
+        }
+
+        switch (peek().type) {
+            case CHANGE:
+            case CREATE:
+            case DEFINE:
+            case DESCRIBE:
+            case HAS:
+            case IF:
+            case REPEAT:
+            case RETURN:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Report a parse error.
      *
      * @param token The token that caused the error.
@@ -536,42 +635,5 @@ public class Parser {
         // as synchronization may not be needed for all errors.
         // Thus don't throw the error here.
         return new ParseError();
-    }
-
-    /**
-     * Synchronize the tokens to the next statement.
-     * (Prevents cascaded errors deriving from an original
-     * error to be falsely reported.)
-     */
-    private void synchronize() {
-        advance();
-
-        // Advance to the next token until the start of the
-        // next statement likely has been reached.
-        while (!isAtEnd() && !isAtStartOfStatement(peek())) {
-            advance();
-        }
-    }
-
-    /**
-     * Check if a given token is the start of a statement.
-     *
-     * @param token The token.
-     * @return Whether it is a start token.
-     */
-    private boolean isAtStartOfStatement(Token token) {
-        switch (token.type) {
-            case CHANGE:
-            case CREATE:
-            case DEFINE:
-            case DESCRIBE:
-            case HAS:
-            case IF:
-            case REPEAT:
-            case RETURN:
-                return true;
-            default:
-                return false;
-        }
     }
 }

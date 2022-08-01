@@ -15,15 +15,19 @@ import java.util.Stack;
  * resolver visits all nodes exactly 1 time (O(n)) and does not execute
  * any statements.
  */
-public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
-    private final ErrorReporter reporter;                       // Error reporter for reporting compile time errors
-    private final Interpreter interpreter;                      // The interpreter
-    private final Stack<Set<String>> scopes = new Stack<>();    // Stack of local block scopes containing the variable names
+public class Resolver implements ExpressionVisitor<Void>, StatementVisitor<Void> {
+    private final ErrorReporter reporter;                       // Reporter of compile-time errors
+    private final Interpreter interpreter;                      // The interpreter executing the code (runtime)
+    private final Stack<Set<String>> scopes = new Stack<>();    // Stack of block scopes containing the variable names (including 1st scope as global)
     private ContextType currentContext = ContextType.NONE;      // The current context in which something is being resolved (e.g. a function or method)
 
     public Resolver(Interpreter interpreter, ErrorReporter reporter) {
         this.interpreter = interpreter;
         this.reporter = reporter;
+
+        // The first scope on the stack is the global scope
+        createScope();
+        scopes.peek().addAll(interpreter.getNativeNames());
     }
 
     /**
@@ -65,6 +69,8 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
 
     @Override
     public Void visitDefineStatement(Statement.Define statement) {
+        // Declare the name in the current scope before resolving the
+        // function's statements in its inner scope to allow for recursion.
         declare(statement.name);
         resolveFunction(statement, ContextType.FUNCTION);
 
@@ -82,6 +88,12 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     public Void visitIfStatement(Statement.If statement) {
         resolve(statement.condition);
         resolve(statement.thenBranch);
+
+        for (Statement.OtherwiseIf otherwiseIf : statement.otherwiseIfs) {
+            resolve(otherwiseIf.condition);
+            resolve(otherwiseIf.thenBranch);
+        }
+
         if (statement.otherwiseBranch != null) {
             resolve(statement.otherwiseBranch);
         }
@@ -108,7 +120,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitReturnStatement(Statement.Return statement) {
         if (currentContext != ContextType.FUNCTION) {
-            error(statement.closest, "You can only return from within a definition.");
+            error(statement.location, "You can only return from within a definition.");
         }
 
         return null;
@@ -117,7 +129,7 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     @Override
     public Void visitReturnWithStatement(Statement.ReturnWith statement) {
         if (currentContext != ContextType.FUNCTION) {
-            error(statement.closest, "You can only return from within a definition.");
+            error(statement.location, "You can only return from within a definition.");
         }
 
         resolve(statement.value);
@@ -178,6 +190,31 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     /**
+     * Declare a name in the innermost scope.
+     *
+     * @param name The name to be declared.
+     */
+    private void declare(Token name) {
+        Set<String> scope = getInnermostScope();
+        if (scope.contains(name.lexeme)) {
+            error(name, "'" + name.lexeme + "' already exists.");
+        }
+
+        scope.add(name.lexeme);
+    }
+
+    /**
+     * Declare names in the innermost scope.
+     *
+     * @param names The names to be declared.
+     */
+    private void declare(List<Token> names) {
+        for (Token name : names) {
+            declare(name);
+        }
+    }
+
+    /**
      * Resolve a statement.
      *
      * @param statement The statement to resolve.
@@ -196,27 +233,26 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     /**
-     * Resolve a local variable.
+     * Resolve a variable.
      *
      * @param name The name to resolve.
      */
     private void resolve(Token name) {
-        // Search for the name starting from the innermost scope.
+        // Search for the name in each scope to know where it was most recently
+        // declared (lexically closer) by starting from the innermost scope.
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).contains(name.lexeme)) {
-                // Calculate the distance from the innermost scope
-                // to the closest scope where the name was defined.
-                int distance = scopes.size() - 1 - i;
+                // Add the distance to the interpreter so that it can
+                // look up the variable in the correct environment.
+                interpreter.resolve(name, getDistanceToScope(i));
 
-                // Add the result to the interpreter so that it can directly
-                // look up the environment in which the variable exists.
-                interpreter.resolve(name, distance);
                 return;
             }
         }
 
-        // If this is reached, the variable is assumed to be global.
-        // (The interpreter will throw a runtime error if it is not.)
+        // If this is reached, the variable or function has not been
+        // declared lexically prior to where it is being referenced.
+        error(name, "'" + name.lexeme + "' has not been created or defined. To create it, use 'create', or define it using 'define'.");
     }
 
     /**
@@ -259,7 +295,9 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
      * Discard the innermost scope.
      */
     private void discardScope() {
-        scopes.pop();
+        if (!isGlobalScope()) {
+            scopes.pop();
+        }
     }
 
     /**
@@ -272,55 +310,50 @@ public class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Voi
     }
 
     /**
-     * Declare a name in the innermost scope.
+     * Get the distance from the innermost scope to an outer scope.
      *
-     * @param name The name to be declared.
+     * @param targetScopeIndex The index of the target scope.
+     * @return The distance to the target scope.
      */
-    private void declare(Token name) {
-        if (scopes.isEmpty()) {
-            return;
-        }
+    private int getDistanceToScope(int targetScopeIndex) {
+        int innermostScopeIndex = scopes.size() - 1;
 
-        Set<String> scope = getInnermostScope();
-        if (scope.contains(name.lexeme)) {
-            error(name, "'" + name.lexeme + "' has already been created. If you meant to change it, use 'change'.");
-        }
-
-        scope.add(name.lexeme);
+        return innermostScopeIndex - targetScopeIndex;
     }
 
     /**
-     * Declare names in the innermost scope.
+     * Check if the current scope is the global scope.
      *
-     * @param names The names to be declared.
+     * @return Whether the current scope is the global scope.
      */
-    private void declare(List<Token> names) {
-        for (Token name : names) {
-            declare(name);
-        }
+    private boolean isGlobalScope() {
+        return scopes.size() == 1;
     }
 
     /**
-     * Verify that the variable being declared is not also being
+     * Verify that the variable being initialized is not also being
      * accessed in its initializer.
      *
-     * @param declared The declared variable.
-     * @param initialized The variable used in the initializer.
+     * @param initialized The initialized variable.
+     * @param initializer The right-hand side initializer.
      */
-    private void verifyNotAccessingItselfInInitializer(Token declared, Expression initialized) {
-        if (!(initialized instanceof Expression.Variable))
+    private void verifyNotAccessingItselfInInitializer(Token initialized, Expression initializer) {
+        if (!(initializer instanceof Expression.Variable))
             return;
 
-        // Accessing a variable that has previously been declared in
+        // Accessing a variable that has previously been initialized in
         // an outer scope with the same name as the one currently being
-        // declared is not allowed in its own initializer. E.g:
+        // initialized is not allowed in its own initializer. E.g:
         // create x = 1
         // if x > 0
         //      create x = x        <-- illegal access on right-hand side
-        Token initializerName = ((Expression.Variable)initialized).name;
-        if (initializerName.lexeme.equals(declared.lexeme)) {
+        Token initializerName = ((Expression.Variable)initializer).name;
+        if (initializerName.lexeme.equals(initialized.lexeme)) {
             error(initializerName, "You cannot use '" + initializerName.lexeme + "' on both sides of '=' when creating it.");
         }
+
+        // TODO: Update implementation. The current implementation applies to
+        //       right-hand sides that are exactly a variable, not e.g. x + 1
     }
 
     /**

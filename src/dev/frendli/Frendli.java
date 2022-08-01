@@ -20,7 +20,7 @@ public class Frendli {
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             printUsage();
-            System.exit(64);    // UNIX sysexits.h
+            System.exit(ExitCode.USAGE_ERROR.getValue());
         }
         else if (args.length == 1) {
             runFile(args[0]);
@@ -31,16 +31,18 @@ public class Frendli {
     }
 
     private static void runFile(String path) throws IOException {
+        verifyExtension(path);
+
         final String REGEX_ALL_NEWLINES = "(\\r\\n)|(\\r)/g";
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         String source = new String(bytes, Charset.defaultCharset());
         run(source.replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
         if (reporter.hadCompileTimeError()) {
-            System.exit(65);    // UNIX sysexits.h
+            System.exit(ExitCode.INPUT_DATA_ERROR.getValue());
         }
         if (reporter.hadRuntimeError()) {
-            System.exit(70);    // UNIX sysexits.h
+            System.exit(ExitCode.INTERNAL_SOFTWARE_ERROR.getValue());
         }
     }
 
@@ -67,7 +69,7 @@ public class Frendli {
 
     private static void run(String source) {
         Scanner scanner = new Scanner(source, reporter);
-        List<Token> tokens = scanner.scanTokens();
+        List<Token> tokens = scanner.scan();
         Parser parser = new Parser(tokens, reporter);
         List<Statement> statements = parser.parse();
 
@@ -76,6 +78,7 @@ public class Frendli {
             return;
         }
 
+        // The resolver inserts the resolved data directly into the interpreter.
         Resolver resolver = new Resolver(interpreter, reporter);
         resolver.resolve(statements);
 
@@ -85,6 +88,13 @@ public class Frendli {
         }
 
         interpreter.interpret(statements);
+    }
+
+    private static void verifyExtension(String path) {
+        if (!path.toLowerCase().endsWith(".frendli")) {
+            System.out.println("Frendli only understands files with extension '.frendli'");
+            System.exit(ExitCode.INPUT_FILE_ERROR.getValue());
+        }
     }
 
     private static void printUsage() {

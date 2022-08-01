@@ -1,24 +1,17 @@
 package dev.frendli;
 
+import java.util.List;
+
 // All expressions reside here as individual classes inheriting
 // from the "Expression" base class. Each subclass must implement
 // the "accept" method and call the corresponding "visit" method
 // on its visitor.
 
-import java.util.List;
-
+/**
+ * The compile-time representation of an expression (the tree node).
+ */
 public abstract class Expression {
-    public interface Visitor<R> {
-        R visitBinaryExpression(Binary expression);
-        R visitCallExpression(Call expression);
-        R visitGroupingExpression(Grouping expression);
-        R visitLiteralExpression(Literal expression);
-        R visitLogicalExpression(Logical expression);
-        R visitUnaryExpression(Unary expression);
-        R visitVariableExpression(Variable expression);
-    }
-
-    public abstract <R> R accept(Visitor<R> visitor);
+    public abstract <R> R accept(ExpressionVisitor<R> visitor);
 
     public static class Binary extends Expression {
         public final Expression left;
@@ -32,7 +25,7 @@ public abstract class Expression {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitBinaryExpression(this);
         }
     }
@@ -40,15 +33,15 @@ public abstract class Expression {
     public static class Call extends Expression {
         public final Expression callee;
         public final List<Expression> arguments;
-        public final Token endToken;
+        public final Token location;
 
-        public Call(Expression callee, List<Expression> arguments, Token endToken) {
+        public Call(Expression callee, List<Expression> arguments, Token location) {
             this.callee = callee;
             this.arguments = arguments;
-            this.endToken = endToken;
+            this.location = location;
         }
 
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitCallExpression(this);
         }
     }
@@ -61,7 +54,7 @@ public abstract class Expression {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitGroupingExpression(this);
         }
     }
@@ -74,7 +67,7 @@ public abstract class Expression {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitLiteralExpression(this);
         }
     }
@@ -91,7 +84,7 @@ public abstract class Expression {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitLogicalExpression(this);
         }
     }
@@ -106,7 +99,7 @@ public abstract class Expression {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitUnaryExpression(this);
         }
     }
@@ -119,7 +112,7 @@ public abstract class Expression {
         }
 
         @Override
-        public <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitVariableExpression(this);
         }
     }
