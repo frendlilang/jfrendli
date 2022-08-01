@@ -78,7 +78,7 @@ public class Scanner {
         }
 
         // Reset indent level and add remaining DEDENT tokens for correctly ended files.
-        boolean endsWithNewline = (current > 0 && getJustConsumed() == '\n');
+        boolean endsWithNewline = (current > 0 && getJustConsumed() == Ascii.NEWLINE.get());
         if (endsWithNewline) {
             resetIndents();
         }
@@ -105,64 +105,69 @@ public class Scanner {
         start = current - 1;
 
         char character = getJustConsumed();
-        switch (character) {
+        Ascii ascii = Ascii.find(character);
+        if (ascii == null) {
+            error(line, "Found an unexpected character " + character);
+            return;
+        }
+        switch (ascii) {
             // '\r' and '\r\n' have been replaced with '\n'
             // prior to sending the source code to Scanner
-            case '\n':
+            case NEWLINE:
                 if (!isBlankLine) {
                     addToken(TokenType.NEWLINE);
                 }
                 line++;
                 isAtStartOfLine = true;
                 break;
-            case '(':
+            // Ignore whitespace and tabs that are
+            // not at the beginning of the lines.
+            case SPACE:
+            case TAB:
+                break;
+            case OPEN_PAREN:
                 addToken(TokenType.OPEN_PAREN);
                 break;
-            case ')':
+            case CLOSE_PAREN:
                 addToken(TokenType.CLOSE_PAREN);
                 break;
-            case ',':
+            case COMMA:
                 addToken(TokenType.COMMA);
                 break;
-            case '.':
+            case DOT:
                 addToken(TokenType.DOT);
                 break;
-            case '=':
+            case EQUALS:
                 addToken(TokenType.EQUALS_SIGN);
                 break;
-            case '-':
+            case MINUS:
                 addToken(TokenType.MINUS);
                 break;
-            case '+':
+            case PLUS:
                 addToken(TokenType.PLUS);
                 break;
-            case '*':
+            case STAR:
                 addToken(TokenType.STAR);
                 break;
-            case '>':
-                addToken(match('=')
+            case GREATER_THAN:
+                addToken(match(Ascii.EQUALS.get())
                     ? TokenType.GREATER_THAN_EQUALS
                     : TokenType.GREATER_THAN);
                 break;
-            case '<':
-                addToken(match('=')
+            case LESS_THAN:
+                addToken(match(Ascii.EQUALS.get())
                     ? TokenType.LESS_THAN_EQUALS
                     : TokenType.LESS_THAN);
                 break;
-            case '/':
-                if (match('/')) {
+            case SLASH:
+                if (match(Ascii.SLASH.get())) {
                     skipUntilEndOfLine();
                 }
                 else {
                     addToken(TokenType.SLASH);
                 }
                 break;
-            // Ignore whitespace and tabs that are
-            // not at the beginning of the lines.
-            case ' ':
-            case '\t':
-                break;
-            case '"':
+            case DOUBLE_QUOTE:
                 consumeText();
                 break;
             default:
@@ -173,9 +178,6 @@ public class Scanner {
                 }
                 else if (isAlpha(character)) {
                     consumeIdentifier();
-                }
-                else {
-                    error(line, "Found an unexpected character " + character);
                 }
                 break;
         }
@@ -191,10 +193,10 @@ public class Scanner {
         char character = getJustConsumed();
 
         // Skip blank lines (lines with only whitespace, comments, and/or newline).
-        boolean isComment = (character == '/' && peek() == '/');
-        isBlankLine = (character == ' ' || character == '\t' || isComment || character == '\n');
+        boolean isComment = (character == Ascii.SLASH.get() && peek() == Ascii.SLASH.get());
+        isBlankLine = (character == Ascii.SPACE.get() || character == Ascii.TAB.get() || isComment || character == Ascii.NEWLINE.get());
         if (isBlankLine) {
-            if (isAtEnd() && character != '\n') {
+            if (isAtEnd() && character != Ascii.NEWLINE.get()) {
                 error(line, "The last line is indented. The file must end with a new line without indentation.");
             }
 
@@ -237,8 +239,8 @@ public class Scanner {
         tabsInIndent = 0;
 
         char character = getJustConsumed();
-        while ((character == ' ' || character == '\t')) {
-            if (character == ' ') {
+        while ((character == Ascii.SPACE.get() || character == Ascii.TAB.get())) {
+            if (character == Ascii.SPACE.get()) {
                 spacesInIndent++;
                 columnsInIndent++;
                 altColumnsInIndent++;
@@ -340,7 +342,7 @@ public class Scanner {
 
         // Only consume the dot if there are succeeding digits
         // (since it may otherwise be a method call).
-        if (peek() == '.' && isDigit(peekNext())) {
+        if (peek() == Ascii.DOT.get() && isDigit(peekNext())) {
             // Consume the dot (.) then all following digits.
             advance();
             while (isDigit(peek())) {
@@ -370,12 +372,12 @@ public class Scanner {
      * Consume the current text literal.
      */
     private void consumeText() {
-        while (peek() != '"' && peek() != '\n' && !isAtEnd()) {
+        while (peek() != Ascii.DOUBLE_QUOTE.get() && peek() != Ascii.NEWLINE.get() && !isAtEnd()) {
             advance();
         }
 
-        if (isAtEnd() || peek() == '\n') {
-            error(line, "The text is not terminated. Texts must be terminated on the same line by a \"");
+        if (isAtEnd() || peek() == Ascii.NEWLINE.get()) {
+            error(line, "The text is not terminated. Texts must be terminated on the same line by a " + Ascii.DOUBLE_QUOTE.get());
             return;
         }
 
@@ -444,7 +446,7 @@ public class Scanner {
      */
     private char peek() {
         if (isAtEnd()) {
-            return '\0';    // null
+            return Ascii.NULL.get();
         }
 
         return getCurrentUnconsumed();
@@ -457,7 +459,7 @@ public class Scanner {
      */
     private char peekNext() {
         if (current + 1 > source.length()) {
-            return '\0';    // null
+            return Ascii.NULL.get();
         }
 
         return source.charAt(current + 1);
@@ -505,7 +507,7 @@ public class Scanner {
      * Advance to the end of the line.
      */
     private void skipUntilEndOfLine() {
-        while (peek() != '\n' && !isAtEnd()) {
+        while (peek() != Ascii.NEWLINE.get() && !isAtEnd()) {
             advance();
         }
     }
@@ -517,9 +519,9 @@ public class Scanner {
      * @return Whether it is alpha.
      */
     private boolean isAlpha(char character) {
-        return (character >= 'a' && character <= 'z')
-                || (character >= 'A' && character <= 'Z')
-                || (character == '_');
+        return (character >= Ascii.a.get() && character <= Ascii.z.get())
+                || (character >= Ascii.A.get() && character <= Ascii.Z.get())
+                || (character == Ascii.UNDERSCORE.get());
     }
 
     /**
@@ -539,7 +541,7 @@ public class Scanner {
      * @return Whether it is a digit.
      */
     private boolean isDigit(char character) {
-        return character >= '0' && character <= '9';
+        return character >= Ascii._0.get() && character <= Ascii._9.get();
     }
 
     /**

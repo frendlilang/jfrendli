@@ -4,8 +4,7 @@ package dev.frendli;
  * The type of token.
  */
 public enum TokenType {
-    // Single characters
-    OPEN_PAREN,
+    // Punctuation and non-keyword operators
     CLOSE_PAREN,
     COMMA,
     DOT,
@@ -15,11 +14,12 @@ public enum TokenType {
     LESS_THAN,
     LESS_THAN_EQUALS,
     MINUS,
+    OPEN_PAREN,
     PLUS,
     STAR,
     SLASH,
 
-    // Keywords
+    // Reserved keywords
     ACCEPT,
     AND,
     CHANGE,
@@ -58,5 +58,5 @@ public enum TokenType {
     NEWLINE,
 
     // End of file
-    EOF
+    EOF;
 }
