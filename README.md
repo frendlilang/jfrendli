@@ -18,12 +18,13 @@ Frendli is an open-source general-purpose programming language designed around e
     - [Control Flow](#control-flow)
     - [Functions](#functions)
     - [OOP](#oop)
+- [License](#license)
 
 ## Welcome 👋
 
 Hey there!
 
-Welcome to the `super` `Frendli` programming language. It is still undergoing some heavy lifting, but here's a quick taste of it: 
+Welcome to the `super` `Frendli` programming language for learning and teaching programming. It is still in active development, but here's a quick (and runnable) glimpse of it:
 
 <a href="snippets/snippets.md#small-program">
   <img src="snippets/frendli-snippet-small-program.svg" width="600" alt="A Frendli code snippet.">
@@ -33,9 +34,9 @@ Welcome to the `super` `Frendli` programming language. It is still undergoing so
 
 Frendli was developed to address to the frequent challenges experienced by novice students. Simply put, to create a friendlier language.
 
-The syntactic and semantic design is based on published studies on novices in introductory programming courses at universities. The studies revealed numerous factors that can be exploited in language design to facilitate learning to program.
-
 It is intended for use in the beginning stages of introductory programming courses, helping the student conceptualize and start programming with minimal friction, and thereafter transitioning early or mid-course to a different established language.
+
+The syntactic and semantic design is based on published studies on novices in introductory programming courses at universities. The studies revealed numerous factors that can be exploited in language design to facilitate learning to program.
 
 Frendli was originally developed as part of the thesis [Designing an Introductory Programming Language Based on Studies on Novices](https://lnu.diva-portal.org/smash/record.jsf?pid=diva2:1670920).
 
@@ -43,38 +44,39 @@ Frendli was originally developed as part of the thesis [Designing an Introductor
 
 Frendli is novice-oriented and centers around three main goals which are:
 
-#### 1. Be a low barrier to entry
+### 1. Be a low barrier to entry
 
 *Subgoal: Be easy to use and understand.*
 
-Since first-time programmers are the intended primary users of the language, lowering the barrier of entry and minimizing the initial friction is important.
+Since first-time programmers are the intended primary users of the language, lowering the barrier of entry and alleviating initial hurdles is important.
 
 This means*:
 * Producing fewer encountered difficulties and misconceptions.
 * Minimizing interference of syntax and time fixing syntax errors.
 * Being more intuitive and less ambiguous.
+* Having consistency between syntax and semantics.
 * Being less challenging for non-native English speakers.
 
-#### 2. Facilitate conceptualization
+### 2. Facilitate conceptualization
 
-*Subgoal: Illustrate what constructs do through its syntax.*
+*Subgoal: Illustrate what constructs do through their syntax.*
 
 Misconceptions are very common among novices and often arise from the syntax itself (see [article](https://lnu.diva-portal.org/smash/record.jsf?pid=diva2:1670920)). Frendli's goal is therefore to help the user conceptualize.
 
 This means*:
 * Having syntax that is more self-explanatory.
 
-#### 3. Be universally transitional
+### 3. Be universally transitional
 
 *Subgoal: Be a useful tool for teaching introductory programming and concepts.*
 
-Allowing easier transition into multiple (i.e. universally) general-purpose languages not only helps the student, but provides a realistic alternative for more educational institutions in terms of efficiently incorporating it into their existing programs.
+Allowing easier transition into multiple (i.e. universally) languages not only helps the student, but provides a realistic alternative for more educational institutions in terms of efficiently incorporating it into their existing programs, especially in combination with being useful for teaching.
 
 This means*:
 * Not forcing the use of entity terminology specific to Frendli.
-* Being pedagogically easier to focus on concepts.
 * Having less syntactic and conceptual conflict with the other languages.
 * Being less programming language dependent for reading and reasoning.
+* Being pedagogically easier to focus on fundamental concepts.
 
 &ast; *Compared to other languages used in introductory university courses.*
 
@@ -225,4 +227,4 @@ Implemented features are marked as completed.
 
 ## License
 
-This software is licensed under the terms of the MIT license (see LICENSE file).
+This software is licensed under the terms of the [MIT license](LICENSE).
