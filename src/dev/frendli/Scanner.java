@@ -371,16 +371,12 @@ public class Scanner {
      * Consume the current text literal.
      */
     private void consumeText() {
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') {
-                error(line, "The text is not terminated. Texts must be terminated on the same line by a \"");
-                return;
-            }
+        while (peek() != '"' && peek() != '\n' && !isAtEnd()) {
             advance();
         }
 
-        if (isAtEnd()) {
-            error(line, "The text is not terminated. Texts must be terminated by a \"");
+        if (isAtEnd() || peek() == '\n') {
+            error(line, "The text is not terminated. Texts must be terminated on the same line by a \"");
             return;
         }
 
@@ -392,6 +388,12 @@ public class Scanner {
         addToken(TokenType.TEXT, literal);
     }
 
+    /**
+     * Create a token from the current lexeme that does not
+     * have a literal value and add it to the list of tokens.
+     *
+     * @param type The type of the token.
+     */
     private void addToken(TokenType type) {
         addToken(type, null);
     }
@@ -401,7 +403,7 @@ public class Scanner {
      * the list of tokens.
      *
      * @param type The type of the token.
-     * @param literal The literal of the token type.
+     * @param literal The literal value of the token.
      */
     private void addToken(TokenType type, Object literal) {
         String lexeme = source.substring(start, current);
