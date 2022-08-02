@@ -4,7 +4,7 @@
 
 Frendli is an open-source general-purpose programming language designed around empirical data on difficulties and misconceptions held by novice programmers.
 
-> ⚠️ Frendli is in active development (as are the docs).
+> ⚠️ Frendli and its docs are in active development.
 
 ## Table of Contents
 - [Welcome](#welcome-)
@@ -198,13 +198,11 @@ Implemented features are marked as completed.
 </a>
 
 <br>
-<br>
 
 <a href="snippets/snippets.md#bounded-loop">
   <img src="snippets/frendli-snippet-bounded-loop.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
-<br>
 <br>
 
 <a href="snippets/snippets.md#unbounded-loop">

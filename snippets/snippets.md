@@ -27,7 +27,7 @@ define timeCount(accept target, step)
 
     return with (endTime - startTime) / 1000
 
-// Evaluate the guess
+// Evaluate a guess
 define evaluate(accept guess, actual)
     if guess equals actual
         display(send "Correct.")
@@ -39,10 +39,11 @@ define evaluate(accept guess, actual)
 // Start the count
 create target = 100
 create step = 1
-create guess = 0.01
 create result = timeCount(send target, step)
+
+// Guess the number of seconds
 if result unequals empty
-    evaluate(send guess, result)
+    evaluate(send 0.01, result)
 ```
 
 ## Variables, Data Types, and Literals
