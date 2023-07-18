@@ -1,12 +1,16 @@
 package dev.frendli;
 
 /**
- * The error reporter - reports any errors found. All
- * error reporters must extend the ErrorReporter base class.
+ * The error reporter - reports any errors found.
  */
-public abstract class ErrorReporter {
+public class ErrorReporter {
+    private final Logger logger;
     private boolean compileTimeErrorReported = false;
     private boolean runtimeErrorReported = false;
+
+    public ErrorReporter(Logger logger) {
+        this.logger = logger;
+    }
 
     public boolean hadCompileTimeError() {
         return compileTimeErrorReported;
@@ -49,21 +53,15 @@ public abstract class ErrorReporter {
         runtimeErrorReported = false;
     }
 
-    protected abstract void report(int line, String location, String message);
+    private void report(int line, String location, String message) {
+        logger.log(format(line, location, message));
+    }
 
-    /**
-     * The console error reporter - reports errors to the console.
-     */
-    public static class Console extends ErrorReporter {
-        @Override
-        protected void report(int line, String location, String message) {
-            System.err.println(" Error\n" +
-                    "   > Where: \n" +
-                    "      > Line " + line + " " + location + "\n" +
-                    "   > Message: \n" +
-                    "      > " + message + "\n"
-            );
-            System.out.println();
-        }
+    private String format(int line, String location, String message) {
+        return "Error\n" +
+                "  > Where: \n" +
+                "     > Line " + line + " " + location + "\n" +
+                "  > Message: \n" +
+                "     > " + message + "\n\n";
     }
 }

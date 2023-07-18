@@ -12,10 +12,11 @@ import java.util.List;
  * The main class of jfrendli.
  */
 public class Frendli {
-    private static final ErrorReporter reporter = new ErrorReporter.Console();
+    private static final ConsoleLogger usageLogger = new ConsoleLogger();
+    private static ErrorReporter reporter = new ErrorReporter(new ConsoleLogger());
     // The interpreter is static to allow the user's session in the interactive
     // prompt to keep using the same interpreter without creating a new one.
-    private static final Interpreter interpreter = new Interpreter(reporter);
+    private static Interpreter interpreter = new Interpreter(reporter, new ConsoleLogger());
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -39,6 +40,7 @@ public class Frendli {
         run(source.replaceAll(REGEX_ALL_NEWLINES, "\n"));
 
         if (reporter.hadCompileTimeError()) {
+            usageLogger.log("Exiting");
             System.exit(ExitCode.INPUT_DATA_ERROR.getValue());
         }
         if (reporter.hadRuntimeError()) {
@@ -50,11 +52,11 @@ public class Frendli {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
-        System.out.println("\nHowdy! Welcome to the Frendli interactive prompt!\n");
-        System.out.println("Go ahead and enter one line of code to be executed.");
+        usageLogger.log("\nHowdy! Welcome to the Frendli interactive prompt!\n");
+        usageLogger.log("Go ahead and enter one line of code to be executed.");
 
         while (true) {
-            System.out.print("> ");
+            usageLogger.logSameLine("> ");
             String line = reader.readLine();
             boolean hasExitedPrompt = (line == null);   // Caused when killed by Ctrl + D
             if (hasExitedPrompt) {
@@ -92,16 +94,49 @@ public class Frendli {
 
     private static void verifyExtension(String path) {
         if (!path.toLowerCase().endsWith(".frendli")) {
-            System.out.println("Frendli only understands files with extension '.frendli'");
+            usageLogger.logError("Frendli only understands files with extension '.frendli'");
             System.exit(ExitCode.INPUT_FILE_ERROR.getValue());
         }
     }
 
     private static void printUsage() {
-        System.out.println("Usage:");
-        System.out.println("\tRun a file:");
-        System.out.println("\t   java dev.frendli.Frendli <file>");
-        System.out.println("\tOr run the interactive prompt:");
-        System.out.println("\t   java dev.frendli.Frendli");
+        usageLogger.log("""
+                Usage: java dev.frendli.Frendli [path]
+                
+                    The REPL (interactive prompt) starts if no [path] is provided
+                """);
+    }
+
+    /**
+     * Log output and runtime/comptime Frendli errors to a default
+     * file (frendli-default.log). The file will be overwritten for
+     * each program run. (Used primarily for the tests.)
+     */
+    public static void _logToFile() {
+        setLogger(new FileLogger());
+    }
+
+    /**
+     * Log output and runtime/comptime Frendli errors to a file.
+     * The file will be overwritten for each program run.
+     * (Used primarily for the tests.)
+     *
+     * @param outputPath The path to the file to log to.
+     */
+    public static void _logToFile(String outputPath) {
+        setLogger(new FileLogger(outputPath));
+    }
+
+    /**
+     * Log output and runtime/comptime Frendli errors to the console.
+     * This is the default behavior.
+     */
+    public static void _logToConsole() {
+        setLogger(new ConsoleLogger());
+    }
+
+    private static void setLogger(Logger logger) {
+        reporter = new ErrorReporter(logger);
+        interpreter = new Interpreter(reporter, logger);
     }
 }

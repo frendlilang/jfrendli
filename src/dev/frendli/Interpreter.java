@@ -17,9 +17,9 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     private final Map<Token, Integer> resolved = new HashMap<>();       // Variables (key) resolved by the resolver (value = distance to corresponding environment)
     private final List<String> nativeNames = new ArrayList<>();         // The names of standard library members (used by Resolver)
 
-    public Interpreter(ErrorReporter reporter) {
+    public Interpreter(ErrorReporter reporter, Logger logger) {
         globalEnvironment.defineNative("time", new NativeFunction.Time());
-        globalEnvironment.defineNative("display", new NativeFunction.Display());
+        globalEnvironment.defineNative("display", new NativeFunction.Display(logger));
         nativeNames.add("time");
         nativeNames.add("display");
         this.reporter = reporter;
