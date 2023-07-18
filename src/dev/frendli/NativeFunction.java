@@ -32,6 +32,11 @@ public abstract class NativeFunction implements FrendliCallable {
      * Native function for outputting a string representation to the user.
      */
     public static class Display extends NativeFunction {
+        private final Logger logger;
+
+        public Display(Logger logger) {
+            this.logger = logger;
+        }
         @Override
         public int arity() {
             return 1;
@@ -71,7 +76,9 @@ public abstract class NativeFunction implements FrendliCallable {
         }
 
         private void print(String value) {
-            System.out.println(value);
+            // The default log mechanism is `System.out.println()`, but
+            // tests may modify this behavior to instead log to a file.
+            logger.log(value);
         }
     }
 }
