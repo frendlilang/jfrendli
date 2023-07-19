@@ -182,11 +182,3 @@ DEDENT:
 
 EOF:
     <end of file> ;
-
-
------
-NOTES
------
-
-* To be added to the grammar:
-    * "new" terminal during instantiation (class call)
