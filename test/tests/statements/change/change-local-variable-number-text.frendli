@@ -1,0 +1,8 @@
+if true
+    create a = 12
+    // Expect: 12
+    display(send a)
+
+    change a = "one"
+    // Expect: one
+    display(send a)

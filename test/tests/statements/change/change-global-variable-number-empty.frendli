@@ -1,0 +1,7 @@
+create a = 12
+// Expect: 12
+display(send a)
+
+change a = empty
+// Expect: empty
+display(send a)

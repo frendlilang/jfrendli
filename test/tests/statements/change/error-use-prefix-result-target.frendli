@@ -1,0 +1,3 @@
+create a = "one"
+// Expect comptime error: Values cannot be assigned to that target.
+change -a = "two"
