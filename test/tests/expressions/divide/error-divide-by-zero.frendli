@@ -1,0 +1,2 @@
+// Expect runtime error: Division by zero is not allowed. The operand must be a non-zero number.
+display(send 12 / 0)

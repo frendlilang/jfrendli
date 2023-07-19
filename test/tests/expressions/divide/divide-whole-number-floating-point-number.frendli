@@ -1,0 +1,5 @@
+// Expect: 0.3472222222222222
+display(send 12 / 34.56)
+
+// Expect: 35.29411764705882
+display(send 12 / 0.34)
