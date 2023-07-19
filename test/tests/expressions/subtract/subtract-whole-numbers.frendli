@@ -1,0 +1,2 @@
+// Expect: -22
+display(send 12 - 34)
