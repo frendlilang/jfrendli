@@ -1,0 +1,5 @@
+create one = "one"
+create two = "two"
+create onetwo = "onetwo"
+// Expect comptime error: Values cannot be assigned to that target.
+change one + two = "three"
