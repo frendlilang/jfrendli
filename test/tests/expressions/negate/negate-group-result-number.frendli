@@ -1,0 +1,8 @@
+// Expect: -12
+display(send -(12))
+
+// Expect: 46
+display(send --(12 + 34))
+
+// Expect: -46
+display(send ---(12 + 34))

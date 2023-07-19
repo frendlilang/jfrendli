@@ -1,0 +1,2 @@
+// Expect runtime error: The operand must be a number.
+display(send -"one")
