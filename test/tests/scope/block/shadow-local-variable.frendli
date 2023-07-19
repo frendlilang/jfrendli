@@ -1,0 +1,12 @@
+if true
+    create a = "local1"
+    // Expect: local1
+    display(send a)
+
+    if true
+        create a = "local2"
+        // Expect: local2
+        display(send a)
+
+    // Expect: local1
+    display(send a)
