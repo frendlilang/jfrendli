@@ -1,0 +1,12 @@
+if true
+    create a = "parent"
+    // Expect: "parent"
+    display(send a)
+
+    if true
+        // Expect: "parent"
+        display(send a)
+
+        if true
+            // Expect: "parent"
+            display(send a)

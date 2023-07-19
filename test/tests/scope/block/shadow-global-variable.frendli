@@ -1,0 +1,11 @@
+create a = "global"
+// Expect: outer
+display(send a)
+
+if true
+    create a = "local"
+    // Expect: "local"
+    display(send a)
+
+// Expect: "global"
+display(send a)

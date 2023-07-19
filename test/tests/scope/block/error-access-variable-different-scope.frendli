@@ -1,0 +1,5 @@
+if true
+    create a = "local"
+
+// Expect comptime error: 'a' has not been created or defined. To create it, use 'create', or define it using 'define'.
+display(send a)
