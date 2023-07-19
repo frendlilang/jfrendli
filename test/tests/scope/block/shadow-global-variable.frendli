@@ -4,8 +4,8 @@ display(send a)
 
 if true
     create a = "local"
-    // Expect: "local"
+    // Expect: local
     display(send a)
 
-// Expect: "global"
+// Expect: global
 display(send a)
