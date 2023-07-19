@@ -59,9 +59,9 @@ public class ErrorReporter {
 
     private String format(int line, String location, String message) {
         return "Error\n" +
-                "  > Where: \n" +
+                "  > Where:\n" +
                 "     > Line " + line + " " + location + "\n" +
-                "  > Message: \n" +
-                "     > " + message + "\n\n";
+                "  > Message:\n" +
+                "     > " + message + "\n";
     }
 }

@@ -18,7 +18,7 @@ public class Frendli {
     // prompt to keep using the same interpreter without creating a new one.
     private static Interpreter interpreter = new Interpreter(reporter, new ConsoleLogger());
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SecurityException {
         if (args.length > 1) {
             printUsage();
             System.exit(ExitCode.USAGE_ERROR.getValue());
@@ -31,7 +31,7 @@ public class Frendli {
         }
     }
 
-    private static void runFile(String path) throws IOException {
+    private static void runFile(String path) throws IOException, SecurityException {
         verifyExtension(path);
 
         final String REGEX_ALL_NEWLINES = "(\\r\\n)|(\\r)/g";
@@ -92,7 +92,7 @@ public class Frendli {
         interpreter.interpret(statements);
     }
 
-    private static void verifyExtension(String path) {
+    private static void verifyExtension(String path) throws SecurityException {
         if (!path.toLowerCase().endsWith(".frendli")) {
             usageLogger.logError("Frendli only understands files with extension '.frendli'");
             System.exit(ExitCode.INPUT_FILE_ERROR.getValue());

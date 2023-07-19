@@ -1,0 +1,2 @@
+// Expect: onetwo
+display(send "one" + "two")
