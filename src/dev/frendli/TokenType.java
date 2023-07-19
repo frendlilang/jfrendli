@@ -33,7 +33,6 @@ public enum TokenType {
     IF,
     INHERIT,
     ME,
-    NEW,
     NOT,
     OR,
     OTHERWISE,

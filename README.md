@@ -1,38 +1,73 @@
 # The Frendli Programming Language
 
-### v0.1
-
 Frendli is an open-source general-purpose programming language designed around empirical data on difficulties and misconceptions held by novice programmers.
 
-> ⚠️ Frendli and its docs are in active development.
+> 👉️ Frendli and its docs are in active development.
 
 ## Table of Contents
 - [Welcome](#welcome-)
+- [Frendli Code Snippets](#frendli-code-snippets)
+  - [Variables, Data Types, and Literals](#variables-data-types-and-literals)
+  - [Control Flow](#control-flow)
+  - [Functions](#functions)
+  - [OOP](#oop)
 - [Purpose](#purpose)
 - [Goals](#goals)
 - [General Characteristics](#general-characteristics)
 - [Features (v0.1)](#features-v01)
 - [Future Additions](#future-additions)
-- [Frendli Code Snippets](#frendli-code-snippets)
-    - [Variables, Data Types, and Literals](#variables-data-types-and-literals)
-    - [Control Flow](#control-flow)
-    - [Functions](#functions)
-    - [OOP](#oop)
+- [Runnable Sample Program](#runnable-sample-program)
 - [License](#license)
 
 ## Welcome 👋
 
 Hey there!
 
-Welcome to the `super` `Frendli` programming language for learning and teaching programming. It is still in active development, but here's a quick (and runnable) glimpse of it:
+Welcome to the `Frendli` programming language for **learning** and **teaching** programming. It is still in active development, but you'll find a quick glimpse of it below.
 
-<a href="snippets/snippets.md#small-program">
-  <img src="snippets/frendli-snippet-small-program.svg" width="600" alt="A Frendli code snippet.">
+## Frendli Code Snippets
+
+#### Variables, Data Types, and Literals
+
+<a href="snippets/snippets.md#variables-data-types-and-literals">
+  <img src="snippets/frendli-snippet-variables.svg" width="600" alt="A Frendli code snippet.">
+</a>
+
+#### Control Flow
+
+<a href="snippets/snippets.md#selection">
+  <img src="snippets/frendli-snippet-selection.svg" width="600" alt="A Frendli code snippet.">
+</a>
+
+<br>
+
+<a href="snippets/snippets.md#bounded-loop">
+  <img src="snippets/frendli-snippet-bounded-loop.svg" width="600" alt="A Frendli code snippet.">
+</a>
+
+<br>
+
+<a href="snippets/snippets.md#unbounded-loop">
+  <img src="snippets/frendli-snippet-unbounded-loop.svg" width="600" alt="A Frendli code snippet.">
+</a>
+
+#### Functions
+
+<a href="snippets/snippets.md#functions">
+  <img src="snippets/frendli-snippet-function.svg" width="600" alt="A Frendli code snippet.">
+</a>
+
+#### OOP
+
+*(paused feature, may be removed)*
+
+<a href="snippets/snippets.md#oop">
+  <img src="snippets/frendli-snippet-class.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
 ## Purpose
 
-Frendli was developed to address to the frequent challenges experienced by novice students. Simply put, to create a friendlier language.
+Frendli was developed to address the frequent challenges experienced by novice students. Simply put, to create a friendlier language.
 
 It is intended for use in the beginning stages of introductory programming courses, helping the student conceptualize and start programming with minimal friction, and thereafter transitioning early or mid-course to a different established language.
 
@@ -118,7 +153,7 @@ Implemented features are marked as completed.
     - [x] Not equal to (`unequals`)
   - [x] Logical
     - [x] Conjunction (`and`)
-    - [x] Conjunction (`or`)
+    - [x] Disjunction (`or`)
     - [x] Negation (`not`)
   - [x] Arithmetic
     - [x] Addition (`+`)
@@ -159,7 +194,7 @@ Implemented features are marked as completed.
     - [ ] Single public inheritance (`inherit`)
       - [ ] Parent reference (`parent`)
   - [ ] Instances
-    - [ ] Instantiation (`new`)
+    - [ ] Instantiation (`()`)
     - [ ] Member (field or method) access (`.`)
 - [x] Standard library
   - [x] Functions
@@ -183,44 +218,15 @@ Implemented features are marked as completed.
 * Arithmetic operators (e.g. modulus)
 * Control statements (e.g. terminate execution of a loop)
 
-## Frendli Code Snippets
+## Runnable Sample Program
 
-#### Variables, Data Types, and Literals
+Below is a small program that is runnable using the current implementation.
 
-<a href="snippets/snippets.md#variables-data-types-and-literals">
-  <img src="snippets/frendli-snippet-variables.svg" width="600" alt="A Frendli code snippet.">
-</a>
+1. When `timeCount()` is invoked, it will time how long it takes to count from `0` to `target` in increments of `step`, while displaying the current count.
+2. If the arguments sent were valid, `evaluate()` is invoked to evaluate if we guessed the right number of seconds it took to count.
 
-#### Control Flow
-
-<a href="snippets/snippets.md#selection">
-  <img src="snippets/frendli-snippet-selection.svg" width="600" alt="A Frendli code snippet.">
-</a>
-
-<br>
-
-<a href="snippets/snippets.md#bounded-loop">
-  <img src="snippets/frendli-snippet-bounded-loop.svg" width="600" alt="A Frendli code snippet.">
-</a>
-
-<br>
-
-<a href="snippets/snippets.md#unbounded-loop">
-  <img src="snippets/frendli-snippet-unbounded-loop.svg" width="600" alt="A Frendli code snippet.">
-</a>
-
-#### Functions
-
-<a href="snippets/snippets.md#functions">
-  <img src="snippets/frendli-snippet-function.svg" width="600" alt="A Frendli code snippet.">
-</a>
-
-#### OOP
-
-*(paused feature, may be removed)*
-
-<a href="snippets/snippets.md#oop">
-  <img src="snippets/frendli-snippet-class.svg" width="600" alt="A Frendli code snippet.">
+<a href="snippets/snippets.md#small-program">
+  <img src="snippets/frendli-snippet-small-program.svg" width="600" alt="A Frendli code snippet.">
 </a>
 
 ## License

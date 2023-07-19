@@ -52,7 +52,6 @@ public class Scanner {
         keywords.put("if", TokenType.IF);
         keywords.put("inherit", TokenType.INHERIT);
         keywords.put("me", TokenType.ME);
-        keywords.put("new", TokenType.NEW);
         keywords.put("not", TokenType.NOT);
         keywords.put("or", TokenType.OR);
         keywords.put("otherwise", TokenType.OTHERWISE);

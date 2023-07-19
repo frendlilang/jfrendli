@@ -43,7 +43,8 @@ create result = timeCount(send target, step)
 
 // Guess the number of seconds
 if result unequals empty
-    evaluate(send 0.01, result)
+    create guess = 0.01
+    evaluate(send guess, result)
 ```
 
 ## Variables, Data Types, and Literals
@@ -53,9 +54,8 @@ create age = 30               // number
 create price = 4.25           // number
 create isValid = true         // boolean
 create isOnline = false       // boolean
-create firstName = "Jane"     // text
-create middleName = empty     // empty
-change middleName = "Mary"    // text
+create nickname = empty       // empty
+change nickname = "Alex"      // text
 ```
 
 ## Control Flow
@@ -133,6 +133,6 @@ describe Point
         change me.x = me.x + x
         change me.y = me.y + y
 
-create pointA = new Point(send 1, 2)
+create pointA = Point(send 1, 2)
 pointA.move(send 3, 4)
 ```
