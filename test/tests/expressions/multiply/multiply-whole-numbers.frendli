@@ -1,0 +1,2 @@
+// Expect: 408
+display(send 12 * 34)

@@ -1,0 +1,5 @@
+// Expect: 414.72
+display(send 12 * 34.56)
+
+// Expect: 4.08
+display(send 12 * 0.34)
