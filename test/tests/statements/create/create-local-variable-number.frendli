@@ -1,0 +1,4 @@
+if true
+    create a = 12
+    // Expect: 12
+    display(send a)

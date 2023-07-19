@@ -1,0 +1,2 @@
+// Expect comptime error: 'a' must be initialized using '='. You may set it to 'empty' if needed.
+create a

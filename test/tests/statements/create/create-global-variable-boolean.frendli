@@ -1,0 +1,3 @@
+create a = true
+// Expect: true
+display(send a)

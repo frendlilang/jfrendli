@@ -1,0 +1,3 @@
+create a = empty
+// Expect: empty
+display(send a)
