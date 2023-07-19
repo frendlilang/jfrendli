@@ -1,0 +1,2 @@
+// Expect runtime error: The operands must be only numbers or only texts.
+display(send empty + true)
