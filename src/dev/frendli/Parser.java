@@ -147,7 +147,7 @@ public class Parser {
 
     // variableDeclaration: "create" IDENTIFIER "=" expression NEWLINE ;
     private Statement variableDeclaration() {
-        Token name = consume(TokenType.IDENTIFIER, "A name for what is created must be provided.");
+        Token name = consume(TokenType.IDENTIFIER, "A name for what is created must be provided, beginning with a letter or underscore, but no reserved keywords.");
         consume(TokenType.EQUALS_SIGN, "'" + name.lexeme + "' must be initialized using '='. You may set it to 'empty' if needed.");
         Expression initializer = expression();
         consumeNewline();
