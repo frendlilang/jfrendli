@@ -1,5 +1,5 @@
 create a = "global"
-// Expect: outer
+// Expect: global
 display(send a)
 
 if true
