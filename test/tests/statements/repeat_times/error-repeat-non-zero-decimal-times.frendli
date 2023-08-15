@@ -1,0 +1,3 @@
+// Expect runtime error: The number must be a positive integer.
+repeat 2.5 times
+    display(send "in repeat")
