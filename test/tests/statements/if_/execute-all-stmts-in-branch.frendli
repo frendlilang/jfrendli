@@ -1,0 +1,10 @@
+// Expect:
+//      in if
+//      in if
+//      in if
+if true
+    display(send "in if")
+    display(send "in if")
+    display(send "in if")
+otherwise
+    display(send "in otherwise")

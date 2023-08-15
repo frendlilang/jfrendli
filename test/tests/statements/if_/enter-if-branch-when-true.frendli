@@ -1,0 +1,5 @@
+// Expect: in if
+if true
+    display(send "in if")
+otherwise
+    display(send "in otherwise")
