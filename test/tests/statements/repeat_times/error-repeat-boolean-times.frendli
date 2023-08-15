@@ -1,0 +1,3 @@
+// Expect runtime error: The operand must be a number.
+repeat true times
+    display(send "in repeat")

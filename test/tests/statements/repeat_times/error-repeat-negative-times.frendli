@@ -1,0 +1,3 @@
+// Expect runtime error: The number must be a positive integer.
+repeat -1 times
+    display(send "in repeat")

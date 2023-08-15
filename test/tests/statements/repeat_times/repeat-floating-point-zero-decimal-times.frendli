@@ -1,0 +1,8 @@
+// Expect:
+//      1
+//      2
+//      3
+create i = 1
+repeat 3.0 times
+    display(send i)
+    change i = i + 1

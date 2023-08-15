@@ -1,0 +1,10 @@
+// Expect:
+//      1
+//      2
+//      3
+create a = 5
+create b = 2
+create i = 1
+repeat (a - b) times
+    display(send i)
+    change i = i + 1
