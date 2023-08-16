@@ -1,5 +1,5 @@
-// Expect: done
 repeat while false
     display(send "in repeat while")
 
+// Expect: done
 display(send "done")
