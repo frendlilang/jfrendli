@@ -36,6 +36,6 @@ public abstract class FrendliTest {
     }
 
     protected final String toAbsolutePath(String sourceFilePath) {
-        return new File("test/tests/" + sourceFilePath).getAbsolutePath();
+        return new File("src/test/java/tests/" + sourceFilePath).getAbsolutePath();
     }
 }
