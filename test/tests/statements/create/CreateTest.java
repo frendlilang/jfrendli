@@ -50,6 +50,14 @@ public class CreateTest {
             String expected = "12";
             assertEquals(expected, actual);
         }
+
+        @Test
+        void itCanCreateVariableWithUnderscoreIdentifier() {
+            String sourceFile = "statements/create/create-variable-underscore-identifier.frendli";
+            String actual = run(sourceFile);
+            String expected = "one";
+            assertEquals(expected, actual);
+        }
     }
 
     @Nested
@@ -106,6 +114,34 @@ public class CreateTest {
                          > Line 2 at 'empty'
                       > Message:
                          > A name for what is created must be provided, beginning with a letter or underscore, but no reserved keywords.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotCreateGlobalVariablesWithSameIdentifiers() {
+            String sourceFile = "statements/create/error-create-global-variables-same-identifiers.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 3 at 'a'
+                      > Message:
+                         > 'a' already exists.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotCreateLocalVariablesWithSameIdentifiers() {
+            String sourceFile = "statements/create/error-create-local-variables-same-identifiers.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 4 at 'a'
+                      > Message:
+                         > 'a' already exists.
                     """;
             assertEquals(expected, actual);
         }

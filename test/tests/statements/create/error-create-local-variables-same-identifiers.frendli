@@ -1,0 +1,4 @@
+// Expect comptime error: 'a' already exists.
+if true
+    create a = 1
+    create a = 2

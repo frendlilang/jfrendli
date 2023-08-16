@@ -1,0 +1,3 @@
+create _ = "one"
+// Expect: one
+display(send _)
