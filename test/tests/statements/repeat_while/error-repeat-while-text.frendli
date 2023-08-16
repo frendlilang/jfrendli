@@ -1,0 +1,3 @@
+// Expect runtime error: The operand must be a boolean ('true' or 'false').
+repeat while "hello"
+    display(send "in repeat")

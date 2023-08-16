@@ -1,0 +1,5 @@
+// Expect: done
+repeat while false
+    display(send "in repeat while")
+
+display(send "done")

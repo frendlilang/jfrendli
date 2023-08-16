@@ -1,0 +1,10 @@
+create i = 0
+// Expect:
+//      1
+//      1
+//      1
+repeat while i < 3
+    change i = i + 1
+    create j = 0
+    change j = j + 1
+    display(send j)
