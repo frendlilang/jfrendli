@@ -1,0 +1,9 @@
+create a = "global"
+
+if true
+    create a = "local"
+    // Expect: local
+    display(send a)
+
+// Expect: global
+display(send a)

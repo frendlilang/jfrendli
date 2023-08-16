@@ -1,0 +1,3 @@
+// Expect comptime error: 'a' already exists.
+create a = 1
+create a = 2

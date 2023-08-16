@@ -12,7 +12,7 @@ public class IfTest {
     @Nested
     public class IfTestExpectSuccess extends FrendliTestExpectSuccess {
         @Test
-        void itEntersIfBranchWhenTrue() {
+        void itCanEnterIfBranchWhenTrue() {
             String sourceFile = "statements/if_/enter-if-branch-when-true.frendli";
             String actual = run(sourceFile);
             String expected = "in if";
@@ -20,7 +20,7 @@ public class IfTest {
         }
 
         @Test
-        void itEntersConsecutiveIfBranchesWhenTrue() {
+        void itCanEnterConsecutiveIfBranchesWhenTrue() {
             String sourceFile = "statements/if_/enter-consecutive-if-branches-when-true.frendli";
             String actual = run(sourceFile);
             String expected = """
@@ -31,7 +31,7 @@ public class IfTest {
         }
 
         @Test
-        void itEntersFirstTrueOtherwiseIfBranch() {
+        void itCanEnterFirstTrueOtherwiseIfBranch() {
             String sourceFile = "statements/if_/enter-first-true-otherwise-if-branch.frendli";
             String actual = run(sourceFile);
             String expected = "in otherwise if 2";
@@ -39,7 +39,7 @@ public class IfTest {
         }
 
         @Test
-        void itEntersOtherwiseBranch() {
+        void itCanEnterOtherwiseBranch() {
             String sourceFile = "statements/if_/enter-otherwise-branch.frendli";
             String actual = run(sourceFile);
             String expected = "in otherwise";
@@ -47,13 +47,46 @@ public class IfTest {
         }
 
         @Test
-        void itExecutesAllStmtsInTakenBranch() {
+        void itCanExecuteAllStmtsInTakenBranch() {
             String sourceFile = "statements/if_/execute-all-stmts-in-branch.frendli";
             String actual = run(sourceFile);
             String expected = """
                     in if
                     in if
                     in if
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanCreateScopeInIfBranch() {
+            String sourceFile = "statements/if_/create-scope-in-if.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    local
+                    global
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanCreateScopeInOtherwiseIfBranch() {
+            String sourceFile = "statements/if_/create-scope-in-otherwise-if.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    local
+                    global
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanCreateScopeInOtherwiseBranch() {
+            String sourceFile = "statements/if_/create-scope-in-otherwise.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    local
+                    global
                     """.trim();
             assertEquals(expected, actual);
         }

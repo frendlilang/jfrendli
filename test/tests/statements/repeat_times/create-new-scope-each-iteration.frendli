@@ -1,0 +1,8 @@
+// Expect:
+//      1
+//      1
+//      1
+repeat 3 times
+    create i = 0
+    change i = i + 1
+    display(send i)
