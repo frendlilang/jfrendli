@@ -1,0 +1,11 @@
+create a = "global"
+
+if false
+    display(send "in if")
+otherwise
+    create a = "local"
+    // Expect: local
+    display(send a)
+
+// Expect: global
+display(send a)
