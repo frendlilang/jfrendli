@@ -46,6 +46,29 @@ public class RepeatTimesTest {
                     """.trim();
             assertEquals(expected, actual);
         }
+
+        @Test
+        void itCanCreateScope() {
+            String sourceFile = "statements/repeat_times/create-scope.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    local
+                    global
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanCreateNewScopeEachIteration() {
+            String sourceFile = "statements/repeat_times/create-new-scope-each-iteration.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    1
+                    1
+                    1
+                    """.trim();
+            assertEquals(expected, actual);
+        }
     }
 
     @Nested
