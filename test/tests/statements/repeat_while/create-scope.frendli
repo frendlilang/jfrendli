@@ -1,0 +1,11 @@
+create a = "global"
+
+create i = 0
+repeat while i < 1
+    change i = i + 1
+    create a = "local"
+    // Expect: local
+    display(send a)
+
+// Expect: global
+display(send a)
