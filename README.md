@@ -1,6 +1,6 @@
 # The Frendli Programming Language
 
-Frendli is an open-source general-purpose programming language designed around empirical data on difficulties and misconceptions held by novice programmers.
+Frendli is an open-source general-purpose programming language intended for learning and teaching programming. It is designed around empirical data on difficulties and misconceptions held by novice programmers.
 
 > 👉️ Frendli and its docs are in active development.
 

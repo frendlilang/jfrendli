@@ -2,51 +2,6 @@
 
 Below are the copyable code snippets that are also shown with syntax highlighting in the images.
 
-## Small Program
-
-A program that counts up to a specified target and times how many seconds it takes.
-
-Assumption: Only number data types are passed.
-(Data type-checking is on the roadmap.)
-
-```
-// Time visibly counting to a target
-define timeCount(accept target, step)
-    if target <= 0 or step <= 0
-        display(send "Numbers must be positive.")
-        return
-
-    create count = 0
-    create startTime = time()
-
-    repeat while count < target
-        change count = count + step
-        display(send count)
-
-    create endTime = time()
-
-    return with (endTime - startTime) / 1000
-
-// Evaluate a guess
-define evaluate(accept guess, actual)
-    if guess equals actual
-        display(send "Correct.")
-    otherwise if guess < actual
-        display(send "Too low.")
-    otherwise
-        display(send "Too high.")
-
-// Start the count
-create target = 100
-create step = 1
-create result = timeCount(send target, step)
-
-// Guess the number of seconds
-if result unequals empty
-    create guess = 0.01
-    evaluate(send guess, result)
-```
-
 ## Variables, Data Types, and Literals
 
 ```
@@ -135,4 +90,52 @@ describe Point
 
 create pointA = Point(send 1, 2)
 pointA.move(send 3, 4)
+```
+
+## Small Program
+
+The program does the following:
+
+1. When `timeCount()` is invoked, it will time how long it takes to count from `0` to `target` in increments of `step`, while displaying the current count.
+2. If the arguments sent were valid, `evaluate()` is invoked to evaluate if we guessed the right number of seconds it took to count.
+
+Assumption: Only number data types are passed.
+(Data type-checking is on the roadmap.)
+
+```
+// Time visibly counting to a target
+define timeCount(accept target, step)
+    if target <= 0 or step <= 0
+        display(send "Numbers must be positive.")
+        return
+
+    create count = 0
+    create startTime = time()
+
+    repeat while count < target
+        change count = count + step
+        display(send count)
+
+    create endTime = time()
+
+    return with (endTime - startTime) / 1000
+
+// Evaluate a guess
+define evaluate(accept guess, actual)
+    if guess equals actual
+        display(send "Correct.")
+    otherwise if guess < actual
+        display(send "Too low.")
+    otherwise
+        display(send "Too high.")
+
+// Start the count
+create target = 100
+create step = 1
+create result = timeCount(send target, step)
+
+// Guess the number of seconds
+if result unequals empty
+    create guess = 0.01
+    evaluate(send guess, result)
 ```
