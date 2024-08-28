@@ -1,0 +1,8 @@
+create a = 1
+create b = 1
+create c = 1
+
+if a equals b
+    if b equals c
+        // Expect: true
+        display(send a equals c)

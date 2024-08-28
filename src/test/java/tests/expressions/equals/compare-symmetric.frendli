@@ -1,0 +1,14 @@
+create a = true
+create b = true
+// Expect: true
+display(send (a equals b) and (b equals a))
+
+change a = 100
+change b = 100
+// Expect: true
+display(send (a equals b) and (b equals a))
+
+change a = "one"
+change b = "one"
+// Expect: true
+display(send (a equals b) and (b equals a))

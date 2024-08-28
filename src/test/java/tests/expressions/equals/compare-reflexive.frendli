@@ -1,0 +1,11 @@
+create a = true
+// Expect: true
+display(send a equals a)
+
+change a = 100
+// Expect: true
+display(send a equals a)
+
+change a = "one"
+// Expect: true
+display(send a equals a)
