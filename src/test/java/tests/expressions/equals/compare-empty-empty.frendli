@@ -1,0 +1,2 @@
+// Expect: true
+display(send empty equals empty)

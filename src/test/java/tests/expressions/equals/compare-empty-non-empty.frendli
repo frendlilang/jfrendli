@@ -1,0 +1,11 @@
+// Expect: false
+display(send empty equals 0)
+
+// Expect: false
+display(send 0 equals empty)
+
+// Expect: false
+display(send true equals empty)
+
+// Expect: false
+display(send "" equals empty)

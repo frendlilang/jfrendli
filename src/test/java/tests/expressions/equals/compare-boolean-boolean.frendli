@@ -1,0 +1,8 @@
+// Expect: true
+display(send true equals true)
+
+// Expect: true
+display(send false equals false)
+
+// Expect: false
+display(send true equals false)

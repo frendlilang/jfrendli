@@ -1,0 +1,8 @@
+// Expect: true
+display(send 1 equals 1.0)
+
+// Expect: true
+display(send 555.0000 equals 555)
+
+// Expect: false
+display(send 555.0001 equals 555)
