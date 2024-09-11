@@ -9,5 +9,8 @@
         <module name="jfrendli" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="jfrendli" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>
