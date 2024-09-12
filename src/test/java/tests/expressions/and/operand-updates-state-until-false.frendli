@@ -1,0 +1,45 @@
+create a = "originalA"
+create b = "originalB"
+create c = "originalC"
+
+define updateVariableA_ReturnBoolean(accept returnValue)
+    change a = "updatedA"
+    return with returnValue
+
+define updateVariableB_ReturnBoolean(accept returnValue)
+    change b = "updatedB"
+    return with returnValue
+
+define updateVariableC_ReturnBoolean(accept returnValue)
+    change c = "updatedC"
+    return with returnValue
+
+define resetVariables()
+    change a = "originalA"
+    change b = "originalB"
+    change c = "originalC"
+
+updateVariableA_ReturnBoolean(send false) and updateVariableB_ReturnBoolean(send true)
+
+// Expected: "updatedA"
+display(send a)
+// Expected: "originalB"
+display(send b)
+
+resetVariables()
+
+// Expected: "originalA"
+display(send a)
+// Expected: "originalB"
+display(send b)
+// Expected: "originalC"
+display(send c)
+
+updateVariableA_ReturnBoolean(send true) and updateVariableB_ReturnBoolean(send false) and updateVariableC_ReturnBoolean(send true)
+
+// Expected: "updatedA"
+display(send a)
+// Expected: "updatedB"
+display(send b)
+// Expected: "originalC"
+display(send c)
