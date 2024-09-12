@@ -1,0 +1,10 @@
+// Expect: false
+display(send "one" unequals "one")
+
+create a = "one"
+create b = "one"
+// Expect: false
+display(send a unequals b)
+
+// Expect: true
+display(send "one" unequals "two")
