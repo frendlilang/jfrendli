@@ -1,0 +1,2 @@
+// Expect runtime error: The operand must be a boolean ('true' or 'false').
+display(send false or "1")
