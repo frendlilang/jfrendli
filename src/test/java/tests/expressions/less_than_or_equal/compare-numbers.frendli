@@ -1,0 +1,17 @@
+// Expect: true
+display(send 0 <= 1)
+
+// Expect: true
+display(send 0 <= 0)
+
+// Expect: true
+display(send 0 <= -0)
+
+// Expect: true
+display(send 123 <= 123.0)
+
+// Expect: false
+display(send 432.1 <= 123.4)
+
+// Expect: false
+display(send -123.4 <= -432.1)
