@@ -1,0 +1,3 @@
+// Expect: false
+display(send not true)
+

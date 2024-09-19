@@ -1,4 +1,4 @@
-package tests.expressions.or;
+package tests.expressions.logical_or;
 
 import tests.FrendliTestExpectSuccess;
 import tests.FrendliTestExpectError;
@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OrTest {
+public class LogicalOrTest {
     @Nested
-    public class OrTestExpectSuccess extends FrendliTestExpectSuccess {
+    public class LogicalOrTestExpectSuccess extends FrendliTestExpectSuccess {
         @Test
         void itIsFalseIfAllAreFalse() {
-            String sourceFile = "expressions/or/all-false.frendli";
+            String sourceFile = "expressions/logical_or/all-false.frendli";
             String actual = run(sourceFile);
             String expected = """
                     false
@@ -24,7 +24,7 @@ public class OrTest {
 
         @Test
         void itIsTrueIfOneIsTrue() {
-            String sourceFile = "expressions/or/one-true.frendli";
+            String sourceFile = "expressions/logical_or/one-true.frendli";
             String actual = run(sourceFile);
             String expected = """
                     true
@@ -37,7 +37,7 @@ public class OrTest {
 
         @Test
         void itEvaluatesAllIfAllAreFalse() {
-            String sourceFile = "expressions/or/operand-updates-state.frendli";
+            String sourceFile = "expressions/logical_or/operand-updates-state.frendli";
             String actual = run(sourceFile);
             String expected = """
                     updatedA
@@ -49,7 +49,7 @@ public class OrTest {
 
         @Test
         void itJumpsExecutionAfterFirstTrue() {
-            String sourceFile = "expressions/or/operand-updates-state-until-true.frendli";
+            String sourceFile = "expressions/logical_or/operand-updates-state-until-true.frendli";
             String actual = run(sourceFile);
             String expected = """
                     updatedA
@@ -66,10 +66,10 @@ public class OrTest {
     }
 
     @Nested
-    public class OrTestExpectError extends FrendliTestExpectError {
+    public class LogicalOrTestExpectError extends FrendliTestExpectError {
         @Test
         void itCannotAcceptNonBooleans() {
-            String sourceFile = "expressions/or/error-non-boolean-operand.frendli";
+            String sourceFile = "expressions/logical_or/error-non-boolean-operand.frendli";
             String actual = runExpectRuntimeError(sourceFile);
             String expected = """
                     Error

@@ -1,0 +1,5 @@
+// Expect: false
+display(send not (1 > 0))
+
+// Expect: true
+display(send not (0 > 1))
