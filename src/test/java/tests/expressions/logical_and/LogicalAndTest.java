@@ -1,4 +1,4 @@
-package tests.expressions.and;
+package tests.expressions.logical_and;
 
 import tests.FrendliTestExpectSuccess;
 import tests.FrendliTestExpectError;
@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AndTest {
+public class LogicalAndTest {
     @Nested
-    public class AndTestExpectSuccess extends FrendliTestExpectSuccess {
+    public class LogicalAndTestExpectSuccess extends FrendliTestExpectSuccess {
         @Test
         void itIsTrueIfAllAreTrue() {
-            String sourceFile = "expressions/and/all-true.frendli";
+            String sourceFile = "expressions/logical_and/all-true.frendli";
             String actual = run(sourceFile);
             String expected = """
                     true
@@ -24,7 +24,7 @@ public class AndTest {
 
         @Test
         void itIsFalseIfOneIsFalse() {
-            String sourceFile = "expressions/and/one-false.frendli";
+            String sourceFile = "expressions/logical_and/one-false.frendli";
             String actual = run(sourceFile);
             String expected = """
                     false
@@ -37,7 +37,7 @@ public class AndTest {
 
         @Test
         void itEvaluatesAllIfAllAreTrue() {
-            String sourceFile = "expressions/and/operand-updates-state.frendli";
+            String sourceFile = "expressions/logical_and/operand-updates-state.frendli";
             String actual = run(sourceFile);
             String expected = """
                     updatedA
@@ -49,7 +49,7 @@ public class AndTest {
 
         @Test
         void itJumpsExecutionAfterFirstFalse() {
-            String sourceFile = "expressions/and/operand-updates-state-until-false.frendli";
+            String sourceFile = "expressions/logical_and/operand-updates-state-until-false.frendli";
             String actual = run(sourceFile);
             String expected = """
                     updatedA
@@ -66,10 +66,10 @@ public class AndTest {
     }
 
     @Nested
-    public class AndTestExpectError extends FrendliTestExpectError {
+    public class LogicalAndTestExpectError extends FrendliTestExpectError {
         @Test
         void itCannotAcceptNonBooleans() {
-            String sourceFile = "expressions/and/error-non-boolean-operand.frendli";
+            String sourceFile = "expressions/logical_and/error-non-boolean-operand.frendli";
             String actual = runExpectRuntimeError(sourceFile);
             String expected = """
                     Error
