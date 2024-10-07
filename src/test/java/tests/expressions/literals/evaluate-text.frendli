@@ -1,0 +1,14 @@
+// Expect: abcdefghijklmnopqrstuvwxyz
+display(send "abcdefghijklmnopqrstuvwxyz")
+
+// Expect: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+display(send "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+// Expect: <empty string>
+display(send "")
+
+// Expect: 0123456789
+display(send "0123456789")
+
+// Expect: _ !#%&/=?*^-.:;<>()[]{}|'~
+display(send "_ !#%&/=?*^-.:;<>()[]{}|'~")
