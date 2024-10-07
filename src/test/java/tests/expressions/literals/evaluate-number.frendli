@@ -1,0 +1,14 @@
+// Expect: 0
+display(send 0)
+
+// Expect: 1
+display(send 1)
+
+// Expect: 12.34
+display(send 12.34)
+
+// Expect: 1234567.89
+display(send 1234567.890)
+
+// Expect: -1234567.89
+display(send -1234567.890)
