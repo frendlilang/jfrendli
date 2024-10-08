@@ -51,14 +51,6 @@ public class AddTest {
                     """.trim();
             assertEquals(expected, actual);
         }
-
-        @Test
-        void itCanAddTexts() {
-            String sourceFile = "expressions/add/add-texts.frendli";
-            String actual = run(sourceFile);
-            String expected = "onetwo";
-            assertEquals(expected, actual);
-        }
     }
 
     @Nested

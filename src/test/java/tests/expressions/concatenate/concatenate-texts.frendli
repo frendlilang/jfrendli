@@ -1,0 +1,8 @@
+// Expect: one
+display(send "" + "one")
+
+// Expect: onetwo
+display(send "one" + "two")
+
+// Expect: onetwothree
+display(send "one" + "two" + "three")
