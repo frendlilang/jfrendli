@@ -1,0 +1,2 @@
+// Expect comptime error: A name for what is created must be provided, beginning with a letter or underscore, but no reserved keywords.
+create change = 1
