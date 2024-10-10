@@ -11,7 +11,7 @@ public class KeywordsTest {
     @Nested
     public class KeywordsTestExpectError extends FrendliTestExpectError {
         @Test
-        void itCannotUseKeywordAcceptAsIdentifier() {
+        void itCannotUseAcceptAsIdentifier() {
             String sourceFile = "keywords/error-accept-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -25,7 +25,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordAndAsIdentifier() {
+        void itCannotUseAndAsIdentifier() {
             String sourceFile = "keywords/error-and-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -39,7 +39,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordChangeAsIdentifier() {
+        void itCannotUseChangeAsIdentifier() {
             String sourceFile = "keywords/error-change-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -53,7 +53,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordCreateAsIdentifier() {
+        void itCannotUseCreateAsIdentifier() {
             String sourceFile = "keywords/error-create-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -67,7 +67,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordDefineAsIdentifier() {
+        void itCannotUseDefineAsIdentifier() {
             String sourceFile = "keywords/error-define-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -81,7 +81,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordDescribeAsIdentifier() {
+        void itCannotUseDescribeAsIdentifier() {
             String sourceFile = "keywords/error-describe-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -95,7 +95,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordEmptyAsIdentifier() {
+        void itCannotUseEmptyAsIdentifier() {
             String sourceFile = "keywords/error-empty-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -109,7 +109,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordEqualsAsIdentifier() {
+        void itCannotUseEqualsAsIdentifier() {
             String sourceFile = "keywords/error-equals-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -123,7 +123,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordFalseAsIdentifier() {
+        void itCannotUseFalseAsIdentifier() {
             String sourceFile = "keywords/error-false-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -137,7 +137,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordHasAsIdentifier() {
+        void itCannotUseHasAsIdentifier() {
             String sourceFile = "keywords/error-has-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -151,7 +151,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordIfAsIdentifier() {
+        void itCannotUseIfAsIdentifier() {
             String sourceFile = "keywords/error-if-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -165,7 +165,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordInheritAsIdentifier() {
+        void itCannotUseInheritAsIdentifier() {
             String sourceFile = "keywords/error-inherit-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -179,7 +179,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordMeAsIdentifier() {
+        void itCannotUseMeAsIdentifier() {
             String sourceFile = "keywords/error-me-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -193,7 +193,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordNotAsIdentifier() {
+        void itCannotUseNotAsIdentifier() {
             String sourceFile = "keywords/error-not-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -207,7 +207,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordOrAsIdentifier() {
+        void itCannotUseOrAsIdentifier() {
             String sourceFile = "keywords/error-or-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -221,7 +221,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordOtherwiseAsIdentifier() {
+        void itCannotUseOtherwiseAsIdentifier() {
             String sourceFile = "keywords/error-otherwise-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -235,7 +235,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordParentAsIdentifier() {
+        void itCannotUseParentAsIdentifier() {
             String sourceFile = "keywords/error-parent-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -249,7 +249,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordRepeatAsIdentifier() {
+        void itCannotUseRepeatAsIdentifier() {
             String sourceFile = "keywords/error-repeat-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -263,7 +263,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordReturnAsIdentifier() {
+        void itCannotUseReturnAsIdentifier() {
             String sourceFile = "keywords/error-return-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -277,7 +277,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordSendAsIdentifier() {
+        void itCannotUseSendAsIdentifier() {
             String sourceFile = "keywords/error-send-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -291,7 +291,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordTimesAsIdentifier() {
+        void itCannotUseTimesAsIdentifier() {
             String sourceFile = "keywords/error-times-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -305,7 +305,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordTrueAsIdentifier() {
+        void itCannotUseTrueAsIdentifier() {
             String sourceFile = "keywords/error-true-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -319,7 +319,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordUnequalsAsIdentifier() {
+        void itCannotUseUnequalsAsIdentifier() {
             String sourceFile = "keywords/error-unequals-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -333,7 +333,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordWhileAsIdentifier() {
+        void itCannotUseWhileAsIdentifier() {
             String sourceFile = "keywords/error-while-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
@@ -347,7 +347,7 @@ public class KeywordsTest {
         }
 
         @Test
-        void itCannotUseKeywordWithAsIdentifier() {
+        void itCannotUseWithAsIdentifier() {
             String sourceFile = "keywords/error-with-as-identifier.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
