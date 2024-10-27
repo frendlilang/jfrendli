@@ -11,34 +11,86 @@ import java.util.Map;
  * in individual tokens.
  */
 public class Scanner {
-    private final ErrorReporter reporter;                               // Reporter of syntax errors
-    private final String source;                                        // Source code
-    private final List<Token> tokens = new ArrayList<>();               // Tokens produced by the scanner
-    private final Map<String, TokenType> keywords = new HashMap<>();    // Reserved keywords
-    private final int TAB_SIZE = 8;                                     // Number of columns in a tab
-    private final int ALT_TAB_SIZE = 1;                                 // Number of alt columns in a tab
-    private final int MAX_INDENT_LEVEL = 100;                           // Max indent level allowed
-    private final int[] indentStack = new int[MAX_INDENT_LEVEL];        // Stack with number of columns used in each indent level
-    private final int[] altIndentStack = new int[MAX_INDENT_LEVEL];     // Stack with number of alt columns used in each indent level
-    private int indentLevel = 0;                                        // Current indent level (always incremented by 1)
-    private int pendingIndents = 0;                                     // Number of pending indents (if > 0) or dedents (if < 0)
-    private int columnsInIndent = 0;                                    // Number of columns in current indentation
-    private int altColumnsInIndent = 0;                                 // Number of alt columns in current indentation
-    private int spacesInIndent = 0;                                     // Number of spaces in current indentation
-    private int tabsInIndent = 0;                                       // Number of tabs in current indentation
-    private int start = 0;                                              // Position of first character of current lexeme being scanned
-    private int current = 0;                                            // Position of current unconsumed character of current lexeme being scanned
-    private int line = 1;                                               // Current line in source file (for error reporting)
-    private boolean isAtStartOfLine = true;                             // Whether the scanner is at the start of the line
-    private boolean isBlankLine = false;                                // Whether the current line is blank (only whitespace, comments, and/or newline)
+    /**
+     * Reserved keywords.
+     */
+    private static final Map<String, TokenType> keywords;
+    /**
+     * Reporter of lexical errors.
+     */
+    private final ErrorReporter reporter;
+    /**
+     * Source code.
+     */
+    private final String source;
+    /**
+     * Tokens produced by this scanner.
+     */
+    private final List<Token> tokens = new ArrayList<>();
+    /**
+     * Max indent level allowed.
+     */
+    private final int MAX_INDENT_LEVEL = 100;
+    /**
+     * Stack with number of columns used in each indent level.
+     */
+    private final int[] indentStack = new int[MAX_INDENT_LEVEL];
+    /**
+     * Stack with number of alt. columns used in each indent level.
+     */
+    private final int[] altIndentStack = new int[MAX_INDENT_LEVEL];
+    /**
+     * Current indent level (always incremented by 1).
+     */
+    private int indentLevel = 0;
+    /**
+     * Number of pending indents (if > 0) or dedents (if < 0) to add.
+     */
+    private int pendingIndents = 0;
+    /**
+     * Number of columns used in the current indentation.
+     */
+    private int columnsInIndent = 0;
+    /**
+     * Number of alt. columns used in the current indentation.
+     */
+    private int altColumnsInIndent = 0;
+    /**
+     * Number of spaces used in the current indentation.
+     */
+    private int spacesInIndent = 0;
+    /**
+     * Number of tabs used in the current indentation.
+     */
+    private int tabsInIndent = 0;
+    /**
+     * Position of the first character of the current lexeme being scanned.
+     */
+    private int start = 0;
+    /**
+     * Position of the current unconsumed character of the current lexeme being scanned.
+     */
+    private int current = 0;
+    /**
+     * Current line in the source file (for error reporting).
+     */
+    private int line = 1;
+    /**
+     * Whether the scanner is at the start of the line.
+     */
+    private boolean isAtStartOfLine = true;
+    /**
+     * Whether the current line is blank (i.e. only contains whitespace, comments, and/or a newline).
+     */
+    private boolean isBlankLine = false;
 
     public Scanner(String source, ErrorReporter reporter) {
         this.source = source;
         this.reporter = reporter;
-        fillKeywords();
     }
 
-    private void fillKeywords() {
+    static {
+        keywords = new HashMap<>();
         keywords.put("accept", TokenType.ACCEPT);
         keywords.put("and", TokenType.AND);
         keywords.put("change", TokenType.CHANGE);
@@ -106,7 +158,7 @@ public class Scanner {
         char character = getJustConsumed();
         switch (character) {
             // '\r' and '\r\n' have been replaced with '\n'
-            // prior to sending the source code to Scanner
+            // prior to sending the source code to Scanner.
             case Ascii.NEWLINE:
                 if (!isBlankLine) {
                     addToken(TokenType.NEWLINE);
@@ -230,6 +282,9 @@ public class Scanner {
      * Count and consume the columns in the indentation.
      */
     private void countColumnsInIndent() {
+        final int TAB_COLUMN_SIZE = 8;
+        final int ALT_TAB_COLUMN_SIZE = 1;
+
         columnsInIndent = 0;
         altColumnsInIndent = 0;
         spacesInIndent = 0;
@@ -244,8 +299,8 @@ public class Scanner {
             }
             else {
                 tabsInIndent++;
-                columnsInIndent = tabsToSpaces(columnsInIndent, TAB_SIZE);
-                altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_SIZE);
+                columnsInIndent = tabsToSpaces(columnsInIndent, TAB_COLUMN_SIZE);
+                altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_COLUMN_SIZE);
             }
 
             // Don't add '&& !isAtEnd()' to the loop condition as
@@ -341,10 +396,9 @@ public class Scanner {
         // (since it may otherwise be a method call).
         if (peek() == Ascii.DOT && isDigit(peekNext())) {
             // Consume the dot (.) then all following digits.
-            advance();
-            while (isDigit(peek())) {
+            do {
                 advance();
-            }
+            } while (isDigit(peek()));
         }
 
         double literal = Double.parseDouble(getJustConsumedLexeme());
