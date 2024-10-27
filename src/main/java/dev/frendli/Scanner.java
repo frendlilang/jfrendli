@@ -28,14 +28,6 @@ public class Scanner {
      */
     private final Map<String, TokenType> keywords = new HashMap<>();
     /**
-     * Number of columns in a tab.
-     */
-    private final int TAB_SIZE = 8;
-    /**
-     * Number of alt columns in a tab.
-     */
-    private final int ALT_TAB_SIZE = 1;
-    /**
      * Max indent level allowed.
      */
     private final int MAX_INDENT_LEVEL = 100;
@@ -290,6 +282,9 @@ public class Scanner {
      * Count and consume the columns in the indentation.
      */
     private void countColumnsInIndent() {
+        final int TAB_COLUMN_SIZE = 8;
+        final int ALT_TAB_COLUMN_SIZE = 1;
+
         columnsInIndent = 0;
         altColumnsInIndent = 0;
         spacesInIndent = 0;
@@ -304,8 +299,8 @@ public class Scanner {
             }
             else {
                 tabsInIndent++;
-                columnsInIndent = tabsToSpaces(columnsInIndent, TAB_SIZE);
-                altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_SIZE);
+                columnsInIndent = tabsToSpaces(columnsInIndent, TAB_COLUMN_SIZE);
+                altColumnsInIndent = tabsToSpaces(altColumnsInIndent, ALT_TAB_COLUMN_SIZE);
             }
 
             // Don't add '&& !isAtEnd()' to the loop condition as
