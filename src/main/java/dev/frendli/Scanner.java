@@ -12,6 +12,10 @@ import java.util.Map;
  */
 public class Scanner {
     /**
+     * Reserved keywords.
+     */
+    private static final Map<String, TokenType> keywords;
+    /**
      * Reporter of lexical errors.
      */
     private final ErrorReporter reporter;
@@ -23,10 +27,6 @@ public class Scanner {
      * Tokens produced by this scanner.
      */
     private final List<Token> tokens = new ArrayList<>();
-    /**
-     * Reserved keywords.
-     */
-    private final Map<String, TokenType> keywords = new HashMap<>();
     /**
      * Max indent level allowed.
      */
@@ -87,10 +87,10 @@ public class Scanner {
     public Scanner(String source, ErrorReporter reporter) {
         this.source = source;
         this.reporter = reporter;
-        fillKeywords();
     }
 
-    private void fillKeywords() {
+    static {
+        keywords = new HashMap<>();
         keywords.put("accept", TokenType.ACCEPT);
         keywords.put("and", TokenType.AND);
         keywords.put("change", TokenType.CHANGE);
