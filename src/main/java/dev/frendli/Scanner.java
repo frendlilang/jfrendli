@@ -396,10 +396,9 @@ public class Scanner {
         // (since it may otherwise be a method call).
         if (peek() == Ascii.DOT && isDigit(peekNext())) {
             // Consume the dot (.) then all following digits.
-            advance();
-            while (isDigit(peek())) {
+            do {
                 advance();
-            }
+            } while (isDigit(peek()));
         }
 
         double literal = Double.parseDouble(getJustConsumedLexeme());
