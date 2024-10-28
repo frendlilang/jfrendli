@@ -4,16 +4,17 @@ name: Run Tests
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'src/**'
       - 'pom.xml'
-      - '.github/workflows/run-tests.yml'
+      - '.github/workflows/**'
   pull_request:
-    types: [ opened, edited ]
     paths:
       - 'src/**'
       - 'pom.xml'
-      - '.github/workflows/run-tests.yml'
+      - '.github/workflows/**'
 
 jobs:
   build:
