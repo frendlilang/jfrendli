@@ -15,7 +15,7 @@ public class Token {
     public final String lexeme;
     /**
      * The value represented.
-     * (E.g. a number for NUMBER types or a string for TEXT types.
+     * (E.g. a double for NUMBER types or a string for TEXT types.
      * Token types without an association to a value use null.)
      */
     public final Object literal;
