@@ -1,8 +1,7 @@
 package dev.frendli;
 
 /**
- * Interface that should be implemented by any class that
- * visits statements.
+ * Interface for any class that visits statements.
  *
  * @param <R> The return type after visiting the statement.
  */

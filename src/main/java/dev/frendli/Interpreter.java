@@ -11,11 +11,28 @@ import java.util.Map;
  * values. The current node always evaluates its children first (post-order traversal).
  */
 public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<Void> {
-    private final ErrorReporter reporter;                               // Reporter of runtime errors
-    private final Environment globalEnvironment = new Environment();    // The global environment
-    private Environment currentEnvironment = globalEnvironment;         // The current environment which changes during execution as blocks are entered and exited
-    private final Map<Token, Integer> resolved = new HashMap<>();       // Variables (key) resolved by the resolver (value = distance to corresponding environment)
-    private final List<String> nativeNames = new ArrayList<>();         // The names of standard library members (used by Resolver)
+    /**
+     * Reporter of runtime errors.
+     */
+    private final ErrorReporter reporter;
+    /**
+     * The global environment.
+     */
+    private final Environment globalEnvironment = new Environment();
+    /**
+     * The current environment which changes during execution as
+     * blocks are entered and exited.
+     */
+    private Environment currentEnvironment = globalEnvironment;
+    /**
+     * Variables (the keys) resolved by the resolver, which are mapped to
+     * the distance to the environment the corresponding variable is declared in.
+     */
+    private final Map<Token, Integer> resolved = new HashMap<>();
+    /**
+     * The names of standard library members (used by the resolver).
+     */
+    private final List<String> nativeNames = new ArrayList<>();
 
     public Interpreter(ErrorReporter reporter, Logger logger) {
         globalEnvironment.defineNative("time", new NativeFunction.Time());
@@ -145,7 +162,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
-        // Evaluate the operands left to right
+        // Evaluate the operands left to right.
         Object left = evaluate(expression.left);
         Token operator = expression.operator;
         Object right = evaluate(expression.right);
@@ -171,7 +188,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
                 verifyNumberOperands(left, right, operator);
                 return (double)left - (double)right;
             case PLUS:
-                // Overload the + operator to allow for text concatenation
+                // Overload the + operator to allow for text concatenation.
                 if (left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
                 }
@@ -199,7 +216,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
         }
         FrendliCallable function = (FrendliCallable)callee;
 
-        // Evaluate the arguments from left to right
+        // Evaluate the arguments from left to right.
         List<Object> arguments = new ArrayList<>();
         for (Expression argument : expression.arguments) {
             arguments.add(evaluate(argument));
@@ -346,7 +363,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
      * Add a local variable to the resolved data.
      *
      * @param name The name to resolve.
-     * @param distance The distance from the innermost scope to where the variable is defined.
+     * @param distance The distance from the innermost scope to where the variable is declared.
      */
     public void resolve(Token name, int distance) {
         resolved.put(name, distance);

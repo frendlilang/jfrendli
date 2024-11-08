@@ -16,16 +16,30 @@ import java.util.Stack;
  * any statements.
  */
 public class Resolver implements ExpressionVisitor<Void>, StatementVisitor<Void> {
-    private final ErrorReporter reporter;                       // Reporter of compile-time errors
-    private final Interpreter interpreter;                      // The interpreter executing the code (runtime)
-    private final Stack<Set<String>> scopes = new Stack<>();    // Stack of block scopes containing the variable names (including 1st scope as global)
-    private ContextType currentContext = ContextType.NONE;      // The current context in which something is being resolved (e.g. a function or method)
+    /**
+     * Reporter of compile-time errors.
+     */
+    private final ErrorReporter reporter;
+    /**
+     * The interpreter executing the code (runtime).
+     */
+    private final Interpreter interpreter;
+    /**
+     * Stack of block scopes each containing the names of the declared variables.
+     * (The first scope is always the global scope.)
+     */
+    private final Stack<Set<String>> scopes = new Stack<>();
+    /**
+     * The current context in which something is being resolved.
+     * (E.g. a function or method.)
+     */
+    private ContextType currentContext = ContextType.NONE;
 
     public Resolver(Interpreter interpreter, ErrorReporter reporter) {
         this.interpreter = interpreter;
         this.reporter = reporter;
 
-        // The first scope on the stack is the global scope
+        // The first scope on the stack is the global scope.
         createScope();
         scopes.peek().addAll(interpreter.getNativeNames());
     }

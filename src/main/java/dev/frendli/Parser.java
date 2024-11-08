@@ -38,7 +38,6 @@ import java.util.List;
 // arguments:               "send" expression ( "," expression )* ;
 // primary:                 IDENTIFIER | NUMBER | TEXT | "true" | "false" | "empty" | "(" expression ")" ;
 
-
 /**
  * The parser - traverses the tokens produced by the scanner and
  * maps them to rules in the grammar to form an abstract syntax tree,
@@ -47,9 +46,18 @@ import java.util.List;
  * the lowest-precedence.)
  */
 public class Parser {
-    private final ErrorReporter reporter;           // Reporter of syntax errors
-    private final List<Token> tokens;               // Tokens to be parsed
-    private int current = 0;                        // Position of current unconsumed token
+    /**
+     * Reporter of syntax errors.
+     */
+    private final ErrorReporter reporter;
+    /**
+     * Tokens to be parsed.
+     */
+    private final List<Token> tokens;
+    /**
+     * Position of the current unconsumed token.
+     */
+    private int current = 0;
 
     public Parser (List<Token> tokens, ErrorReporter reporter) {
         this.tokens = tokens;
@@ -477,8 +485,8 @@ public class Parser {
     }
 
     /**
-     * Check if the current unconsumed token is of any of the types
-     * provided and consume it if it is.
+     * Check if the current unconsumed token matches any of the types
+     * provided and consume it if it does.
      *
      * @param types The types to check for.
      * @return Whether it matches any of the types.
