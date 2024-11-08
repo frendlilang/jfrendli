@@ -1,8 +1,7 @@
 package dev.frendli;
 
 /**
- * Interface that should be implemented by any class that
- * visits expressions.
+ * Interface for any class that visits expressions.
  *
  * @param <R> The return type after visiting the expression.
  */

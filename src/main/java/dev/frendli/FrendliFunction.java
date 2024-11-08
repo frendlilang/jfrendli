@@ -6,8 +6,14 @@ import java.util.List;
  * A user-defined function (runtime representation).
  */
 public class FrendliFunction implements FrendliCallable {
-    private final Statement.Define declaration;     // The compile-time (syntax tree node) representation of a function
-    private final Environment closure;              // The environment used when declared
+    /**
+     * The compile-time (syntax tree node) representation of a function.
+     */
+    private final Statement.Define declaration;
+    /**
+     * The environment used when declared.
+     */
+    private final Environment closure;
 
     public FrendliFunction(Statement.Define declaration, Environment closure) {
         this.declaration = declaration;

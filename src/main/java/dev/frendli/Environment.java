@@ -8,15 +8,21 @@ import java.util.Map;
  * of inner and outer scopes as blocks are entered and exited.
  */
 public class Environment {
-    // Each environment stores a reference to its enclosing environment
-    // in order to look up variables in outer scopes.
+    /**
+     * The enclosing environment.
+     * (Used for looking up variables in outer scopes.)
+     */
     public final Environment enclosing;
-    private final Map<String, Object> values = new HashMap<>(); // Maps variable names to values
+    /**
+     * Variable bindings (maps variable names to values) in this environment.
+     */
+    private final Map<String, Object> values = new HashMap<>();
 
     // Global scope
     public Environment() {
         enclosing = null;
     }
+
     // Local scope
     public Environment(Environment enclosing) {
         this.enclosing = enclosing;

@@ -3,7 +3,7 @@ package dev.frendli;
 import java.util.List;
 
 /**
- * Interface that should be implemented by any callable object.
+ * Interface for any callable object.
  */
 public interface FrendliCallable {
     /**

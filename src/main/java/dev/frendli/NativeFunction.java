@@ -7,6 +7,9 @@ import java.util.List;
 // subclass must implement the "arity" and "call" methods
 // declared in the FrendliCallable interface.
 
+/**
+ * A function that is native to Frendli (runtime representation).
+ */
 public abstract class NativeFunction implements FrendliCallable {
     /**
      * Native function for getting the number of milliseconds since the epoch.
