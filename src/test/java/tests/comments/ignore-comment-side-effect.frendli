@@ -1,0 +1,9 @@
+create a = 10
+//change a = 9
+
+// Expect: 10
+display(send a)
+
+// Expect: <no output>
+//if true
+//  display(send true)

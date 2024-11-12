@@ -1,0 +1,3 @@
+// Expect comptime error: Cannot find a valid expression.
+create a = // 1
+1
