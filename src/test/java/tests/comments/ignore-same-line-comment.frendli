@@ -1,0 +1,4 @@
+// Expect: <no output>
+create a = 1 //display(send a)
+create b = 2 ///display(send b)
+create c = 3 ////display(send c)

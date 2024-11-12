@@ -1,0 +1,4 @@
+//create a = 10
+
+// Expect comptime error: 'a' has not been created or defined. To create it, use 'create', or define it using 'define'.
+change a = 9
