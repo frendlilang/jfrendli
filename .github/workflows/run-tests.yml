@@ -24,6 +24,13 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
 
+    # Setup for the test reporter to build reports
+    # based on the result of earlier actions.
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,6 +44,14 @@ jobs:
 
       - name: Build and test with Maven
         run: mvn -B package --file pom.xml
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: JUnit Tests
+          path: '*.xml'
+          reporter: java-junit
 
       # Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive.
       - name: Update dependency graph
