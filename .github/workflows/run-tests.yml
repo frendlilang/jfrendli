@@ -50,9 +50,9 @@ jobs:
         if: success() || failure()
         with:
           name: JUnit Tests
-          path: '*.xml'
+          path: 'target/surefire-reports/*.xml'
           reporter: java-junit
-          fail-on-error: 'false'
+          # fail-on-error: 'false'
 
       # Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive.
       - name: Update dependency graph
