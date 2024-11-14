@@ -1,0 +1,5 @@
+define onlyReturn()
+    return
+
+// Expect: <definition: onlyReturn>
+display(send onlyReturn)

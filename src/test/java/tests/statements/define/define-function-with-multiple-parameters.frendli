@@ -1,0 +1,9 @@
+define showMultipleArguments(accept first, second, third)
+    display(send first)
+    display(send second)
+    display(send third)
+
+// Expect: Argument 1
+//         Argument 2
+//         Argument 3
+showMultipleArguments(send "Argument 1", "Argument 2", "Argument 3")

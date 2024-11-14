@@ -1,0 +1,7 @@
+define showMultipleArguments(accept first, second, third)
+    display(send first)
+    display(send second)
+    display(send third)
+
+// Expect runtime error: The number of arguments sent must be 3 but got 1.
+showMultipleArguments(send "Argument 1")
