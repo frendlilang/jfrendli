@@ -1,0 +1,7 @@
+define showArguments(accept first, second, third)
+    display(send first)
+    display(send second)
+    display(send third)
+
+// Expect comptime error: 'first' has not been created or defined. To create it, use 'create', or define it using 'define'.
+first

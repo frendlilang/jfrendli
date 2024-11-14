@@ -1,0 +1,5 @@
+define showSingleOutput()
+    display(send "In statement 1")
+
+// Expect: In statement 1
+showSingleOutput()

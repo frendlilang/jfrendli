@@ -1,0 +1,5 @@
+define showSingleArgument(accept first)
+    display(send first)
+
+// Expect: Argument 1
+showSingleArgument(send "Argument 1")

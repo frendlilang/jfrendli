@@ -1,0 +1,9 @@
+define showMultipleOutput()
+  display(send "In statement 1")
+  display(send "In statement 2")
+  display(send "In statement 3")
+
+// Expect: In statement 1
+//         In statement 2
+//         In statement 3
+showMultipleOutput()

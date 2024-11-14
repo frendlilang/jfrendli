@@ -1,0 +1,16 @@
+define showAllDataTypes(accept aNumber, aText, aBoolean, anEmpty)
+    display(send aNumber)
+    display(send aText)
+    display(send aBoolean)
+    display(send anEmpty)
+
+create aNumber = 123
+create aText = "Some text"
+create aBoolean = false
+create anEmpty = empty
+
+// Expect: 123
+//         Some text
+//         false
+//         empty
+showAllDataTypes(send aNumber, aText, aBoolean, anEmpty)

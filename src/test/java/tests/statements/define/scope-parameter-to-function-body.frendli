@@ -1,0 +1,10 @@
+create message = "In outer scope"
+
+define showArgument(accept message)
+    display(send message)
+
+// Expect: In inner scope
+showArgument(send "In inner scope")
+
+// Expect: In outer scope
+display(send message)
