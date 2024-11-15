@@ -80,7 +80,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
         return null;
     }
-    
+
     @Override
     public Void visitDefineStatement(Statement.Define statement) {
         // When a define statement is visited, a runtime representation of the
@@ -212,7 +212,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     public Object visitCallExpression(Expression.Call expression) {
         Object callee = evaluate(expression.callee);
         if (!(callee instanceof FrendliCallable)) {
-            throw new RuntimeError(expression.location, "You can only call what has previously been defined (with 'define')");
+            throw new RuntimeError(expression.location, "You can only call what has previously been defined (with 'define').");
         }
         FrendliCallable function = (FrendliCallable)callee;
 

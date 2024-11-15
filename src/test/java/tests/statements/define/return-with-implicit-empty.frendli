@@ -1,0 +1,11 @@
+define returnWithImplicitEmpty1()
+   return
+
+// Expect: empty
+display(send returnWithImplicitEmpty1())
+
+define returnWithImplicitEmpty2()
+   create a = 1
+
+// Expect: empty
+display(send returnWithImplicitEmpty2())

@@ -1,0 +1,5 @@
+define returnWithExplicitEmpty()
+   return with empty
+
+// Expect: empty
+display(send returnWithExplicitEmpty())

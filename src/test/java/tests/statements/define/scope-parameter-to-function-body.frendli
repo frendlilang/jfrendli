@@ -1,10 +1,10 @@
-create message = "In outer scope"
+create message = "In global scope"
 
 define showArgument(accept message)
     display(send message)
 
-// Expect: In inner scope
-showArgument(send "In inner scope")
+// Expect: In local scope
+showArgument(send "In local scope")
 
-// Expect: In outer scope
+// Expect: In global scope
 display(send message)

@@ -1,0 +1,8 @@
+define returnWithNonLiteralExpression(accept a, b, c)
+   return with a + b + c
+
+// Expect: 102
+display(send returnWithNonLiteralExpression(send 12, 34, 56))
+
+// Expect: 123456
+display(send returnWithNonLiteralExpression(send "12", "34", "56"))

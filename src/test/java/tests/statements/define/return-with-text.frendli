@@ -1,0 +1,5 @@
+define returnWithText()
+   return with "Some text"
+
+// Expect: "Some text"
+display(send returnWithText())

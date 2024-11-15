@@ -1,0 +1,3 @@
+define createVariableWithSameNameAsParameter(accept a)
+    // Expect comptime error: 'a' already exists.
+    create a = 1

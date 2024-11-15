@@ -1,0 +1,16 @@
+if true
+    define showOutput()
+        display(send "Local function in if-block")
+
+    // Expect: Local function in if-block
+    showOutput()
+
+define globalFunction()
+    define localFunction()
+        define showOutput()
+            display(send "Local function in nested function-block")
+
+        // Expect: Local function in nested function-block
+        showOutput()
+    localFunction()
+globalFunction()
