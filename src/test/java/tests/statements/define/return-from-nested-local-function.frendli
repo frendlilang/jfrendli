@@ -1,0 +1,11 @@
+define returnFromGlobalFunction()
+    define returnFromLocalFunction()
+        define returnFromNestedLocalFunction()
+            create result = 123
+            return with result
+
+        return with returnFromNestedLocalFunction()
+    return with returnFromLocalFunction()
+
+// Expect: 123
+display(send returnFromGlobalFunction())

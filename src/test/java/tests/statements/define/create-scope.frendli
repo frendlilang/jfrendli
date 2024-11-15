@@ -1,0 +1,11 @@
+create a = "global"
+
+define showLocal()
+    create a = "local"
+    // Expect: local
+    display(send a)
+
+showLocal()
+
+// Expect: global
+display(send a)

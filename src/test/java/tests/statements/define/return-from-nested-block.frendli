@@ -1,0 +1,8 @@
+define returnFromNestedIfBlock()
+    create result = 123
+    if true
+        if true
+            return with result
+
+// Expect: 123
+display(send returnFromNestedIfBlock())

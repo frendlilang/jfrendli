@@ -1,0 +1,3 @@
+// Expect: <no output>
+define showOutput()
+    display(send "Some text")

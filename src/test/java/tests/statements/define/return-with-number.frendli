@@ -1,0 +1,5 @@
+define returnWithNumber()
+   return with 123
+
+// Expect: 123
+display(send returnWithNumber())

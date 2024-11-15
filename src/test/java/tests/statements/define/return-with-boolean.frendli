@@ -1,0 +1,5 @@
+define returnWithBoolean()
+   return with true
+
+// Expect: true
+display(send returnWithBoolean())

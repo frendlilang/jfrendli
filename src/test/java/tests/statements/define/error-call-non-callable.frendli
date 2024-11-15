@@ -1,0 +1,4 @@
+create notAFunction = 123
+
+// Expect runtime error: You can only call what has previously been defined (with 'define').
+notAFunction()

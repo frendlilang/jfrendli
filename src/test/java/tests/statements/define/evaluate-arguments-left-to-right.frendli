@@ -1,0 +1,11 @@
+define onlyReturn(accept a, b, c)
+    return
+
+define showAndReturnMessage(accept message)
+    display(send message)
+    return with message
+
+// Expect: Argument 1
+//         Argument 2
+//         Argument 3
+onlyReturn(send showAndReturnMessage(send "Argument 1"), showAndReturnMessage(send "Argument 2"), showAndReturnMessage(send "Argument 3"))
