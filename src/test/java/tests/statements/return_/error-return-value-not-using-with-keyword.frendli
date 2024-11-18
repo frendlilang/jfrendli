@@ -1,0 +1,3 @@
+define tryReturnNumber()
+    // Expect comptime error: You must add a new line after 'return'. To return with a value, use 'return with' instead.
+    return 123
