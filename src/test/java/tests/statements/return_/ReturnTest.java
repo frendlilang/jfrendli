@@ -121,8 +121,8 @@ public class ReturnTest {
         }
 
         @Test
-        void itCannotReturnValueWhenNotUsingWithKeyword() {
-            String sourceFile = "statements/return_/error-return-value-not-using-with-keyword.frendli";
+        void itCannotReturnWithValueWhenNotUsingWithKeyword() {
+            String sourceFile = "statements/return_/error-return-with-value-not-using-with-keyword.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
                     Error
