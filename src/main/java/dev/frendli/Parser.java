@@ -437,11 +437,16 @@ public class Parser {
         // Hence, an error is thrown to synchronize the parser's state using Java's
         // call stack, catching the exception where it's being synchronized to.
         String message = "Cannot find a valid expression.";
+
+        // If the user starts the expression with an indentation where a
+        // new a block is not allowed, provide a more meaningful message.
         if (peek().type == TokenType.INDENT) {
-            // If the user starts the expression with an indentation where a
-            // new a block is not allowed, provide a more meaningful message.
             message = "This line is too indented. Decrease the level of indentation used.";
         }
+        else if (getJustConsumed().type == TokenType.WITH) {
+            message = "You must add a valid expression after 'return with' to return with that value. To not return an explicit value, use only 'return'.";
+        }
+
         throw error(peek(), message);
     }
 

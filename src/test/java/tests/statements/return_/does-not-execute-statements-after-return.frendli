@@ -1,0 +1,15 @@
+define returnAndShowOutput()
+    return
+    display(send "In first statement after 'return'.")
+    display(send "In second statement after 'return'.")
+
+// Expect: <no output>
+returnAndShowOutput()
+
+define returnWithValueAndShowOutput()
+    return with 123
+    display(send "In first statement after 'return with'.")
+    display(send "In second statement after 'return with'.")
+
+// Expect: <no output>
+returnWithValueAndShowOutput()

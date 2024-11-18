@@ -1,0 +1,2 @@
+// Expect comptime error: You can only return from within a definition.
+return
