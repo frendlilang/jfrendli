@@ -444,7 +444,7 @@ public class Parser {
             message = "This line is too indented. Decrease the level of indentation used.";
         }
         else if (getJustConsumed().type == TokenType.WITH) {
-            message = "You must add a valid expression after 'with' to return with that value. To not return an explicit value, use only 'return'.";
+            message = "You must add a valid expression after 'return with' to return with that value. To not return an explicit value, use only 'return'.";
         }
 
         throw error(peek(), message);

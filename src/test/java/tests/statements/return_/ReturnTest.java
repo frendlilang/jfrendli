@@ -143,7 +143,7 @@ public class ReturnTest {
                       > Where:
                          > Line 3 at the end of the line
                       > Message:
-                         > You must add a valid expression after 'with' to return with that value. To not return an explicit value, use only 'return'.
+                         > You must add a valid expression after 'return with' to return with that value. To not return an explicit value, use only 'return'.
                     """;
             assertEquals(expected, actual);
         }
