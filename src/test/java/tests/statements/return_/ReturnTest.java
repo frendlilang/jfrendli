@@ -66,6 +66,28 @@ public class ReturnTest {
         }
 
         @Test
+        void itCanReturnWithGlobalFunction() {
+            String sourceFile = "statements/return_/return-with-global-function.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    <definition: returnWithArgument>
+                    123
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanReturnWithLocalFunction() {
+            String sourceFile = "statements/return_/return-with-local-function.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    <definition: returnWithArgument>
+                    123
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
         void itCanReturnFromNestedBlock() {
             String sourceFile = "statements/return_/return-from-nested-block.frendli";
             String actual = run(sourceFile);
@@ -86,6 +108,14 @@ public class ReturnTest {
             String sourceFile = "statements/return_/does-not-execute-statements-after-return.frendli";
             String actual = run(sourceFile);
             String expected = "";
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanChainFunctionCalls() {
+            String sourceFile = "statements/return_/chain-function-calls.frendli";
+            String actual = run(sourceFile);
+            String expected = "123";
             assertEquals(expected, actual);
         }
     }

@@ -1,0 +1,13 @@
+define returnWithArgument(accept a)
+    return with a
+
+define returnWithFunction()
+    return with returnWithArgument
+
+create myFunction = returnWithFunction()
+// Expect: <definition: returnWithArgument>
+display(send myFunction)
+
+create myArgument = myFunction(send 123)
+// Expect: 123
+display(send myArgument)
