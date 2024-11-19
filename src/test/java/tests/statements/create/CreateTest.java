@@ -44,6 +44,14 @@ public class CreateTest {
         }
 
         @Test
+        void itCanCreateGlobalVariableAsFunction() {
+            String sourceFile = "statements/create/create-global-variable-function.frendli";
+            String actual = run(sourceFile);
+            String expected = "<definition: myFunction>";
+            assertEquals(expected, actual);
+        }
+
+        @Test
         void itCanCreateLocalVariableAsNumber() {
             String sourceFile = "statements/create/create-local-variable-number.frendli";
             String actual = run(sourceFile);

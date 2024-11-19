@@ -1,0 +1,6 @@
+define myFunction()
+    return
+
+create a = myFunction
+// Expect: <definition: myFunction>
+display(send a)
