@@ -1,0 +1,8 @@
+define callArgument(accept a)
+    a()
+
+define showOutput()
+    display(send 123)
+
+// Expect: 123
+callArgument(send showOutput)

@@ -45,6 +45,14 @@ public class DefineTest {
         }
 
         @Test
+        void itCanAcceptFunction() {
+            String sourceFile = "statements/define/define-function-accept-function.frendli";
+            String actual = run(sourceFile);
+            String expected = "123";
+            assertEquals(expected, actual);
+        }
+
+        @Test
         void itCanDefineFunctionWithSingleParameter() {
             String sourceFile = "statements/define/define-function-with-single-parameter.frendli";
             String actual = run(sourceFile);
