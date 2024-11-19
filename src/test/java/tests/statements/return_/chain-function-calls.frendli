@@ -1,8 +1,8 @@
-define returnArgument(accept a)
+define returnWithArgument(accept a)
     return with a
 
 define getAnotherFunction()
-    return with returnArgument
+    return with returnWithArgument
 
 define getFunction()
     return with getAnotherFunction
