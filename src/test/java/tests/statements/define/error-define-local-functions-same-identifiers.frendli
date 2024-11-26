@@ -1,0 +1,7 @@
+if true
+    define a()
+        return
+
+    // Expect comptime error: 'a' already exists.
+    define a()
+        return

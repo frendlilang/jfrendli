@@ -106,6 +106,14 @@ public class DefineTest {
         }
 
         @Test
+        void itCanDefineRecursiveFunction() {
+            String sourceFile = "statements/define/define-recursive-function.frendli";
+            String actual = run(sourceFile);
+            String expected = "120";
+            assertEquals(expected, actual);
+        }
+
+        @Test
         void itDoesNotExecuteBodyWhenDefiningFunction() {
             String sourceFile = "statements/define/define-function-no-body-execution.frendli";
             String actual = run(sourceFile);
@@ -186,6 +194,34 @@ public class DefineTest {
                     Error
                       > Where:
                          > Line 3 at 'a'
+                      > Message:
+                         > 'a' already exists.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotCreateGlobalFunctionsWithSameIdentifiers() {
+            String sourceFile = "statements/define/error-define-global-functions-same-identifiers.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 5 at 'a'
+                      > Message:
+                         > 'a' already exists.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotCreateLocalFunctionsWithSameIdentifiers() {
+            String sourceFile = "statements/define/error-define-local-functions-same-identifiers.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 6 at 'a'
                       > Message:
                          > 'a' already exists.
                     """;
