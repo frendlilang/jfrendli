@@ -201,6 +201,34 @@ public class DefineTest {
         }
 
         @Test
+        void itCannotCreateGlobalFunctionsWithSameIdentifiers() {
+            String sourceFile = "statements/define/error-define-global-functions-same-identifiers.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 5 at 'a'
+                      > Message:
+                         > 'a' already exists.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotCreateLocalFunctionsWithSameIdentifiers() {
+            String sourceFile = "statements/define/error-define-local-functions-same-identifiers.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 6 at 'a'
+                      > Message:
+                         > 'a' already exists.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
         void itCannotCallNonCallable() {
             String sourceFile = "statements/define/error-call-non-callable.frendli";
             String actual = runExpectRuntimeError(sourceFile);
