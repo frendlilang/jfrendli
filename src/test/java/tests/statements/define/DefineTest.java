@@ -106,6 +106,14 @@ public class DefineTest {
         }
 
         @Test
+        void itCanDefineRecursiveFunction() {
+            String sourceFile = "statements/define/define-recursive-function.frendli";
+            String actual = run(sourceFile);
+            String expected = "120";
+            assertEquals(expected, actual);
+        }
+
+        @Test
         void itDoesNotExecuteBodyWhenDefiningFunction() {
             String sourceFile = "statements/define/define-function-no-body-execution.frendli";
             String actual = run(sourceFile);

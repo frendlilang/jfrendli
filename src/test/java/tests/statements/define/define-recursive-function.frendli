@@ -1,0 +1,9 @@
+define factorial(accept n)
+    if n equals 0 or n equals 1
+        return with 1
+
+    return with n * factorial(send n - 1)
+
+create result = factorial(send 5)
+// Expect: 120
+display(send result)
