@@ -1,3 +1,3 @@
 if true
-    // Expect comptime error: Blocks must be dedented at the end.
+    // Expect comptime error: Blocks must be dedented at the end. Add a new line and decrease the indentation level.
     display(send "hello")
