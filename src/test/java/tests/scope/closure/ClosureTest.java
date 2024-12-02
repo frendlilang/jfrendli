@@ -39,6 +39,7 @@ public class ClosureTest {
                     1
                     2
                     3
+                    101
                     """.trim();
             assertEquals(expected, actual);
         }

@@ -17,3 +17,8 @@ increment()
 
 // Expect: 3
 increment()
+
+change count = 100
+
+// Expect: 101
+increment()
