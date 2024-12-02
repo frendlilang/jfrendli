@@ -1,0 +1,11 @@
+define returnWithClosure()
+    create a = "local"
+    define showA()
+        display(send a)
+
+    return with showA
+
+create closure = returnWithClosure()
+
+// Expect: local
+closure()

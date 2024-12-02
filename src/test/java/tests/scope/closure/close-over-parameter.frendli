@@ -1,0 +1,10 @@
+define returnWithClosure(accept a)
+    define showA()
+        display(send a)
+
+    return with showA
+
+create closure = returnWithClosure(send "argument")
+
+// Expect: argument
+closure()
