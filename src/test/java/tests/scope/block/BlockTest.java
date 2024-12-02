@@ -37,7 +37,7 @@ public class BlockTest {
 
         @Test
         void itCanAccessLocalVariableInChildBlock() {
-            String sourceFile = "scope/block/access-local-variable-child-block.frendli";
+            String sourceFile = "scope/block/access-local-variable-in-child-block.frendli";
             String actual = run(sourceFile);
             String expected = """
                     parent
@@ -52,7 +52,7 @@ public class BlockTest {
     public class BlockTestExpectError extends FrendliTestExpectError {
         @Test
         void itCannotAccessVariableInDifferentScope() {
-            String sourceFile = "scope/block/error-access-variable-different-scope.frendli";
+            String sourceFile = "scope/block/error-access-variable-in-different-scope.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
                     Error
@@ -66,7 +66,7 @@ public class BlockTest {
 
         @Test
         void itCannotAccessVariableInSameBlockDifferentScope() {
-            String sourceFile = "scope/block/error-access-variable-same-block-different-scope.frendli";
+            String sourceFile = "scope/block/error-access-variable-in-same-block-different-scope.frendli";
             String actual = runExpectComptimeError(sourceFile);
             String expected = """
                     Error
