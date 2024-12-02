@@ -274,7 +274,7 @@ public class Parser {
             statements.add(statement());
         }
 
-        Token dedent = consume(TokenType.DEDENT, "Blocks must be dedented at the end.");
+        Token dedent = consume(TokenType.DEDENT, "Blocks must be dedented at the end. Add a new line and decrease the indentation level.");
         if (statements.size() == 0) {
             // Report an error if there are no statements in the block.
             // Synchronization by throwing the error is not needed since
