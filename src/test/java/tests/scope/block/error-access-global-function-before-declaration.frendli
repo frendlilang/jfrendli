@@ -1,0 +1,6 @@
+define myFunction1()
+    // Expect comptime error: 'myFunction2' has not been created or defined. To create it, use 'create', or define it using 'define'.
+    myFunction2()
+
+define myFunction2()
+    display(send "hello")

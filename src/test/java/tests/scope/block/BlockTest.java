@@ -1,7 +1,7 @@
 package tests.scope.block;
 
-import tests.FrendliTestExpectError;
 import tests.FrendliTestExpectSuccess;
+import tests.FrendliTestExpectError;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,6 +31,17 @@ public class BlockTest {
                     local1
                     local2
                     local1
+                    """.trim();
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCanShadowParameterViaAnotherParameter() {
+            String sourceFile = "scope/block/shadow-parameter-via-parameter.frendli";
+            String actual = run(sourceFile);
+            String expected = """
+                    2
+                    1
                     """.trim();
             assertEquals(expected, actual);
         }
@@ -74,6 +85,40 @@ public class BlockTest {
                          > Line 3 at 'a'
                       > Message:
                          > 'a' has not been created or defined. To create it, use 'create', or define it using 'define'.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotAccessGlobalFunctionBeforeDeclaration() {
+            String sourceFile = "scope/block/error-access-global-function-before-declaration.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 3 at 'myFunction2'
+                      > Message:
+                         > 'myFunction2' has not been created or defined. To create it, use 'create', or define it using 'define'.
+                    """;
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void itCannotEndBlockWithoutDedentation() {
+            String sourceFile = "scope/block/error-end-block-without-dedentation.frendli";
+            String actual = runExpectComptimeError(sourceFile);
+            String expected = """
+                    Error
+                      > Where:
+                         > Line 3 at the end of the file
+                      > Message:
+                         > Expected a new line.
+
+                    Error
+                      > Where:
+                         > Line 3 at the end of the file
+                      > Message:
+                         > Blocks must be dedented at the end. Add a new line and decrease the indentation level.
                     """;
             assertEquals(expected, actual);
         }
