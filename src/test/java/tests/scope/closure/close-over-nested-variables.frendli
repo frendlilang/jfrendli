@@ -1,0 +1,23 @@
+create a = "globalA"
+
+define invokeNestedClosure()
+    create b = "localB"
+    define nested1()
+        create c = "localC"
+        define nested2()
+            create d = "localD"
+            define showVariables()
+                display(send a)
+                display(send b)
+                display(send c)
+                display(send d)
+
+            showVariables()
+        nested2()
+    nested1()
+
+// Expect: globalA
+//         localB
+//         localC
+//         localD
+invokeNestedClosure()

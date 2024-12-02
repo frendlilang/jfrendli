@@ -1,0 +1,16 @@
+create a = empty
+
+define setVariableToClosure()
+    create b = "local"
+    define showB()
+        display(send b)
+
+    change a = showB
+
+// Expect: empty
+display(send a)
+
+setVariableToClosure()
+
+// Expect: local
+a()

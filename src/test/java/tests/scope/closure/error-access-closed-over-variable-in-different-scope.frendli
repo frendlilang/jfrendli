@@ -1,0 +1,11 @@
+define returnWithClosure()
+    create a = "local"
+    define showA()
+        display(send a)
+
+    return with showA
+
+create closure = returnWithClosure()
+
+// Expect comptime error: 'a' has not been created or defined. To create it, use 'create', or define it using 'define'.
+display(send a)

@@ -1,0 +1,11 @@
+define globalFunction(accept a)
+    define localFunction(accept a)
+        display(send a)
+
+    localFunction(send 2)
+
+    display(send a)
+
+// Expect: 2
+//         1
+globalFunction(send 1)

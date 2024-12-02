@@ -1,0 +1,24 @@
+create count = 0
+
+define returnWithClosure()
+    define increment()
+        change count = count + 1
+        display(send count)
+
+    return with increment
+
+create increment = returnWithClosure()
+
+// Expect: 1
+increment()
+
+// Expect: 2
+increment()
+
+// Expect: 3
+increment()
+
+change count = 100
+
+// Expect: 101
+increment()

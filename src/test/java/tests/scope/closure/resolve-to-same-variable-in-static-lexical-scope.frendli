@@ -1,0 +1,17 @@
+create a = "global"
+
+if true
+    define showA()
+        display(send a)
+
+    // Expect: global
+    showA()
+
+    // Even though the variable "a" is now also created within
+    // the same block as "showA", the closed over variable "a"
+    // in "showA" should always resolve to the same variable each
+    // time. Thus, the scope should behave as static lexical scope.
+    create a = "local"
+
+    // Expect: global
+    showA()
